@@ -1,0 +1,8 @@
+url: https://darwin-eu.github.io/CohortSurvival/
+template:
+  bootstrap: 5
+  bootswatch: flatly
+navbar:
+  structure:
+    right: [github]
+
