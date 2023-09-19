@@ -9,7 +9,8 @@ generateDeathCohortSet(
   deathInObservation = FALSE,
   name = "death_cohort",
   cohortTable = NULL,
-  cohortId = NULL
+  cohortId = NULL,
+  overwrite = FALSE
 )
 }
 \arguments{
@@ -23,6 +24,8 @@ observed during an ongoing observation period.}
 \item{cohortTable}{name of the cohort table to create a death cohort for}
 
 \item{cohortId}{name of the cohort table to create a death cohort for}
+
+\item{overwrite}{Should the cohort table be overwritten if it already exists?}
 }
 \value{
 A cohort table with a death cohort in cdm

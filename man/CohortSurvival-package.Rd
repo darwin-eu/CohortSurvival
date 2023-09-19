@@ -4,9 +4,9 @@
 \name{CohortSurvival-package}
 \alias{CohortSurvival}
 \alias{CohortSurvival-package}
-\title{CohortSurvival: What the Package Does (One Line, Title Case)}
+\title{CohortSurvival: Estimate survival using the OMOP Common Data Model}
 \description{
-What the package does (one paragraph).
+Estimate survival using data mapped to the Observational Medical Outcomes Partnership (OMOP) common data model. Survival can be estimated based on user-defined study cohorts.
 }
 \seealso{
 Useful links:
@@ -16,7 +16,15 @@ Useful links:
 
 }
 \author{
-\strong{Maintainer}: First Last \email{first.last@example.com} (\href{https://orcid.org/YOUR-ORCID-ID}{ORCID})
+\strong{Maintainer}: Edward Burn \email{edward.burn@ndorms.ox.ac.uk} (\href{https://orcid.org/0000-0002-9286-1128}{ORCID})
+
+Other contributors:
+\itemize{
+  \item Kim Lopez \email{kim.lopez@spc.ox.ac.uk} (\href{https://orcid.org/0000-0002-8462-8668}{ORCID}) [contributor]
+  \item Marti Catala \email{marti.catalasabate@ndorms.ox.ac.uk} (\href{https://orcid.org/0000-0003-3308-9905}{ORCID}) [contributor]
+  \item Xintong Li \email{xintong.li@ndorms.ox.ac.uk} (\href{https://orcid.org/0000-0003-3308-9905}{ORCID}) [contributor]
+  \item Danielle Newby \email{danielle.newby@ndorms.ox.ac.uk} (\href{https://orcid.org/0000-0002-3001-1478}{ORCID}) [contributor]
+}
 
 }
 \keyword{internal}

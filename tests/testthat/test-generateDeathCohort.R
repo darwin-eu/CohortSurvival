@@ -13,7 +13,7 @@ test_that("basic example", {
   cdm$death <- dplyr::tbl(attr(cdm, "dbcon"), "death")
 
 
-  cdm <- generateDeathCohortSet(cdm=cdm)
+  cdm <- generateDeathCohortSet(cdm=cdm, overwrite = TRUE)
 
  expect_true(all(c("cohort_definition_id", "subject_id",
     "cohort_start_date", "cohort_end_date") %in%

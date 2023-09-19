@@ -1,10 +1,22 @@
 Package: CohortSurvival
-Title: What the Package Does (One Line, Title Case)
-Version: 0.0.0.9000
-Authors@R: 
-    person("First", "Last", , "first.last@example.com", role = c("aut", "cre"),
-           comment = c(ORCID = "YOUR-ORCID-ID"))
-Description: What the package does (one paragraph).
+Title: Estimate survival using the OMOP Common Data Model
+Version: 0.1
+Authors@R: c(
+    person("Edward", "Burn", email = "edward.burn@ndorms.ox.ac.uk", 
+    role = c("aut", "cre"), 
+    comment = c(ORCID = "0000-0002-9286-1128")), 
+    person("Kim", "Lopez", email = "kim.lopez@spc.ox.ac.uk", role = c("ctb"),
+    comment = c(ORCID = "0000-0002-8462-8668")),
+    person("Marti", "Catala", email = "marti.catalasabate@ndorms.ox.ac.uk", 
+    role = c("ctb"), 
+    comment = c(ORCID = "0000-0003-3308-9905")),
+    person("Xintong", "Li", email = "xintong.li@ndorms.ox.ac.uk", 
+    role = c("ctb"), 
+    comment = c(ORCID = "0000-0003-3308-9905")),
+    person("Danielle", "Newby", email = "danielle.newby@ndorms.ox.ac.uk", 
+    role = c("ctb"), 
+    comment = c(ORCID = "0000-0002-3001-1478")))
+Description: Estimate survival using data mapped to the Observational Medical Outcomes Partnership (OMOP) common data model. Survival can be estimated based on user-defined study cohorts.
 License: Apache License (>= 2)
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)

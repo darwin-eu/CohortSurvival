@@ -8,6 +8,7 @@
 #' @param name name for the created death cohort table
 #' @param cohortTable name of the cohort table to create a death cohort for
 #' @param cohortId name of the cohort table to create a death cohort for
+#' @param overwrite	Should the cohort table be overwritten if it already exists?
 #'
 #' @return A cohort table with a death cohort in cdm
 #' @export
@@ -18,7 +19,8 @@ generateDeathCohortSet <- function(
     deathInObservation = FALSE,
     name = "death_cohort",
     cohortTable = NULL,
-    cohortId = NULL){
+    cohortId = NULL,
+    overwrite = FALSE){
 
   # 0. validate inputs...
   checkCdm(cdm, tables = c(
@@ -80,7 +82,9 @@ generateDeathCohortSet <- function(
     ) %>%
     CDMConnector::computeQuery(
       name = paste0(attr(cdm, "write_prefix"), name),
-      FALSE, attr(cdm, "write_schema"), TRUE
+      temporary = FALSE,
+      schema =  attr(cdm, "write_schema"),
+      overwrite = overwrite
     )
 
   cohortSetRef <- cohortRef %>%
@@ -89,7 +93,9 @@ generateDeathCohortSet <- function(
     dplyr::mutate(cohort_name = "death_cohort") %>%
     CDMConnector::computeQuery(
       name = paste0(attr(cdm, "write_prefix"), name, "_set"),
-      FALSE, attr(cdm, "write_schema"), TRUE
+      temporary = FALSE,
+      schema = attr(cdm, "write_schema"),
+      overwrite = overwrite
     )
 
   cohortCountRef <-  cohortRef %>%
@@ -101,15 +107,17 @@ generateDeathCohortSet <- function(
     ) %>%
     CDMConnector::computeQuery(
       name = paste0(attr(cdm, "write_prefix"), name, "_count"),
-      FALSE, attr(cdm, "write_schema"), TRUE
+      temporary = FALSE,
+      schema =  attr(cdm, "write_schema"),
+      overwrite = overwrite
     )
 
-
+  if(cohortRef %>% utils::head(5) %>% dplyr::tally() %>% dplyr::pull("n") > 0){
   cdm[[name]] <- CDMConnector::newGeneratedCohortSet(
     cohortRef = cohortRef,
     cohortSetRef = cohortSetRef,
     cohortCountRef = cohortCountRef
-  )
+  )}
 
   attr(cdm[[name]], "cohort_attrition") <- tibble::tibble(
     "reason" = "Qualifying initial records",

@@ -27,7 +27,7 @@ for(i in seq_along(toObscure$group_name)){
       .data$strata_name == toObscure$strata_name[i]  &
       .data$strata_level == toObscure$strata_level[i]  &
       .data$variable_type == "n_start", paste0("<", minCellCount),
-      as.character(estimate))) %>%
+      as.character(.data$estimate))) %>%
     dplyr::mutate(estimate = dplyr::if_else(
       .data$group_name == toObscure$group_name[i] &
         .data$group_level == toObscure$group_level[i] &
@@ -35,7 +35,7 @@ for(i in seq_along(toObscure$group_name)){
         .data$strata_level == toObscure$strata_level[i]  &
         .data$variable_type != "n_start",
       as.character(NA),
-      as.character(estimate)))
+      as.character(.data$estimate)))
 }
   }
 
