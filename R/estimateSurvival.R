@@ -740,12 +740,24 @@ competingRiskSurvival <- function(survData, times, variables, timeGap) {
                       "restricted_mean"= "rmean",
                       "n_events"= "nevent") %>%
         dplyr::mutate(analysis_type = "competing risk") %>%
-        dplyr::mutate(strata_name = "Overall",
-                      strata_level = "Overall") %>%
-        tibble::rownames_to_column(var = "outcome") %>%
-        dplyr::mutate(outcome = dplyr::if_else(.data$outcome == "(s0)", "none",
-                                               dplyr::if_else(.data$outcome == "1",
-                                                              "outcome", "competing outcome")))
+        dplyr::mutate(rowname = rownames(.)) %>%
+        dplyr::mutate(
+          strata_name = paste(name, collapse = " and "),
+          strata_level = gsub(", "," and ",gsub(paste(paste0(name,"="),
+                                                      collapse="|"),"",
+                                                row.names(.)))
+        ) %>%
+        dplyr::mutate(
+          outcome = gsub("^.*and", "", strata_level)
+        ) %>%
+        dplyr::mutate(
+          strata_level = gsub("and ([^and ]*)$", "", strata_level)
+        ) %>%
+        dplyr::mutate(strata_level = gsub("[[:space:]]*$","",strata_level)) %>%
+        dplyr::mutate(outcome = dplyr::if_else(.data$outcome == " (s0)", "none",
+                                               dplyr::if_else(.data$outcome == " 1",
+                                                              "outcome", "competing outcome"))) %>%
+          dplyr::select(-c("rowname"))
 
       estimates[[i+1]] <- dplyr::bind_rows(
         dplyr::bind_cols(
@@ -801,13 +813,7 @@ competingRiskSurvival <- function(survData, times, variables, timeGap) {
           dplyr::mutate(strata_level= stringr::str_replace(string = .data$strata_level,
                                                            pattern = ",",
                                                            replacement = " and"))
-        fitSummary[[i+1]] <- fitSummary[[i+1]] %>%
-          dplyr::mutate(
-            strata_name = paste(name, collapse = " and "),
-            strata_level = gsub(", "," and ",gsub(paste(paste0(name,"="),
-                                                        collapse="|"),"",
-                                                  row.names(fitSummary[[i+1]])))
-          )
+
       }
     }
     cli::cli_progress_done()

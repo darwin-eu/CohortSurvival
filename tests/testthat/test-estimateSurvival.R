@@ -136,18 +136,18 @@ test_that("mgus example: Competing risk, strata", {
   cdm[["mgus_diagnosis"]] <- cdm[["mgus_diagnosis"]] %>%
     dplyr::mutate(mspike_r = round(mspike, digits = 0))
   survCR <- estimateSurvival(cdm,
-    targetCohortTable = "mgus_diagnosis",
-    targetCohortId = 1,
-    outcomeCohortTable = "death_cohort",
-    outcomeCohortId = 1,
-    competingOutcomeCohortTable = "progression",
-    competingOutcomeCohortId = 1,
-    strata = list(
-      "age" = c("age"),
-      "sex" = c("sex"),
-      "age and sex" = c("age", "sex"),
-      "mspike rounded" = c("mspike_r")
-    )
+                             targetCohortTable = "mgus_diagnosis",
+                             targetCohortId = 1,
+                             outcomeCohortTable = "death_cohort",
+                             outcomeCohortId = 1,
+                             competingOutcomeCohortTable = "progression",
+                             competingOutcomeCohortId = 1,
+                             strata = list(
+                               "age" = c("age"),
+                               "sex" = c("sex"),
+                               "age and sex" = c("age", "sex"),
+                               "mspike rounded" = c("mspike_r")
+                             )
   )
 
   # problem with strata variables (age up to 300)
@@ -157,18 +157,18 @@ test_that("mgus example: Competing risk, strata", {
   expect_true(all(compareNA(survCR %>% dplyr::select(time) %>% dplyr::pull() %>% unique(), c(0:424,NA))))
   expect_true(survCR %>% dplyr::select(analysis_type) %>% dplyr::pull() %>% unique() == "Competing risk")
   expect_true(all(survCR %>% dplyr::select(strata_name) %>% dplyr::pull() %>% unique() %in% c("Overall", "sex", "age", "mspike_r", "age and sex")))
-#  expect_true(all(survCR %>% dplyr::select(strata_level) %>% dplyr::pull() %>% unique() %in% c(
-#    "M", "F", 0, 1, 2, 3, c(24:96), "Overall",
-#    paste(expand.grid(c(24:96), c("M", "F"))$Var1, expand.grid(c(24:96), c("M", "F"))$Var2, sep = " and ")
-#  )))
+  expect_true(all(survCR %>% dplyr::select(strata_level) %>% dplyr::pull() %>% unique() %in% c(
+    "M", "F", 0, 1, 2, 3, c(24:96), "Overall",
+    paste(expand.grid(c(24:96), c("M", "F"))$Var1, expand.grid(c(24:96), c("M", "F"))$Var2, sep = " and ")
+  )))
 
   expect_true(all(survCR %>% dplyr::filter(estimate_type == "Survival events") %>% dplyr::select(variable_level) %>% dplyr::pull() %>% unique() %in% c("timeGap 1", "timeGap 7", "timeGap 30", "timeGap 365")))
   expect_true(all(survCR %>% dplyr::filter(estimate_type == "Survival events") %>% dplyr::select(time) %>% dplyr::pull() %>% unique() == c(0:424)))
   expect_true(all(survCR %>% dplyr::filter(estimate_type == "Survival events") %>% dplyr::select(strata_name) %>% dplyr::pull() %>% unique() %in% c("Overall", "sex", "age", "mspike_r", "age and sex")))
-#  expect_true(all(survCR %>% dplyr::filter(estimate_type == "Survival events") %>% dplyr::select(strata_level) %>% dplyr::pull() %>% unique() %in% c(
-#    "M", "F", 0, 1, 2, 3, c(24:96), "Overall",
-#    paste(expand.grid(c(24:96), c("M", "F"))$Var1, expand.grid(c(24:96), c("M", "F"))$Var2, sep = " and ")
-#  )))
+  expect_true(all(survCR %>% dplyr::filter(estimate_type == "Survival events") %>% dplyr::select(strata_level) %>% dplyr::pull() %>% unique() %in% c(
+    "M", "F", 0, 1, 2, 3, c(24:96), "Overall",
+    paste(expand.grid(c(24:96), c("M", "F"))$Var1, expand.grid(c(24:96), c("M", "F"))$Var2, sep = " and ")
+  )))
 
   CDMConnector::cdmDisconnect(cdm)
 })

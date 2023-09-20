@@ -116,8 +116,10 @@ generateDeathCohortSet <- function(
   cdm[[name]] <- CDMConnector::newGeneratedCohortSet(
     cohortRef = cohortRef,
     cohortSetRef = cohortSetRef,
-    cohortCountRef = cohortCountRef
-  )}
+    cohortCountRef = cohortCountRef,
+    overwrite = TRUE
+  )
+  }
 
   attr(cdm[[name]], "cohort_attrition") <- tibble::tibble(
     "reason" = "Qualifying initial records",
