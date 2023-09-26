@@ -2,6 +2,7 @@
 #'
 #' @param result Survival results
 #' @param x Variable to plot on x axis
+#' @param xscale X axis scale. Can be "days" or "years".
 #' @param ylim Limits for the Y axis
 #' @param ribbon If TRUE, the plot will join points using a ribbon
 #' @param facet Variables to use for facets
@@ -14,6 +15,7 @@
 #' @examples
 plotSurvival <- function(result,
                          x = "time",
+                         xscale = "days",
                          ylim = c(0,NA),
                          ribbon = TRUE,
                          facet = NULL,
@@ -21,10 +23,11 @@ plotSurvival <- function(result,
                          colour_name = NULL){
 
 
-  plotEstimates(result = result %>%
+ plot <- plotEstimates(result = result %>%
                   dplyr::filter(.data$estimate_type ==
                                   "Survival probability"),
                 x = x,
+                xscale = xscale,
                 y = "estimate",
                 yLower = "estimate_95CI_lower",
                 yUpper = "estimate_95CI_upper",
@@ -34,9 +37,18 @@ plotSurvival <- function(result,
                 facet = facet,
                 colour = colour,
                 colour_name = colour_name) +
-    ggplot2::ylab("Survival probability") +
-    ggplot2::xlab("Time in days")
+    ggplot2::ylab("Survival probability")
 
+  if(xscale == "years"){
+    plot <- plot+
+      ggplot2::xlab("Time in years")+
+      ggplot2::scale_x_continuous(breaks = function(x) unique(floor(pretty(seq(0, (max(x) + 1) * 1.1)))))
+  } else {
+    plot <- plot+
+      ggplot2::xlab("Time in days")
+  }
+
+ return(plot)
 
 }
 
@@ -44,6 +56,7 @@ plotSurvival <- function(result,
 #'
 #' @param result Survival results
 #' @param x Variable to plot on x axis
+#' @param xscale X axis scale. Can be "days" or "years".
 #' @param ylim Limits for the Y axis
 #' @param ribbon If TRUE, the plot will join points using a ribbon
 #' @param facet Variables to use for facets
@@ -56,6 +69,7 @@ plotSurvival <- function(result,
 #' @examples
 plotCumulativeIncidence <- function(result,
                                     x = "time",
+                                    xscale = "days",
                                     ylim = c(0,NA),
                                     ribbon = TRUE,
                                     facet = NULL,
@@ -63,10 +77,11 @@ plotCumulativeIncidence <- function(result,
                                     colour_name = NULL){
 
 
-  plotEstimates(result = result %>%
+  plot <- plotEstimates(result = result %>%
                   dplyr::filter(.data$estimate_type ==
                                   "Cumulative failure probability"),
                 x = x,
+                xscale = xscale,
                 y = "estimate",
                 yLower = "estimate_95CI_lower",
                 yUpper = "estimate_95CI_upper",
@@ -76,8 +91,18 @@ plotCumulativeIncidence <- function(result,
                 facet = facet,
                 colour = colour,
                 colour_name = colour_name) +
-    ggplot2::ylab("Cumulative failure probability") +
-    ggplot2::xlab("Time in days")
+    ggplot2::ylab("Cumulative failure probability")
+
+  if(xscale == "years"){
+    plot <- plot+
+      ggplot2::xlab("Time in years")+
+      ggplot2::scale_x_continuous(breaks = function(x) unique(floor(pretty(seq(0, (max(x) + 1) * 1.1)))))
+  } else {
+    plot <- plot+
+      ggplot2::xlab("Time in days")
+  }
+
+  return(plot)
 
 
 }
@@ -86,6 +111,7 @@ plotCumulativeIncidence <- function(result,
 
 plotEstimates <- function(result,
                           x,
+                          xscale,
                           y,
                           yLower,
                           yUpper,
@@ -97,6 +123,8 @@ plotEstimates <- function(result,
                           colour_name){
 
   errorMessage <- checkmate::makeAssertCollection()
+  checkmate::assert_character(xscale, len = 1)
+  checkmate::assertTRUE(xscale %in% c("days", "years"))
   #checkmate::assertTRUE(inherits(result, "SurvivalResult"))
   checkmate::assertTRUE(all(c(x) %in% colnames(result)))
   checkmate::reportAssertions(collection = errorMessage)
@@ -104,6 +132,13 @@ plotEstimates <- function(result,
   plot_data <- getPlotData(estimates = result,
                            facetVars = facet,
                            colourVars = colour)
+
+  if(xscale == "years"){
+    plot_data <- plot_data %>%
+      dplyr::mutate(time = .data$time / 365.25)
+  }
+
+
 
   if(is.null(colour)){
     plot <- plot_data %>%

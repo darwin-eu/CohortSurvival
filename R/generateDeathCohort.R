@@ -16,8 +16,8 @@
 #' @examples
 generateDeathCohortSet <- function(
     cdm,
+    name,
     deathInObservation = FALSE,
-    name = "death_cohort",
     cohortTable = NULL,
     cohortId = NULL,
     overwrite = FALSE){

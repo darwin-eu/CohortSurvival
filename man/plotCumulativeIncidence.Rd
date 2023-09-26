@@ -7,6 +7,7 @@
 plotCumulativeIncidence(
   result,
   x = "time",
+  xscale = "days",
   ylim = c(0, NA),
   ribbon = TRUE,
   facet = NULL,
@@ -18,6 +19,8 @@ plotCumulativeIncidence(
 \item{result}{Survival results}
 
 \item{x}{Variable to plot on x axis}
+
+\item{xscale}{X axis scale. Can be "days" or "years".}
 
 \item{ylim}{Limits for the Y axis}
 

@@ -15,6 +15,23 @@ test_that("basic Survival plot", {
 
 })
 
+test_that("plot years on x axis", {
+
+  cdm <- mockMGUS2cdm()
+  surv <- estimateSurvival(cdm,
+                           targetCohortTable = "mgus_diagnosis",
+                           targetCohortId = 1,
+                           outcomeCohortTable = "death_cohort",
+                           outcomeCohortId = 1
+  )
+
+  plot <- plotSurvival(surv, xscale = c("years"))
+  expect_true(ggplot2::is.ggplot(plot))
+
+  DBI::dbDisconnect(attr(cdm, "dbcon"), shutdown = TRUE)
+
+})
+
 test_that("plot facets", {
 
   cdm <- mockMGUS2cdm()
@@ -34,6 +51,24 @@ test_that("plot facets", {
 
 })
 
+test_that("plot facets - multiple column", {
+
+  cdm <- mockMGUS2cdm()
+  surv <- estimateSurvival(cdm,
+                           targetCohortTable = "mgus_diagnosis",
+                           targetCohortId = 1,
+                           outcomeCohortTable = "death_cohort",
+                           outcomeCohortId = 1,
+                           strata=list(c("sex", "age_group"))
+  )
+
+  plot <- plotSurvival(surv,
+                      facet = c("cdm_name","strata_level"))
+  expect_true(ggplot2::is.ggplot(plot))
+
+  DBI::dbDisconnect(attr(cdm, "dbcon"), shutdown = TRUE)
+
+})
 
 test_that("plot colour", {
 
@@ -65,7 +100,7 @@ test_that("basic cumulative incidence plot", {
                            outcomeCohortId = 1
   )
 
-  plot <- plotCumulativeIncidence(surv)
+  plot <- plotCumulativeIncidence(surv, xscale = "years")
   expect_true(ggplot2::is.ggplot(plot))
 
   DBI::dbDisconnect(attr(cdm, "dbcon"), shutdown = TRUE)

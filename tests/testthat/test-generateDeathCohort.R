@@ -13,7 +13,9 @@ test_that("basic example", {
   cdm$death <- dplyr::tbl(attr(cdm, "dbcon"), "death")
 
 
-  cdm <- generateDeathCohortSet(cdm=cdm, overwrite = TRUE)
+  cdm <- generateDeathCohortSet(cdm=cdm,
+                                name = "death_cohort",
+                                overwrite = TRUE)
 
  expect_true(all(c("cohort_definition_id", "subject_id",
     "cohort_start_date", "cohort_end_date") %in%
@@ -37,7 +39,8 @@ test_that("first death record per person", {
   })
   cdm$death <- dplyr::tbl(attr(cdm, "dbcon"), "death")
 
-  cdm <- generateDeathCohortSet(cdm=cdm)
+  cdm <- generateDeathCohortSet(cdm=cdm,
+                                name = "death_cohort")
 
   expect_true(nrow(cdm$death_cohort %>%
                      dplyr::filter(subject_id == "2") %>%
@@ -78,7 +81,8 @@ test_that("test death in observation criteria", {
   })
   cdm$death <- dplyr::tbl(attr(cdm, "dbcon"), "death")
 
-  cdm <- generateDeathCohortSet(cdm=cdm, deathInObservation = TRUE)
+  cdm <- generateDeathCohortSet(cdm=cdm,
+                                name = "death_cohort", deathInObservation = TRUE)
 
   expect_true(nrow(cdm$death_cohort %>% dplyr::collect()) == 1)
 
@@ -141,7 +145,8 @@ test_that("test subsetting death table by a cohort table", {
   })
   cdm$death <- dplyr::tbl(attr(cdm, "dbcon"), "death")
 
-  cdm <-  generateDeathCohortSet(cdm=cdm, cohortTable = "cohort1")
+  cdm <-  generateDeathCohortSet(cdm=cdm,
+                                 name = "death_cohort", cohortTable = "cohort1")
 
   expect_true(nrow(cdm$death_cohort %>% dplyr::collect()) == 3)
 
@@ -157,7 +162,8 @@ test_that("test subsetting death table by a cohort table", {
   })
   cdm$death <- dplyr::tbl(attr(cdm, "dbcon"), "death")
 
-  cdm <-  generateDeathCohortSet(cdm=cdm, cohortTable = "cohort1", cohortId = 1)
+  cdm <-  generateDeathCohortSet(cdm=cdm,
+                                 name = "death_cohort", cohortTable = "cohort1", cohortId = 1)
 
   expect_true(nrow(cdm$death_cohort %>% dplyr::collect()) == 2)
 
@@ -181,7 +187,8 @@ test_that("test expected errors", {
   cdm <- PatientProfiles::mockPatientProfiles(cohort1 = cohort1)
 
   # no death table in CDM
-  expect_error(cdm <- generateDeathCohortSet(cdm=cdm))
+  expect_error(cdm <- generateDeathCohortSet(cdm=cdm,
+                                             name = "death_cohort"))
 
   # cohortTable & cohortId
   deathTable <- dplyr::tibble(
@@ -196,10 +203,43 @@ test_that("test expected errors", {
   cdm$death <- dplyr::tbl(attr(cdm, "dbcon"), "death")
 
   # cohortTable not exist
-  expect_error(cdm <- generateDeathCohortSet(cdm=cdm, cohortTable = "non_exist_cohort"))
+  expect_error(cdm <- generateDeathCohortSet(cdm=cdm,
+                                             name = "death_cohort", cohortTable = "non_exist_cohort"))
 
   # wrong cohortId input
-  expect_error(cdm <- generateDeathCohortSet(cdm=cdm, cohortTable = "cohort1", cohortId = "1"))
+  expect_error(cdm <- generateDeathCohortSet(cdm=cdm,
+                                             name = "death_cohort", cohortTable = "cohort1", cohortId = "1"))
+
+  DBI::dbDisconnect(attr(cdm, "dbcon"), shutdown = TRUE)
+})
+
+test_that("test single permanent table created", {
+
+  cdm <- PatientProfiles::mockPatientProfiles()
+  deathTable <- dplyr::tibble(
+    person_id = c(1,2,3),
+    death_date = c(as.Date("2020-01-01"),
+                   as.Date("2020-01-02"),
+                   as.Date("2020-01-01")))
+  DBI::dbWithTransaction(attr(cdm, "dbcon"), {
+    DBI::dbWriteTable(attr(cdm, "dbcon"), "death",
+                      deathTable, overwrite = TRUE)
+  })
+  cdm$death <- dplyr::tbl(attr(cdm, "dbcon"), "death")
+
+  start_tables <- CDMConnector::listTables(attr(cdm, "dbcon"))
+
+  cdm <- generateDeathCohortSet(cdm=cdm,
+                                name = "my_death_cohort",
+                                overwrite = TRUE)
+
+  end_tables <- CDMConnector::listTables(attr(cdm, "dbcon"))
+
+  testthat::expect_equal(
+    sort(end_tables),
+                      sort(c(start_tables, "my_death_cohort", "my_death_cohort_set",
+                                           "my_death_cohort_count",
+                                           "my_death_cohort_attrition")))
 
   DBI::dbDisconnect(attr(cdm, "dbcon"), shutdown = TRUE)
 })

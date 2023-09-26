@@ -37,9 +37,9 @@ test_that("mgus example: no Competing risk", {
   survCR <- estimateSurvival(cdm,
     targetCohortTable = "mgus_diagnosis",
     targetCohortId = 1,
-    outcomeCohortTable = "death_cohort",
+    outcomeCohortTable = "progression",
     outcomeCohortId = 1,
-    competingOutcomeCohortTable = "progression",
+    competingOutcomeCohortTable = "death_cohort",
     competingOutcomeCohortId = 1
   )
 
@@ -53,7 +53,7 @@ test_that("mgus example: no Competing risk", {
                     dplyr::select(outcome) %>%
                     dplyr::pull() %>%
                     unique() %in%
-                    c("outcome", "competing outcome", "none")))
+                    c("death_cohort", "progression", "outcome", "competing outcome", "none")))
 
   expect_true(all(compareNA(survCR %>%
                     dplyr::select(time) %>%
@@ -75,10 +75,10 @@ test_that("mgus example: no Competing risk", {
                     dplyr::pull() %>% unique() == c(0:424)))
 
   expect_true(nrow(survCR %>%
-    dplyr::filter(.data$outcome == "outcome") %>%
+    dplyr::filter(.data$outcome == "death_cohort") %>%
     dplyr::collect())>=1)
   expect_true(nrow(survCR %>%
-                     dplyr::filter(.data$outcome == "competing outcome") %>%
+                     dplyr::filter(.data$outcome == "progression") %>%
                      dplyr::collect())>=1)
 
   expect_true(all(c("death_cohort", "progression") %in%
@@ -109,7 +109,7 @@ test_that("mgus example: no Competing risk, strata", {
   )
   expect_true(tibble::is_tibble(surv))
 
-  expect_true(surv %>% dplyr::select(outcome) %>% dplyr::pull() %>% unique() == "outcome")
+  expect_true(all(surv %>% dplyr::select(outcome) %>% dplyr::pull() %>% unique() %in% c("death_cohort", "outcome")))
   expect_true(all(compareNA(surv %>% dplyr::select(time) %>% dplyr::pull() %>% unique(), c(0:424, NA))))
   expect_true(surv %>% dplyr::select(analysis_type) %>% dplyr::pull() %>% unique() == "Single event")
   expect_true(all(surv %>% dplyr::select(strata_name) %>% dplyr::pull() %>% unique() %in%
@@ -138,9 +138,9 @@ test_that("mgus example: Competing risk, strata", {
   survCR <- estimateSurvival(cdm,
                              targetCohortTable = "mgus_diagnosis",
                              targetCohortId = 1,
-                             outcomeCohortTable = "death_cohort",
+                             outcomeCohortTable = "progression",
                              outcomeCohortId = 1,
-                             competingOutcomeCohortTable = "progression",
+                             competingOutcomeCohortTable = "death_cohort",
                              competingOutcomeCohortId = 1,
                              strata = list(
                                "age" = c("age"),
@@ -150,10 +150,8 @@ test_that("mgus example: Competing risk, strata", {
                              )
   )
 
-  # problem with strata variables (age up to 300)
-
   expect_true(tibble::is_tibble(survCR))
-  expect_true(all(survCR %>% dplyr::select(outcome) %>% dplyr::pull() %>% unique() %in% c("outcome", "competing outcome","none")))
+  expect_true(all(survCR %>% dplyr::select(outcome) %>% dplyr::pull() %>% unique() %in% c("death_cohort", "progression", "outcome", "competing outcome","none")))
   expect_true(all(compareNA(survCR %>% dplyr::select(time) %>% dplyr::pull() %>% unique(), c(0:424,NA))))
   expect_true(survCR %>% dplyr::select(analysis_type) %>% dplyr::pull() %>% unique() == "Competing risk")
   expect_true(all(survCR %>% dplyr::select(strata_name) %>% dplyr::pull() %>% unique() %in% c("Overall", "sex", "age", "mspike_r", "age and sex")))
@@ -319,17 +317,21 @@ test_that("funcionality with created dataset", {
                     c(rep(3, 5), rep(2, 27), rep(1, 950))))
 
   expect_true(all(surv2 %>% dplyr::select(analysis_type) %>% dplyr::pull() == "Competing risk"))
-  expect_true(all(surv2 %>% dplyr::select(outcome) %>% dplyr::pull() %in% c("outcome", "none", "competing outcome")))
-  expect_true(all(surv2 %>% dplyr::filter(estimate_type == "Survival events") %>% dplyr::filter(!is.na(estimate) & variable_level == "timeGap 1" & outcome == "outcome") %>% dplyr::select(time) == c(0:981)))
-  expect_true(all(surv2 %>% dplyr::filter(estimate_type == "Survival events") %>% dplyr::filter(!is.na(estimate) & variable_level == "timeGap 1" & outcome == "competing outcome") %>% dplyr::select(time) == c(0:981)))
-  expect_true(all(surv2 %>% dplyr::filter(estimate_type == "Survival events") %>% dplyr::filter(!is.na(estimate) & variable_level == "timeGap 7" & outcome == "outcome") %>% dplyr::select(time) == c(seq(0,981, by = 7), 981)))
-  expect_true(all(surv2 %>% dplyr::filter(estimate_type == "Survival events") %>% dplyr::filter(!is.na(estimate) & variable_level == "timeGap 7" & outcome == "competing outcome") %>% dplyr::select(time) == c(seq(0,981, by = 7), 981)))
-  expect_true(all(surv2 %>% dplyr::filter(estimate_type == "Survival events") %>% dplyr::filter(!is.na(estimate) & variable_level == "timeGap 30" & outcome == "outcome") %>% dplyr::select(time) == c(seq(0,981, by = 30), 981)))
-  expect_true(all(surv2 %>% dplyr::filter(estimate_type == "Survival events") %>% dplyr::filter(!is.na(estimate) & variable_level == "timeGap 30" & outcome == "competing outcome") %>% dplyr::select(time) == c(seq(0,981, by = 30), 981)))
-  expect_true(all(surv2 %>% dplyr::filter(estimate_type == "Survival events") %>% dplyr::filter(!is.na(estimate) & variable_level == "timeGap 365" & outcome == "outcome") %>% dplyr::select(time) == c(seq(0,981, by = 365), 981)))
-  expect_true(all(surv2 %>% dplyr::filter(estimate_type == "Survival events") %>% dplyr::filter(!is.na(estimate) & variable_level == "timeGap 365" & outcome == "competing outcome") %>% dplyr::select(time) == c(seq(0,981, by = 365), 981)))
+  expect_true(all(surv2 %>% dplyr::select(outcome) %>% dplyr::pull() %in% c("cohort_1", "cohort_1_competing_outcome", "outcome", "competing outcome", "none")))
+  expect_true(all(surv2 %>% dplyr::filter(estimate_type == "Survival events") %>% dplyr::filter(!is.na(estimate) & variable_level == "timeGap 1" & outcome == "cohort_1") %>% dplyr::select(time) == c(0:981)))
+  expect_true(all(surv2 %>% dplyr::filter(estimate_type == "Survival events") %>% dplyr::filter(!is.na(estimate) & variable_level == "timeGap 1" & outcome == "cohort_1_competing_outcome") %>% dplyr::select(time) == c(0:981)))
+  expect_true(all(surv2 %>% dplyr::filter(estimate_type == "Survival events") %>% dplyr::filter(!is.na(estimate) & variable_level == "timeGap 7" & outcome == "cohort_1") %>% dplyr::select(time) == c(seq(0,981, by = 7), 981)))
+  expect_true(all(surv2 %>% dplyr::filter(estimate_type == "Survival events") %>% dplyr::filter(!is.na(estimate) & variable_level == "timeGap 7" & outcome == "cohort_1_competing_outcome") %>% dplyr::select(time) == c(seq(0,981, by = 7), 981)))
+  expect_true(all(surv2 %>% dplyr::filter(estimate_type == "Survival events") %>% dplyr::filter(!is.na(estimate) & variable_level == "timeGap 30" & outcome == "cohort_1") %>% dplyr::select(time) == c(seq(0,981, by = 30), 981)))
+  expect_true(all(surv2 %>% dplyr::filter(estimate_type == "Survival events") %>% dplyr::filter(!is.na(estimate) & variable_level == "timeGap 30" & outcome == "cohort_1_competing_outcome") %>% dplyr::select(time) == c(seq(0,981, by = 30), 981)))
+  expect_true(all(surv2 %>% dplyr::filter(estimate_type == "Survival events") %>% dplyr::filter(!is.na(estimate) & variable_level == "timeGap 365" & outcome == "cohort_1") %>% dplyr::select(time) == c(seq(0,981, by = 365), 981)))
+  expect_true(all(surv2 %>% dplyr::filter(estimate_type == "Survival events") %>% dplyr::filter(!is.na(estimate) & variable_level == "timeGap 365" & outcome == "cohort_1_competing_outcome") %>% dplyr::select(time) == c(seq(0,981, by = 365), 981)))
   expect_true(all(surv2 %>% dplyr::filter(estimate_type == "Survival events") %>% dplyr::select(variable_level) %>% dplyr::pull() %in% c("timeGap 1", "timeGap 7", "timeGap 30", "timeGap 365")))
   expect_true(all(surv2 %>% dplyr::filter(estimate_type == "Survival events") %>% dplyr::group_by(variable_level) %>% dplyr::summarise(n = sum(estimate, na.rm = T)) %>% dplyr::select(n) %>% dplyr::pull() == c(2, 2, 2, 2)))
+
+  # change variable_level not name cohort
+  # maybe not names outcome or copeting, or say must be different names (or put name_cr, in outcome!)
+  # then check
 
   CDMConnector::cdmDisconnect(cdm)
 
