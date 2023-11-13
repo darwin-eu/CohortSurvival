@@ -10,6 +10,9 @@
     <loc>https://darwin-eu.github.io/CohortSurvival/articles/a01_Single_event_of_interest.html</loc>
   </url>
   <url>
+    <loc>https://darwin-eu.github.io/CohortSurvival/articles/a02_Competing_risk_survival.html</loc>
+  </url>
+  <url>
     <loc>https://darwin-eu.github.io/CohortSurvival/articles/index.html</loc>
   </url>
   <url>
@@ -56,6 +59,9 @@
   </url>
   <url>
     <loc>https://darwin-eu.github.io/CohortSurvival/reference/survivalParticipants.html</loc>
+  </url>
+  <url>
+    <loc>https://darwin-eu.github.io/CohortSurvival/reference/survivalSummary.html</loc>
   </url>
   <url>
     <loc>https://darwin-eu.github.io/CohortSurvival/reference/tidyeval.html</loc>
