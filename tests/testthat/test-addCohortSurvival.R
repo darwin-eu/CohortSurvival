@@ -243,10 +243,10 @@ test_that("censorOnDate", {
     subject_id = c(1,2,3),
     cohort_start_date = c(as.Date("2019-01-01"),
                           as.Date("2020-01-05"),
-                          as.Date("2020-01-01")),
+                          as.Date("2021-02-01")),
     cohort_end_date = c(as.Date("2019-01-01"),
                         as.Date("2020-01-05"),
-                        as.Date("2020-01-01")),
+                        as.Date("2021-02-01")),
   )
   observation_period <- dplyr::tibble(
     observation_period_id = c(1,1,1),
@@ -268,7 +268,7 @@ test_that("censorOnDate", {
       cdm = cdm,
       outcomeCohortTable = "cohort2",
       outcomeCohortId = 1,
-      censorOnDate = as.Date("2020-01-04")
+      censorOnDate = as.Date("2021-01-04")
     ) %>%
     dplyr::arrange(subject_id)
 
@@ -281,15 +281,25 @@ test_that("censorOnDate", {
   expect_true(all(compareNA(cohortCensorDate %>%
                               dplyr::select(status) %>%
                               dplyr::pull(),
-                              c(NA, 0, NA))))
+                              c(NA, 1, 0))))
   expect_true(all(compareNA(cohortCensorDate %>%
                               dplyr::select(days_to_exit) %>%
                               dplyr::pull(),
-                              c(3, 2, -363))))
+                              c(369, 368, 3))))
   expect_true(all(compareNA(cohortCensorDate %>%
                               dplyr::select(time) %>%
                               dplyr::pull(),
-                              c(NA, 2, NA))))
+                              c(NA, 3, 3))))
+
+  expect_error(
+    cdm$cohort1 %>%
+      addCohortSurvival(
+        cdm = cdm,
+        outcomeCohortTable = "cohort2",
+        outcomeCohortId = 1,
+        censorOnDate = as.Date("2020-01-04")
+      )
+  )
 
   CDMConnector::cdmDisconnect(cdm)
 })
@@ -596,3 +606,87 @@ test_that("allow overwrite of time and status", {
 
   CDMConnector::cdmDisconnect(cdm)
 })
+
+test_that("multiple records per person", {
+
+  exposure_cohort <- dplyr::tibble(
+    subject_id = c(1, 1, 2, 2, 3),
+    cohort_definition_id = rep(1,5),
+    cohort_start_date = c(
+      as.Date("2010-01-01"),
+      as.Date("2015-01-01"),
+      as.Date("2010-01-01"),
+      as.Date("2016-01-01"),
+      as.Date("2010-01-01")
+    ),
+    cohort_end_date = c(
+      as.Date("2010-01-01"),
+      as.Date("2015-01-01"),
+      as.Date("2010-01-01"),
+      as.Date("2016-01-01"),
+      as.Date("2010-01-01")
+    )
+  )
+  # outcome during first cohort entry for id 1
+  # outcome during second cohort entry for id 2
+  outcome_cohort <- dplyr::tibble(
+    cohort_definition_id = c(1, 1),
+    subject_id = c(1, 2),
+    cohort_start_date = c(
+      as.Date("2012-01-10"),
+      as.Date("2017-01-10")
+    ),
+    cohort_end_date = c(
+      as.Date("2012-01-10"),
+      as.Date("2017-01-10")
+    ))
+  observation_period <- dplyr::tibble(
+    observation_period_id = c(1, 1, 1),
+    person_id = c(1, 2, 3),
+    observation_period_start_date = c(
+      as.Date("2007-03-21"),
+      as.Date("2006-09-09"),
+      as.Date("1980-07-20")
+    ),
+    observation_period_end_date = c(
+      as.Date("2022-09-08"),
+      as.Date("2023-01-03"),
+      as.Date("2023-05-20")
+    )
+  )
+
+  cdm <- PatientProfiles::mockPatientProfiles(
+    exposure_cohort = exposure_cohort,
+    cohort1 = outcome_cohort,
+    observation_period = observation_period
+  )
+
+  start_rows<-cdm$exposure_cohort %>% dplyr::count() %>% dplyr::pull()
+
+  cdm$exposure_cohort <- cdm$exposure_cohort %>%
+    addCohortSurvival(cdm = cdm,
+                      outcomeCohortTable = "cohort1")
+
+  end_rows <- cdm$exposure_cohort %>% dplyr::count() %>% dplyr::pull()
+  expect_equal(start_rows, end_rows)
+
+  expect_true(cdm$exposure_cohort %>%
+    dplyr::filter(subject_id == 1,
+                    cohort_start_date == as.Date("2010-01-01")) %>%
+    dplyr::pull("status") == 1)
+  # NA for the second as their cohort start was after their event
+  expect_true(is.na(cdm$exposure_cohort %>%
+                dplyr::filter(subject_id == 1,
+                              cohort_start_date == as.Date("2015-01-01")) %>%
+                dplyr::pull("status")))
+  # Both will be status == 1 as event came after second cohort entry
+  expect_true(all(cdm$exposure_cohort %>%
+                dplyr::filter(subject_id == 2) %>%
+                dplyr::pull("status") == 1))
+  # no event for subject 3
+  expect_true(cdm$exposure_cohort %>%
+                    dplyr::filter(subject_id == 3) %>%
+                    dplyr::pull("status") == 0)
+
+  CDMConnector::cdm_disconnect(cdm)
+  })

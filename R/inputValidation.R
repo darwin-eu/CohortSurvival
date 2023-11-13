@@ -59,24 +59,6 @@ checkCohortId <- function(cohort, cohortId) {
   return(cohortIdPresent)
 }
 
-checkPatientRows <- function(cohort) {
-  oneRowperPatient <- cohort %>%
-    dplyr::group_by(.data$subject_id) %>%
-    dplyr::mutate(num = dplyr::row_number()) %>%
-    dplyr::ungroup() %>%
-    dplyr::filter(.data$num > 1) %>%
-    dplyr::tally() %>%
-    dplyr::pull()
-
-  if (oneRowperPatient > 0) {
-    return(cli::cli_abort(c(
-      "the cohort table must only contain one row per patient"
-    )))
-  } else {
-    return(invisible())
-  }
-}
-
 checkStrata <- function(strata, x) {
   checkmate::assertList(
     strata,
@@ -115,5 +97,18 @@ checkIsCohort_exp <- function(cohort) {
     )))
   } else {
     return(invisible(isCohort))
+  }
+}
+
+checkCensorOnDate <- function(cohort, censorOnDate) {
+  if(!is.null(censorOnDate)) {
+    start_dates <- cohort %>%
+      dplyr::select("cohort_start_date") %>%
+      dplyr::pull()
+    if(max(start_dates) > censorOnDate) {
+      return(cli::cli_abort(c(
+        "the target cohort has at least one cohort_start_date after the censor date {censorOnDate}"
+      )))
+    }
   }
 }

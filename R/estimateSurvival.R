@@ -18,8 +18,6 @@
 #' estimates. First day will be day zero with risk estimates provided
 #' for times up to the end of follow-up, with a gap in days equivalent
 #' to timeGap.
-#' @param times vector of time points at which to give survival estimates,
-#' if NULL estimates at all times are calculated
 #' @param minCellCount The minimum number of events to reported, below which
 #' results will be obscured. If 0, all results will be reported.
 #' @param returnParticipants Either TRUE or FALSE. If TRUE, references to
@@ -34,48 +32,91 @@
 #'
 #' @examples
 #' cdm <- mockMGUS2cdm()
-#' surv <- estimateSingleEventSurvival(cdm,
-#'                        targetCohortTable = "mgus_diagnosis",
-#'                        targetCohortId = 1,
-#'                        outcomeCohortTable = "death_cohort",
-#'                        outcomeCohortId = 1,
-#'                        timeGap = 7
+#' surv <- estimateSingleEventSurvival(
+#'   cdm = cdm,
+#'   targetCohortTable = "mgus_diagnosis",
+#'   targetCohortId = 1,
+#'   outcomeCohortTable = "death_cohort",
+#'   outcomeCohortId = 1,
+#'   timeGap = 7
 #' )
 #'
 estimateSingleEventSurvival <- function(cdm,
-                             targetCohortTable,
-                             targetCohortId = 1,
-                             outcomeCohortTable,
-                             outcomeCohortId = 1,
-                             outcomeDateVariable = "cohort_start_date",
-                             censorOnCohortExit = FALSE,
-                             censorOnDate = NULL,
-                             followUpDays = Inf,
-                             strata = NULL,
-                             timeGap = c(1, 7, 30, 365),
-                             times = NULL,
-                             minCellCount = 5,
-                             returnParticipants = FALSE) {
+                                        targetCohortTable,
+                                        targetCohortId = NULL,
+                                        outcomeCohortTable,
+                                        outcomeCohortId = NULL,
+                                        outcomeDateVariable = "cohort_start_date",
+                                        censorOnCohortExit = FALSE,
+                                        censorOnDate = NULL,
+                                        followUpDays = Inf,
+                                        strata = NULL,
+                                        timeGap = c(1, 7, 30, 365),
+                                        minCellCount = 5,
+                                        returnParticipants = FALSE) {
+  if (is.null(targetCohortId)) {
+    CDMConnector::assertTables(cdm, targetCohortTable)
+    targetCohortId <- CDMConnector::cohort_count(cdm[[targetCohortTable]]) %>%
+      dplyr::filter(.data$number_records >0) %>%
+      dplyr::pull("cohort_definition_id")
+  }
+  if (is.null(outcomeCohortId)) {
+    CDMConnector::assertTables(cdm, outcomeCohortTable)
+    outcomeCohortId <- CDMConnector::cohort_count(cdm[[outcomeCohortTable]]) %>%
+      dplyr::filter(.data$number_records >0) %>%
+      dplyr::pull("cohort_definition_id")
+  }
 
-  estimateSurvival(cdm = cdm,
-    targetCohortTable = targetCohortTable,
-    targetCohortId = targetCohortId,
-    outcomeCohortTable = outcomeCohortTable,
-    outcomeCohortId = outcomeCohortId,
-    outcomeDateVariable = outcomeDateVariable,
-    competingOutcomeCohortTable = NULL,
-    competingOutcomeCohortId = 1,
-    competingOutcomeDateVariable = "cohort_start_date",
-    censorOnCohortExit = censorOnCohortExit,
-    censorOnDate = censorOnDate,
-    followUpDays = followUpDays,
-    strata = strata,
-    timeGap = timeGap,
-    times = times,
-    minCellCount = minCellCount,
-    returnParticipants = returnParticipants
-  )
+  surv <- list()
+  for (i in seq_along(targetCohortId)) {
+    working_target_id <- targetCohortId[i]
+    working_target <- CDMConnector::cohort_set(cdm[[targetCohortTable]]) %>%
+      dplyr::filter(.data$cohort_definition_id == working_target_id) %>%
+      dplyr::pull("cohort_name")
+    for (j in seq_along(outcomeCohortId)) {
+      working_outcome_id <- outcomeCohortId[j]
+      working_outcome <- CDMConnector::cohort_set(cdm[[outcomeCohortTable]]) %>%
+        dplyr::filter(.data$cohort_definition_id == working_outcome_id) %>%
+        dplyr::pull("cohort_name")
+      cli::cli_inform("- Getting survival for target cohort '{working_target}'
+                    and outcome cohort '{working_outcome}'")
 
+      surv[[paste0(i, "_", j)]] <- estimateSurvival(
+        cdm = cdm,
+        targetCohortTable = targetCohortTable,
+        targetCohortId = working_target_id,
+        outcomeCohortTable = outcomeCohortTable,
+        outcomeCohortId = working_outcome_id,
+        outcomeDateVariable = outcomeDateVariable,
+        competingOutcomeCohortTable = NULL,
+        competingOutcomeCohortId = 1,
+        competingOutcomeDateVariable = "cohort_start_date",
+        censorOnCohortExit = censorOnCohortExit,
+        censorOnDate = censorOnDate,
+        followUpDays = followUpDays,
+        strata = strata,
+        timeGap = timeGap,
+        minCellCount = minCellCount,
+        returnParticipants = returnParticipants
+      )
+    }
+  }
+
+  surv_estimates <- dplyr::bind_rows(surv)
+  # add attributes
+  events <- list()
+  attrition <- list()
+  summary <- list()
+  for (i in seq_along(surv)) {
+    events[[i]] <- attr(surv[[i]], "events")
+    attrition[[i]] <- attr(surv[[i]], "attrition")
+    summary[[i]] <- attr(surv[[i]], "summary")
+  }
+  attr(surv_estimates, "events") <- dplyr::bind_rows(events)
+  attr(surv_estimates, "attrition") <- dplyr::bind_rows(attrition)
+  attr(surv_estimates, "summary") <- dplyr::bind_rows(summary)
+
+  return(surv_estimates)
 }
 
 #' Estimate survival for a given event and competing risk of interest using
@@ -103,8 +144,6 @@ estimateSingleEventSurvival <- function(cdm,
 #' estimates. First day will be day zero with risk estimates provided
 #' for times up to the end of follow-up, with a gap in days equivalent
 #' to timeGap.
-#' @param times vector of time points at which to give survival estimates,
-#' if NULL estimates at all times are calculated
 #' @param minCellCount The minimum number of events to reported, below which
 #' results will be obscured. If 0, all results will be reported.
 #' @param returnParticipants Either TRUE or FALSE. If TRUE, references to
@@ -119,88 +158,150 @@ estimateSingleEventSurvival <- function(cdm,
 #'
 #' @examples
 #' cdm <- mockMGUS2cdm()
-#' surv <- estimateCompetingRiskSurvival(cdm,
-#'                        targetCohortTable = "mgus_diagnosis",
-#'                        targetCohortId = 1,
-#'                        outcomeCohortTable = "death_cohort",
-#'                        outcomeCohortId = 1,
-#'                        competingOutcomeCohortTable = "progression",
-#'                        competingOutcomeCohortId = 1,
-#'                        timeGap = 7
+#' surv <- estimateCompetingRiskSurvival(
+#'   cdm = cdm,
+#'   targetCohortTable = "mgus_diagnosis",
+#'   targetCohortId = 1,
+#'   outcomeCohortTable = "death_cohort",
+#'   outcomeCohortId = 1,
+#'   competingOutcomeCohortTable = "progression",
+#'   competingOutcomeCohortId = 1,
+#'   timeGap = 7
 #' )
 #'
 estimateCompetingRiskSurvival <- function(cdm,
-                                        targetCohortTable,
-                                        targetCohortId = 1,
-                                        outcomeCohortTable,
-                                        outcomeCohortId = 1,
-                                        outcomeDateVariable = "cohort_start_date",
-                                        competingOutcomeCohortTable,
-                                        competingOutcomeCohortId = 1,
-                                        competingOutcomeDateVariable = "cohort_start_date",
-                                        censorOnCohortExit = FALSE,
-                                        censorOnDate = NULL,
-                                        followUpDays = Inf,
-                                        strata = NULL,
-                                        timeGap = c(1, 7, 30, 365),
-                                        times = NULL,
-                                        minCellCount = 5,
-                                        returnParticipants = FALSE) {
+                                          targetCohortTable,
+                                          targetCohortId = NULL,
+                                          outcomeCohortTable,
+                                          outcomeCohortId = NULL,
+                                          outcomeDateVariable = "cohort_start_date",
+                                          competingOutcomeCohortTable,
+                                          competingOutcomeCohortId = NULL,
+                                          competingOutcomeDateVariable = "cohort_start_date",
+                                          censorOnCohortExit = FALSE,
+                                          censorOnDate = NULL,
+                                          followUpDays = Inf,
+                                          strata = NULL,
+                                          timeGap = c(1, 7, 30, 365),
+                                          minCellCount = 5,
+                                          returnParticipants = FALSE) {
+  if (is.null(targetCohortId)) {
+    CDMConnector::assertTables(cdm, targetCohortTable)
+    targetCohortId <- CDMConnector::cohort_count(cdm[[targetCohortTable]]) %>%
+      dplyr::filter(.data$number_records >0) %>%
+      dplyr::pull("cohort_definition_id")
+  }
+  if (is.null(outcomeCohortId)) {
+    CDMConnector::assertTables(cdm, outcomeCohortTable)
+    outcomeCohortId <- CDMConnector::cohort_count(cdm[[outcomeCohortTable]]) %>%
+      dplyr::filter(.data$number_records >0) %>%
+      dplyr::pull("cohort_definition_id")
+  }
+  if (is.null(competingOutcomeCohortId)) {
+    CDMConnector::assertTables(cdm, competingOutcomeCohortTable)
+    competingOutcomeCohortId <- CDMConnector::cohort_count(cdm[[competingOutcomeCohortTable]])  %>%
+      dplyr::filter(.data$number_records >0) %>%
+      dplyr::pull("cohort_definition_id")
+  }
 
-  estimateSurvival(cdm = cdm,
-                   targetCohortTable = targetCohortTable,
-                   targetCohortId = targetCohortId,
-                   outcomeCohortTable = outcomeCohortTable,
-                   outcomeCohortId = outcomeCohortId,
-                   outcomeDateVariable = outcomeDateVariable,
-                   competingOutcomeCohortTable = competingOutcomeCohortTable,
-                   competingOutcomeCohortId = competingOutcomeCohortId,
-                   competingOutcomeDateVariable = competingOutcomeDateVariable,
-                   censorOnCohortExit = censorOnCohortExit,
-                   censorOnDate = censorOnDate,
-                   followUpDays = followUpDays,
-                   strata = strata,
-                   timeGap = timeGap,
-                   times = times,
-                   minCellCount = minCellCount,
-                   returnParticipants = returnParticipants
-  )
+  surv <- list()
+  for (i in seq_along(targetCohortId)) {
+    working_target_id <- targetCohortId[i]
+    working_target <- CDMConnector::cohort_set(cdm[[targetCohortTable]]) %>%
+      dplyr::filter(.data$cohort_definition_id == working_target_id) %>%
+      dplyr::pull("cohort_name")
+    for (j in seq_along(outcomeCohortId)) {
+      working_outcome_id <- outcomeCohortId[j]
+      working_outcome <- CDMConnector::cohort_set(cdm[[outcomeCohortTable]]) %>%
+        dplyr::filter(.data$cohort_definition_id == working_outcome_id) %>%
+        dplyr::pull("cohort_name")
+      for (k in seq_along(competingOutcomeCohortId)) {
+        working_competing_outcome_id <- competingOutcomeCohortId[k]
+        working_competing_outcome <- CDMConnector::cohort_set(cdm[[competingOutcomeCohortTable]]) %>%
+          dplyr::filter(.data$cohort_definition_id == working_competing_outcome_id) %>%
+          dplyr::pull("cohort_name")
 
+        cli::cli_inform("- Getting survival for target cohort '{working_target}'
+                    and outcome cohort '{working_outcome}' with
+                    competing outcome cohort '{working_competing_outcome}'")
+        surv[[paste0(i, "_", j, "_", k)]] <- estimateSurvival(
+          cdm = cdm,
+          targetCohortTable = targetCohortTable,
+          targetCohortId = working_target_id,
+          outcomeCohortTable = outcomeCohortTable,
+          outcomeCohortId = working_outcome_id,
+          outcomeDateVariable = outcomeDateVariable,
+          competingOutcomeCohortTable = competingOutcomeCohortTable,
+          competingOutcomeCohortId = working_competing_outcome_id,
+          competingOutcomeDateVariable = competingOutcomeDateVariable,
+          censorOnCohortExit = censorOnCohortExit,
+          censorOnDate = censorOnDate,
+          followUpDays = followUpDays,
+          strata = strata,
+          timeGap = timeGap,
+          minCellCount = minCellCount,
+          returnParticipants = returnParticipants
+        ) %>%
+          dplyr::mutate(
+            outcome = CDMConnector::cohortSet(cdm[[outcomeCohortTable]]) %>%
+              dplyr::filter(.data$cohort_definition_id == .env$working_outcome_id) %>%
+              dplyr::pull("cohort_name")
+          )
+      }
+    }
+  }
+
+  surv_estimates <- dplyr::bind_rows(surv)
+  # add attributes
+  events <- list()
+  attrition <- list()
+  summary <- list()
+  for (i in seq_along(surv)) {
+    events[[i]] <- attr(surv[[i]], "events")
+    attrition[[i]] <- attr(surv[[i]], "attrition")
+    summary[[i]] <- attr(surv[[i]], "summary")
+  }
+  attr(surv_estimates, "events") <- dplyr::bind_rows(events)
+  attr(surv_estimates, "attrition") <- dplyr::bind_rows(attrition)
+  attr(surv_estimates, "summary") <- dplyr::bind_rows(summary)
+
+  return(surv_estimates)
 }
 
 
 
 estimateSurvival <- function(cdm,
                              targetCohortTable,
-                             targetCohortId = 1,
+                             targetCohortId = NULL,
                              outcomeCohortTable,
-                             outcomeCohortId = 1,
+                             outcomeCohortId = NULL,
                              outcomeDateVariable = "cohort_start_date",
                              competingOutcomeCohortTable = NULL,
-                             competingOutcomeCohortId = 1,
+                             competingOutcomeCohortId = NULL,
                              competingOutcomeDateVariable = "cohort_start_date",
                              censorOnCohortExit = FALSE,
                              censorOnDate = NULL,
                              followUpDays = Inf,
                              strata = NULL,
                              timeGap = c(1, 7, 30, 365),
-                             times = NULL,
                              minCellCount = 5,
                              returnParticipants = FALSE) {
-
   # check input
   errorMessage <- checkmate::makeAssertCollection()
 
   checkmate::assertCharacter(targetCohortTable,
-                             len = 1,
-                             add = errorMessage)
+    len = 1,
+    add = errorMessage
+  )
   checkmate::assertCharacter(outcomeCohortTable,
-                             len = 1,
-                             add = errorMessage)
+    len = 1,
+    add = errorMessage
+  )
   checkmate::assertCharacter(competingOutcomeCohortTable,
-                             len = 1,
-                             null.ok = TRUE,
-                             add = errorMessage)
+    len = 1,
+    null.ok = TRUE,
+    add = errorMessage
+  )
   checkCdm(cdm, tables = c(
     "person", "observation_period",
     targetCohortTable,
@@ -209,59 +310,61 @@ estimateSurvival <- function(cdm,
 
   checkIsCohort_exp(cdm[[targetCohortTable]])
   checkmate::assertIntegerish(targetCohortId,
-                              len = 1,
-                              lower = 1,
-                              add = errorMessage)
+    len = 1,
+    lower = 1,
+    add = errorMessage
+  )
   checkStrata(strata, cdm[[targetCohortTable]])
   checkmate::assertIntegerish(outcomeCohortId,
-                              len = 1,
-                              lower = 1,
-                              add = errorMessage)
+    len = 1,
+    lower = 1,
+    add = errorMessage
+  )
   checkmate::assertIntegerish(competingOutcomeCohortId,
-                              len = 1,
-                              lower = 1,
-                              add = errorMessage)
+    len = 1,
+    lower = 1,
+    add = errorMessage
+  )
 
   checkmate::assertCharacter(outcomeDateVariable,
-                             len = 1,
-                             add = errorMessage)
+    len = 1,
+    add = errorMessage
+  )
   checkmate::assertCharacter(competingOutcomeDateVariable,
-                             len = 1,
-                             add = errorMessage)
+    len = 1,
+    add = errorMessage
+  )
   checkmate::assertLogical(censorOnCohortExit,
-                           len = 1,
-                           add = errorMessage)
-  if(!is.null(censorOnDate)) {
+    len = 1,
+    add = errorMessage
+  )
+  if (!is.null(censorOnDate)) {
     checkdate <- censorOnDate %>% inherits("Date")
-    if(!checkdate) {
+    if (!checkdate) {
       cli::cli_abort("{censorOnDate} is neither NULL nor of type Date")
     }
   }
-  if(followUpDays != "Inf") {
+  if (followUpDays != "Inf") {
     checkmate::assertIntegerish(followUpDays,
-                                len = 1,
-                                lower = 0,
-                                add = errorMessage
+      len = 1,
+      lower = 0,
+      add = errorMessage
     )
   }
   checkmate::assertIntegerish(timeGap,
-                              lower = 1,
-                              add = errorMessage
-  )
-  checkmate::assertIntegerish(times,
-                              lower = 0,
-                              null.ok = TRUE,
-                              add = errorMessage
+    lower = 1,
+    add = errorMessage
   )
   checkmate::assertIntegerish(minCellCount,
-                              len = 1,
-                              lower = 0,
-                              null.ok = FALSE,
-                              add = errorMessage
+    len = 1,
+    lower = 0,
+    null.ok = FALSE,
+    add = errorMessage
   )
   checkmate::assertLogical(returnParticipants,
-                           len = 1,
-                           add = errorMessage)
+    len = 1,
+    add = errorMessage
+  )
 
   checkmate::reportAssertions(collection = errorMessage)
 
@@ -312,7 +415,7 @@ estimateSurvival <- function(cdm,
   # collect
   survDataDb <- workingExposureTable %>%
     dplyr::filter(!is.na(.data$outcome_time) &&
-                  !is.na(.data$outcome_status))
+      !is.na(.data$outcome_status))
 
   survData <- survDataDb %>%
     dplyr::collect()
@@ -340,11 +443,7 @@ estimateSurvival <- function(cdm,
   }
 
   # time points to extract survival estimates
-  if(!is.null(times)) {
-    timepoints <- times
-  } else {
-    timepoints <- seq(0, max(survData$outcome_time), by = 1)
-  }
+  timepoints <- seq(0, max(survData$outcome_time), by = 1)
 
   # fit survival, with strata
   if (is.null(competingOutcomeCohortTable)) {
@@ -363,23 +462,26 @@ estimateSurvival <- function(cdm,
     )
   }
 
-  if(nrow(surv)>0){
-  survivalEstimates <-  addCohortDetails(
-    x = surv,
-    cdm = cdm,
-    targetCohortId = targetCohortId,
-    targetCohortTable = targetCohortTable,
-    outcomeCohortId = outcomeCohortId,
-    outcomeCohortTable = outcomeCohortTable,
-    competingOutcomeCohortId = competingOutcomeCohortId,
-    competingOutcomeCohortTable = competingOutcomeCohortTable)
+  if (nrow(surv) > 0) {
+    survivalEstimates <- addCohortDetails(
+      x = surv,
+      cdm = cdm,
+      targetCohortId = targetCohortId,
+      targetCohortTable = targetCohortTable,
+      outcomeCohortId = outcomeCohortId,
+      outcomeCohortTable = outcomeCohortTable,
+      competingOutcomeCohortId = competingOutcomeCohortId,
+      competingOutcomeCohortTable = competingOutcomeCohortTable
+    )
 
-  survivalEstimates <- survivalEstimates %>%
-    tidyr::pivot_longer(cols = "outcome",
-                       names_to = "variable",
-                       values_to = "variable_level") %>%
-    dplyr::mutate(variable = "Outcome") %>%
-    dplyr::mutate(outcome = .data$variable_level)
+    survivalEstimates <- survivalEstimates %>%
+      tidyr::pivot_longer(
+        cols = "outcome",
+        names_to = "variable",
+        values_to = "variable_level"
+      ) %>%
+      dplyr::mutate(variable = "Outcome") %>%
+      dplyr::mutate(outcome = .data$variable_level)
 
     survivalEstimates <- survivalEstimates %>%
       dplyr::select(!"variable_type") %>%
@@ -398,144 +500,148 @@ estimateSurvival <- function(cdm,
       dplyr::distinct()
 
 
-  # add attributes
-  if(isTRUE(returnParticipants)){
-    participantsRef <-  survDataDb %>%
-      dplyr::select("cohort_definition_id",
-                    "subject_id",
-                    "cohort_start_date",
-                    "cohort_end_date") %>%
-      CDMConnector::computeQuery()
+    # add attributes
+    if (isTRUE(returnParticipants)) {
+      participantsRef <- survDataDb %>%
+        dplyr::select(
+          "cohort_definition_id",
+          "subject_id",
+          "cohort_start_date",
+          "cohort_end_date"
+        ) %>%
+        CDMConnector::computeQuery()
 
-    participantsSetRef <- participantsRef %>%
-      dplyr::select("cohort_definition_id") %>%
-      dplyr::distinct() %>%
-      dplyr::mutate(cohort_name = paste0("survival_participants_",
-                                         .data$cohort_definition_id)) %>%
-      dplyr::collect()
+      participantsSetRef <- participantsRef %>%
+        dplyr::select("cohort_definition_id") %>%
+        dplyr::distinct() %>%
+        dplyr::mutate(cohort_name = paste0(
+          "survival_participants_",
+          .data$cohort_definition_id
+        )) %>%
+        dplyr::collect()
 
-    participantsCountRef <-  participantsRef %>%
-      dplyr::group_by(.data$cohort_definition_id) %>%
-      dplyr::summarise(
-        number_records = dplyr::n(),
-        number_subjects = dplyr::n_distinct(.data$subject_id),
-        .groups = "drop"
-      ) %>%
-      dplyr::collect()
+      participantsCountRef <- participantsRef %>%
+        dplyr::group_by(.data$cohort_definition_id) %>%
+        dplyr::summarise(
+          number_records = dplyr::n(),
+          number_subjects = dplyr::n_distinct(.data$subject_id),
+          .groups = "drop"
+        ) %>%
+        dplyr::collect()
 
-    attr(survivalEstimates, "participants") <- CDMConnector::newGeneratedCohortSet(
-      cohortRef = participantsRef ,
-      cohortSetRef = participantsSetRef,
-      cohortCountRef = participantsCountRef
-    )
+      attr(survivalEstimates, "participants") <- CDMConnector::newGeneratedCohortSet(
+        cohortRef = participantsRef,
+        cohortSetRef = participantsSetRef,
+        cohortCountRef = participantsCountRef
+      )
+    }
 
-  }
-
-  attr(survivalEstimates, "events") <- addCohortDetails(
-                   x = attr(surv, "events"),
-                   cdm = cdm,
-                   targetCohortId = targetCohortId,
-                   targetCohortTable = targetCohortTable,
-                   outcomeCohortId = outcomeCohortId,
-                   outcomeCohortTable = outcomeCohortTable,
-                   competingOutcomeCohortTable = competingOutcomeCohortTable,
-                   competingOutcomeCohortId = competingOutcomeCohortId
-                   ) %>%
-    dplyr::rename("estimate" = "n_events") %>%
-    dplyr::mutate(
-      variable = "Outcome",
-      variable_level = paste0("timeGap ", timeGap),
-      estimate_type = "Survival events",
-      variable_type = "n_events"
-    ) %>%
-    dplyr::select(-c("timeGap")) %>%
-    var_order() %>%
-    dplyr::relocate("outcome",
-                    .after = "variable_type") %>%
-    dplyr::relocate("time",
-                    .after = "outcome") %>%
-    dplyr::relocate("analysis_type",
-                    .after = "time") %>%
-    dplyr::relocate("estimate",
-                    .after = "analysis_type")
-
-  survivalEstimates <- dplyr::union_all(
-    survivalEstimates,
-    attr(survivalEstimates, "events")
-  )
-
-  attr(survivalEstimates, "events") <- NULL
-
-  attr(survivalEstimates, "attrition") <- attrition
-
-  if (is.null(competingOutcomeCohortTable)) {
-  attr(survivalEstimates, "summary") <- addCohortDetails(
-    x = attr(surv, "summary"),
-    cdm = cdm,
-    targetCohortId = targetCohortId,
-    targetCohortTable = targetCohortTable,
-    outcomeCohortId = outcomeCohortId,
-    outcomeCohortTable = outcomeCohortTable,
-    summary = TRUE) %>%
-    dplyr::mutate(analysis_type = "Single event")
-
-  } else {
-    attr(survivalEstimates, "summary") <- addCohortDetails(
-      x = attr(surv, "summary"),
+    attr(survivalEstimates, "events") <- addCohortDetails(
+      x = attr(surv, "events"),
       cdm = cdm,
       targetCohortId = targetCohortId,
       targetCohortTable = targetCohortTable,
       outcomeCohortId = outcomeCohortId,
       outcomeCohortTable = outcomeCohortTable,
       competingOutcomeCohortTable = competingOutcomeCohortTable,
-      competingOutcomeCohortId = competingOutcomeCohortId,
-      summary = TRUE) %>%
-      dplyr::mutate(analysis_type = "Competing risk")
-  }
+      competingOutcomeCohortId = competingOutcomeCohortId
+    ) %>%
+      dplyr::rename("estimate" = "n_events") %>%
+      dplyr::mutate(
+        variable = "Outcome",
+        variable_level = paste0("timeGap ", timeGap),
+        estimate_type = "Survival events",
+        variable_type = "n_events"
+      ) %>%
+      dplyr::select(!c("timeGap")) %>%
+      var_order() %>%
+      dplyr::relocate("outcome",
+        .after = "variable_type"
+      ) %>%
+      dplyr::relocate("time",
+        .after = "outcome"
+      ) %>%
+      dplyr::relocate("analysis_type",
+        .after = "time"
+      ) %>%
+      dplyr::relocate("estimate",
+        .after = "analysis_type"
+      )
 
-  attr(survivalEstimates, "summary") <- attr(survivalEstimates, "summary") %>%
-    dplyr::mutate(result_type = "Survival estimate",
-                  variable = "Outcome",
-                  variable_level = CDMConnector::cohortSet(cdm[[targetCohortTable]]) %>%
-                    dplyr::filter(.data$cohort_definition_id ==
-                                    .env$targetCohortId) %>%
-                    dplyr::pull("cohort_name"),
-                  estimate_type = "Survival summary") %>%
-    dplyr::select(-c("variable_type")) %>%
-    tidyr::pivot_longer(cols = -c("cdm_name",
-                                  "result_type",
-                                  "group_name",
-                                  "group_level",
-                                  "strata_name",
-                                  "strata_level",
-                                  "variable",
-                                  "variable_level",
-                                  "estimate_type",
-                                  "outcome",
-                                  "analysis_type"),
-                        names_to = "variable_type",
-                        values_to = "estimate") %>%
-    var_order() %>%
-    dplyr::mutate(time = NA) %>%
-    dplyr::relocate("outcome",
-                    .after = "variable_type") %>%
-    dplyr::relocate("time",
-                    .after = "outcome") %>%
-    dplyr::relocate("analysis_type",
-                    .after = "time") %>%
-    dplyr::relocate("estimate",
-                    .after = "analysis_type")
+    attr(survivalEstimates, "attrition") <- attrition
 
-  survivalEstimates <- dplyr::union_all(
-    survivalEstimates,
-    attr(survivalEstimates, "summary")
-  )
+    if (is.null(competingOutcomeCohortTable)) {
+      attr(survivalEstimates, "summary") <- addCohortDetails(
+        x = attr(surv, "summary"),
+        cdm = cdm,
+        targetCohortId = targetCohortId,
+        targetCohortTable = targetCohortTable,
+        outcomeCohortId = outcomeCohortId,
+        outcomeCohortTable = outcomeCohortTable,
+        summary = TRUE
+      ) %>%
+        dplyr::mutate(analysis_type = "Single event")
+    } else {
+      attr(survivalEstimates, "summary") <- addCohortDetails(
+        x = attr(surv, "summary"),
+        cdm = cdm,
+        targetCohortId = targetCohortId,
+        targetCohortTable = targetCohortTable,
+        outcomeCohortId = outcomeCohortId,
+        outcomeCohortTable = outcomeCohortTable,
+        competingOutcomeCohortTable = competingOutcomeCohortTable,
+        competingOutcomeCohortId = competingOutcomeCohortId,
+        summary = TRUE
+      ) %>%
+        dplyr::mutate(analysis_type = "Competing risk")
+    }
 
-  attr(survivalEstimates, "summary") <- NULL
+    attr(survivalEstimates, "summary") <- attr(survivalEstimates, "summary") %>%
+      dplyr::mutate(
+        result_type = "Survival estimate",
+        variable = "Outcome",
+        variable_level = CDMConnector::cohortSet(cdm[[targetCohortTable]]) %>%
+          dplyr::filter(.data$cohort_definition_id ==
+            .env$targetCohortId) %>%
+          dplyr::pull("cohort_name"),
+        estimate_type = "Survival summary"
+      ) %>%
+      dplyr::select(!c("variable_type")) %>%
+      tidyr::pivot_longer(
+        cols = -c(
+          "cdm_name",
+          "result_type",
+          "group_name",
+          "group_level",
+          "strata_name",
+          "strata_level",
+          "variable",
+          "variable_level",
+          "estimate_type",
+          "outcome",
+          "analysis_type"
+        ),
+        names_to = "variable_type",
+        values_to = "estimate"
+      ) %>%
+      var_order() %>%
+      dplyr::mutate(time = NA) %>%
+      dplyr::relocate("outcome",
+        .after = "variable_type"
+      ) %>%
+      dplyr::relocate("time",
+        .after = "outcome"
+      ) %>%
+      dplyr::relocate("analysis_type",
+        .after = "time"
+      ) %>%
+      dplyr::relocate("estimate",
+        .after = "analysis_type"
+      ) %>%
+      dplyr::mutate(estimate = unname(.data$estimate))
 
-  # obscure counts below minCellCount
-  survivalEstimates <- suppressSurvivalCounts(survivalEstimates, minCellCount)
-
+    # obscure counts below minCellCount
+    survivalEstimates <- suppressSurvivalCounts(survivalEstimates, minCellCount)
   } else {
     survivalEstimates <- surv
   }
@@ -568,29 +674,49 @@ singleEventSurvival <- function(survData, times, variables, timeGap) {
   estimates <- list()
   fitSummary <- list()
 
-
   var_columns <- unlist(variables) %>% unique()
 
   cli::cli_progress_message("Getting overall estimates")
-    fit <- survival::survfit(survival::Surv(outcome_time, outcome_status) ~ 1,
-                             data = survData
-    )
+  fit <- survival::survfit(survival::Surv(outcome_time, outcome_status) ~ 1,
+    data = survData
+  )
+
+  q0 <- stats::quantile(fit, probs = 0)
+  q25 <- stats::quantile(fit, probs = 0.25)
+  q75 <- stats::quantile(fit, probs = 0.75)
+  q100 <- stats::quantile(fit, probs = 1)
 
   fitSummary[[1]] <- as.data.frame(t(summary(fit)$table)) %>%
-      dplyr::rename("n_max" = "n.max",
-                    "n_start" = "n.start",
-                    "restricted_mean"= "rmean",
-                    "restricted_mean_std_error"= "se(rmean)",
-                    "median_survival" = "median",
-                    "median_survival_95CI_lower" = "0.95LCL",
-                    "median_survival_95CI_higher" = "0.95UCL") %>%
-      dplyr::mutate(analysis_type = "single event") %>%
-      dplyr::mutate(strata_name = "Overall",
-                    strata_level = "Overall",
-                    outcome = "outcome")
+    dplyr::select(!c("rmean", "se(rmean)", "n.max", "n.start")) %>%
+    dplyr::rename(
+      "number_records" = "records",
+      "median_survival" = "median",
+      "median_survival_95CI_lower" = "0.95LCL",
+      "median_survival_95CI_higher" = "0.95UCL"
+    ) %>%
+    dplyr::mutate(
+      q0_survival = .env$q0$quantile,
+      q0_survival_95CI_lower = .env$q0$lower,
+      q0_survival_95CI_higher = .env$q0$upper,
+      q25_survival = .env$q25$quantile,
+      q25_survival_95CI_lower = .env$q25$lower,
+      q25_survival_95CI_higher = .env$q25$upper,
+      q75_survival = .env$q75$quantile,
+      q75_survival_95CI_lower = .env$q75$lower,
+      q75_survival_95CI_higher = .env$q75$upper,
+      q100_survival = .env$q100$quantile,
+      q100_survival_95CI_lower = .env$q100$lower,
+      q100_survival_95CI_higher = .env$q100$upper
+    ) %>%
+    dplyr::mutate(analysis_type = "single event") %>%
+    dplyr::mutate(
+      strata_name = "Overall",
+      strata_level = "Overall",
+      outcome = "outcome"
+    )
 
   summ <- summary(fit, times = times, extend = TRUE)
-  estimates[[1]] <-  dplyr::bind_rows(
+  estimates[[1]] <- dplyr::bind_rows(
     dplyr::tibble(
       outcome = "outcome",
       time = summ$time,
@@ -610,39 +736,98 @@ singleEventSurvival <- function(survData, times, variables, timeGap) {
       estimate = 1 - summ$surv,
       estimate_95CI_lower = 1 - summ$upper,
       estimate_95CI_upper = 1 - summ$lower
-    )) %>%
-    dplyr::mutate(analysis_type = "Single event",
-                  strata_name = "Overall",
-                  strata_level = "Overall")
+    )
+  ) %>%
+    dplyr::mutate(
+      analysis_type = "Single event",
+      strata_name = "Overall",
+      strata_level = "Overall"
+    )
 
   # Add strata estimates if required
-  if(!is.null(variables)) {
+  if (!is.null(variables)) {
     cli::cli_progress_bar(
       total = length(variables),
       format = " -- Getting estimates for {cli::pb_bar} {cli::pb_current} of {cli::pb_total} strata"
     )
-    for(i in seq_along(variables)) {
+    for (i in seq_along(variables)) {
       cli::cli_progress_update()
       # Get formula for the model
       name <- variables[[i]]
-      expr <- stats::as.formula(paste(c("survival::Surv(outcome_time, outcome_status) ~ 1",
-                    name), collapse = " + "))
+      expr <- stats::as.formula(paste(c(
+        "survival::Surv(outcome_time, outcome_status) ~ 1",
+        name
+      ), collapse = " + "))
       fit <- survival::survfit(expr, data = survData)
+      tidyFit <- broom::tidy(fit)
 
-      fitSummary[[i+1]] <- as.data.frame(summary(fit)$table) %>%
-        dplyr::rename("n_max" = "n.max",
-                      "n_start" = "n.start",
-                      "restricted_mean"= "rmean",
-                      "restricted_mean_std_error"= "se(rmean)",
-                      "median_survival" = "median",
-                      "median_survival_95CI_lower" = "0.95LCL",
-                      "median_survival_95CI_higher" = "0.95UCL") %>%
-        dplyr::mutate(analysis_type = "single event",
-                      outcome = "outcome")
+      format_surv_strata_quantile <- function(x) {
+        data.frame(x) %>%
+          tibble::rownames_to_column(var = "strata")
+      }
+      q0 <- stats::quantile(fit, probs = 0)
+      q0 <- lapply(q0, format_surv_strata_quantile)
+      q25 <- stats::quantile(fit, probs = 0.25)
+      q25 <- lapply(q25, format_surv_strata_quantile)
+      q75 <- stats::quantile(fit, probs = 0.75)
+      q75 <- lapply(q75, format_surv_strata_quantile)
+      q100 <- stats::quantile(fit, probs = 1)
+      q100 <- lapply(q100, format_surv_strata_quantile)
+
+      fitSummary[[i + 1]] <- as.data.frame(summary(fit)$table) %>%
+        dplyr::select(!c("rmean", "se(rmean)", "n.max", "n.start")) %>%
+        dplyr::rename(
+          "number_records" = "records",
+          "median_survival" = "median",
+          "median_survival_95CI_lower" = "0.95LCL",
+          "median_survival_95CI_higher" = "0.95UCL"
+        ) %>%
+        tibble::rownames_to_column(var = "strata")
+
+      fitSummary[[i + 1]] <- fitSummary[[i + 1]] %>%
+        dplyr::left_join(q0$quantile, by = "strata") %>%
+        dplyr::rename("q0_survival" = "X0") %>%
+        dplyr::left_join(q0$lower, by = "strata") %>%
+        dplyr::rename("q0_survival_95CI_lower" = "X0") %>%
+        dplyr::left_join(q0$upper, by = "strata") %>%
+        dplyr::rename("q0_survival_95CI_higher" = "X0") %>%
+        dplyr::left_join(q25$quantile, by = "strata") %>%
+        dplyr::rename("q25_survival" = "X25") %>%
+        dplyr::left_join(q25$lower, by = "strata") %>%
+        dplyr::rename("q25_survival_95CI_lower" = "X25") %>%
+        dplyr::left_join(q25$upper, by = "strata") %>%
+        dplyr::rename("q25_survival_95CI_higher" = "X25") %>%
+        dplyr::left_join(q75$quantile, by = "strata") %>%
+        dplyr::rename("q75_survival" = "X75") %>%
+        dplyr::left_join(q75$lower, by = "strata") %>%
+        dplyr::rename("q75_survival_95CI_lower" = "X75") %>%
+        dplyr::left_join(q75$upper, by = "strata") %>%
+        dplyr::rename("q75_survival_95CI_higher" = "X75") %>%
+        dplyr::left_join(q100$quantile, by = "strata") %>%
+        dplyr::rename("q100_survival" = "X100") %>%
+        dplyr::left_join(q100$lower, by = "strata") %>%
+        dplyr::rename("q100_survival_95CI_lower" = "X100") %>%
+        dplyr::left_join(q100$upper, by = "strata") %>%
+        dplyr::rename("q100_survival_95CI_higher" = "X100")
+
+      fitSummary[[i + 1]] <- fitSummary[[i + 1]] %>%
+        dplyr::left_join(
+          tidyFit %>%
+            dplyr::group_by(.data$strata) %>%
+            dplyr::summarise(max_time = max(.data$time, na.rm = TRUE)),
+          by = "strata"
+        )
+
+      fitSummary[[i + 1]] <- fitSummary[[i + 1]] %>%
+        dplyr::mutate(
+          analysis_type = "single event",
+          outcome = "outcome"
+        )
 
       summ <- summary(fit, times = times, extend = TRUE)
-      estimates[[i+1]] <- dplyr::bind_rows(
+      estimates[[i + 1]] <- dplyr::bind_rows(
         dplyr::tibble(
+          strata = summ$strata,
           outcome = "outcome",
           time = summ$time,
           n_event = summ$n.event,
@@ -653,6 +838,7 @@ singleEventSurvival <- function(survData, times, variables, timeGap) {
           estimate_95CI_upper = summ$upper
         ),
         dplyr::tibble(
+          strata = summ$strata,
           outcome = "outcome",
           time = summ$time,
           n_event = summ$n.event,
@@ -661,29 +847,49 @@ singleEventSurvival <- function(survData, times, variables, timeGap) {
           estimate = 1 - summ$surv,
           estimate_95CI_lower = 1 - summ$upper,
           estimate_95CI_upper = 1 - summ$lower
-        )) %>%
+        )
+      ) %>%
         dplyr::mutate(analysis_type = "Single event")
 
       # Add strata variable columns in a good format
-      for(j in seq_along(name)) {
-        name_w = name
-        estimates[[i+1]] <- estimates[[i+1]] %>%
+      for (j in seq_along(name)) {
+        name_w <- name
+        estimates[[i + 1]] <- estimates[[i + 1]] %>%
           dplyr::mutate(
             strata_name = paste(name_w, collapse = " and "),
-            strata_level = rep(gsub(", "," and ",gsub(paste(paste0(name_w,"="),
-                                                     collapse="|"),"",
-                                               summ$strata)),2)
-            )
-
-        fitSummary[[i+1]] <- fitSummary[[i+1]] %>%
-          dplyr::mutate(
-            strata_name = paste(name_w, collapse = " and "),
-            strata_level = gsub(", "," and ",gsub(paste(paste0(name_w,"="),
-                                                     collapse="|"),"",
-                                               row.names(fitSummary[[i+1]])))
+            strata_level = rep(gsub(", ", " and ", gsub(
+              paste(paste0(name_w, "="),
+                collapse = "|"
+              ), "",
+              summ$strata
+            )), 2)
           )
 
+        fitSummary[[i + 1]] <- fitSummary[[i + 1]] %>%
+          dplyr::mutate(
+            strata_name = paste(name_w, collapse = " and "),
+            strata_level = gsub(", ", " and ", gsub(
+              paste(paste0(name_w, "="),
+                collapse = "|"
+              ), "",
+              fitSummary[[i + 1]]$strata
+            ))
+          )
       }
+
+      # keep estimated probabilities only up to the end of follow up for that group
+      maxTimePoints <- fitSummary[[i + 1]] %>%
+        dplyr::select("strata", "max_time")
+
+      estimates[[i + 1]] <- estimates[[i + 1]] %>%
+        dplyr::left_join(maxTimePoints,
+          by = "strata"
+        ) %>%
+        dplyr::filter(.data$time <= .data$max_time) %>%
+        dplyr::select(!c("max_time", "strata"))
+
+      fitSummary[[i + 1]] <- fitSummary[[i + 1]] %>%
+        dplyr::select(!c("max_time", "strata"))
     }
     cli::cli_progress_done()
   }
@@ -701,12 +907,16 @@ singleEventSurvival <- function(survData, times, variables, timeGap) {
     dplyr::filter(.data$time %% timeGap[1] == 0 | .data$time == max(.data$time)) %>%
     dplyr::mutate(n_events = c(.data$n_events[1], diff(.data$n_events))) %>%
     dplyr::ungroup() %>%
-    dplyr::mutate(timeGap = timeGap[1],
-                  outcome = "outcome") %>%
-    dplyr::select("time", "n_events", "timeGap", "outcome",
-                  "strata_name", "strata_level")
+    dplyr::mutate(
+      timeGap = timeGap[1],
+      outcome = "outcome"
+    ) %>%
+    dplyr::select(
+      "time", "n_events", "timeGap", "outcome",
+      "strata_name", "strata_level"
+    )
 
-  for(t in timeGap[-1]) {
+  for (t in timeGap[-1]) {
     number_events <- dplyr::union_all(
       number_events,
       estimates %>%
@@ -717,13 +927,15 @@ singleEventSurvival <- function(survData, times, variables, timeGap) {
         dplyr::mutate(n_events = c(.data$n_events[1], diff(.data$n_events))) %>%
         dplyr::ungroup() %>%
         dplyr::mutate(timeGap = t) %>%
-        dplyr::select("time", "n_events", "timeGap", "outcome",
-                      "strata_name", "strata_level")
+        dplyr::select(
+          "time", "n_events", "timeGap", "outcome",
+          "strata_name", "strata_level"
+        )
     )
   }
 
   estimates <- estimates %>%
-    dplyr::select(- .data$n_event)
+    dplyr::select(!"n_event")
 
   attr(estimates, "events") <- number_events
   attr(estimates, "summary") <- dplyr::bind_rows(fitSummary)
@@ -735,9 +947,7 @@ singleEventSurvival <- function(survData, times, variables, timeGap) {
 }
 
 competingRiskSurvival <- function(survData, times, variables, timeGap) {
-
-  if(!length(unique(survData$outcome_or_competing_status)) == 3){
-
+  if (!length(unique(survData$outcome_or_competing_status)) == 3) {
     cli::cli_h1("No results for competing risk analysis")
     cli::cli_text(c(
       "Competing risk variable must have three levels.",
@@ -756,91 +966,119 @@ competingRiskSurvival <- function(survData, times, variables, timeGap) {
   var_columns <- unlist(variables) %>% unique()
 
   cli::cli_progress_message("Getting overall estimates")
-  fit <- survival::survfit(formula = survival::Surv(outcome_or_competing_time,
-                         outcome_or_competing_status) ~ 1,
-          data = survData)
+  fit <- survival::survfit(
+    formula = survival::Surv(
+      outcome_or_competing_time,
+      outcome_or_competing_status
+    ) ~ 1,
+    data = survData
+  )
   summ <- summary(fit, times = times, extend = TRUE)
 
   fitSummary[[1]] <- as.data.frame(summary(fit)$table) %>%
-    dplyr::rename("n_start" = "n",
-                  "restricted_mean"= "rmean",
-                  "n_events"= "nevent") %>%
+    dplyr::select(!"rmean") %>%
+    dplyr::rename(
+      "n_start" = "n",
+      "n_events" = "nevent"
+    ) %>%
     dplyr::mutate(analysis_type = "competing risk") %>%
-    dplyr::mutate(strata_name = "Overall",
-                  strata_level = "Overall") %>%
+    dplyr::mutate(
+      strata_name = "Overall",
+      strata_level = "Overall"
+    ) %>%
     tibble::rownames_to_column(var = "outcome") %>%
     dplyr::mutate(outcome = dplyr::if_else(.data$outcome == "(s0)", "none",
-                                   dplyr::if_else(.data$outcome == "1",
-                                                  "outcome", "competing outcome")))
+      dplyr::if_else(.data$outcome == "1",
+        "outcome", "competing outcome"
+      )
+    ))
 
   estimates[[1]] <- dplyr::bind_rows(
     dplyr::bind_cols(
-   data.frame(outcome = 1L,
-              time = summ$time,
-              n_event = summ$n.event[,2],
-              n_risk = summ$n.risk[,1],
-              estimate_type = "Cumulative failure probability"),
-   as.data.frame(summ$pstate) %>%
-    dplyr::rename("estimate" = "V2") %>%
-    dplyr::select("estimate"),
-  as.data.frame(summ$lower) %>%
-    dplyr::rename("estimate_95CI_lower" = "V2") %>%
-    dplyr::select("estimate_95CI_lower"),
-  as.data.frame(summ$upper) %>%
-    dplyr::rename("estimate_95CI_upper" = "V2") %>%
-    dplyr::select("estimate_95CI_upper")),
- dplyr::bind_cols(
-   data.frame(outcome = 2L,
-              time = summ$time,
-              n_event = summ$n.event[,3],
-              n_risk = summ$n.risk[,1],
-              estimate_type = "Cumulative failure probability"),
-   as.data.frame(summ$pstate) %>%
-     dplyr::rename("estimate" = "V3") %>%
-     dplyr::select("estimate"),
-   as.data.frame(summ$lower) %>%
-     dplyr::rename("estimate_95CI_lower" = "V3") %>%
-     dplyr::select("estimate_95CI_lower"),
-   as.data.frame(summ$upper) %>%
-     dplyr::rename("estimate_95CI_upper" = "V3") %>%
-     dplyr::select("estimate_95CI_upper"))
- ) %>%
-   dplyr::mutate(outcome = dplyr::if_else(.data$outcome == 1,
-                                          "outcome",
-                                          "competing outcome"
-   )) %>%
-   dplyr::mutate(analysis_type = "Competing risk") %>%
-   dplyr::mutate(strata_name = "Overall",
-                 strata_level = "Overall")
+      data.frame(
+        outcome = 1L,
+        time = summ$time,
+        n_event = summ$n.event[, 2],
+        n_risk = summ$n.risk[, 1],
+        estimate_type = "Cumulative failure probability"
+      ),
+      as.data.frame(summ$pstate) %>%
+        dplyr::rename("estimate" = "V2") %>%
+        dplyr::select("estimate"),
+      as.data.frame(summ$lower) %>%
+        dplyr::rename("estimate_95CI_lower" = "V2") %>%
+        dplyr::select("estimate_95CI_lower"),
+      as.data.frame(summ$upper) %>%
+        dplyr::rename("estimate_95CI_upper" = "V2") %>%
+        dplyr::select("estimate_95CI_upper")
+    ),
+    dplyr::bind_cols(
+      data.frame(
+        outcome = 2L,
+        time = summ$time,
+        n_event = summ$n.event[, 3],
+        n_risk = summ$n.risk[, 1],
+        estimate_type = "Cumulative failure probability"
+      ),
+      as.data.frame(summ$pstate) %>%
+        dplyr::rename("estimate" = "V3") %>%
+        dplyr::select("estimate"),
+      as.data.frame(summ$lower) %>%
+        dplyr::rename("estimate_95CI_lower" = "V3") %>%
+        dplyr::select("estimate_95CI_lower"),
+      as.data.frame(summ$upper) %>%
+        dplyr::rename("estimate_95CI_upper" = "V3") %>%
+        dplyr::select("estimate_95CI_upper")
+    )
+  ) %>%
+    dplyr::mutate(outcome = dplyr::if_else(.data$outcome == 1,
+      "outcome",
+      "competing outcome"
+    )) %>%
+    dplyr::mutate(analysis_type = "Competing risk") %>%
+    dplyr::mutate(
+      strata_name = "Overall",
+      strata_level = "Overall"
+    )
 
   # Add strata estimates if required
-  if(!is.null(variables)) {
+  if (!is.null(variables)) {
     cli::cli_progress_bar(
       total = length(variables),
       format = " -- Getting estimates for {cli::pb_bar} {cli::pb_current} of {cli::pb_total} strata"
     )
-    for(i in seq_along(variables)) {
-     cli::cli_progress_update()
+    for (i in seq_along(variables)) {
+      cli::cli_progress_update()
       # Get formula for the model
       name <- variables[[i]]
-      expr <- stats::as.formula(paste(c("survival::Surv(outcome_or_competing_time, outcome_or_competing_status) ~ 1",
-                      name), collapse = " + "))
-      fit <- survival::survfit(formula = expr,
-                        data = survData %>%
-                          dplyr::filter(dplyr::if_any(.env$name, ~ !is.na(.))))
+      expr <- stats::as.formula(paste(c(
+        "survival::Surv(outcome_or_competing_time, outcome_or_competing_status) ~ 1",
+        name
+      ), collapse = " + "))
+      fit <- survival::survfit(
+        formula = expr,
+        data = survData %>%
+          dplyr::filter(dplyr::if_any(.env$name, ~ !is.na(.x)))
+      )
       summ <- summary(fit, times = times, extend = TRUE)
+      tidyFit <- broom::tidy(fit)
 
-      fitSummary[[i+1]] <- as.data.frame(summary(fit)$table) %>%
-        dplyr::rename("n_start" = "n",
-                      "restricted_mean"= "rmean",
-                      "n_events"= "nevent") %>%
+      fitSummary[[i + 1]] <- as.data.frame(summary(fit)$table) %>%
+        dplyr::select(!"rmean") %>%
+        dplyr::rename(
+          "n_start" = "n",
+          "n_events" = "nevent"
+        ) %>%
         dplyr::mutate(analysis_type = "competing risk") %>%
-        dplyr::mutate(rowname = rownames(.)) %>%
+        tibble::rownames_to_column(var = "strata") %>%
         dplyr::mutate(
           strata_name = paste(name, collapse = " and "),
-          strata_level = gsub(", "," and ",gsub(paste(paste0(name,"="),
-                                                      collapse="|"),"",
-                                                row.names(.)))
+          strata_level = gsub(", ", " and ", gsub(
+            paste(paste0(name, "="),
+              collapse = "|"
+            ), "",
+            .data$strata
+          ))
         ) %>%
         dplyr::mutate(
           outcome = gsub("^.*and", "", .data$strata_level)
@@ -848,20 +1086,34 @@ competingRiskSurvival <- function(survData, times, variables, timeGap) {
         dplyr::mutate(
           strata_level = gsub("and ([^and ]*)$", "", .data$strata_level)
         ) %>%
-        dplyr::mutate(strata_level = gsub("[[:space:]]*$","", .data$strata_level)) %>%
+        dplyr::mutate(strata_level = gsub("[[:space:]]*$", "", .data$strata_level)) %>%
         dplyr::mutate(outcome = dplyr::if_else(.data$outcome == " (s0)", "none",
-                                               dplyr::if_else(.data$outcome == " 1",
-                                                              "outcome", "competing outcome"))) %>%
-          dplyr::select(-c("rowname"))
+          dplyr::if_else(.data$outcome == " 1",
+            "outcome", "competing outcome"
+          )
+        ))
 
-      estimates[[i+1]] <- dplyr::bind_rows(
+      fitSummary[[i + 1]] <- fitSummary[[i + 1]] %>%
+        dplyr::mutate(
+          strata = sub(",.*", "", .data$strata)
+        ) %>%
+        dplyr::left_join(
+          tidyFit %>%
+            dplyr::group_by(.data$strata) %>%
+            dplyr::summarise(max_time = max(.data$time, na.rm = TRUE)),
+          by = "strata"
+        )
+
+      estimates[[i + 1]] <- dplyr::bind_rows(
         dplyr::bind_cols(
-          data.frame(outcome = 1L,
-                     time = summ$time,
-                     strata_level = summ$strata,
-                     n_event = summ$n.event[,2],
-                     n_risk = summ$n.risk[,1],
-                     estimate_type = "Cumulative failure probability"),
+          data.frame(
+            outcome = 1L,
+            time = summ$time,
+            strata_level = summ$strata,
+            n_event = summ$n.event[, 2],
+            n_risk = summ$n.risk[, 1],
+            estimate_type = "Cumulative failure probability"
+          ),
           as.data.frame(summ$pstate) %>%
             dplyr::rename("estimate" = "V2") %>%
             dplyr::select("estimate"),
@@ -870,14 +1122,17 @@ competingRiskSurvival <- function(survData, times, variables, timeGap) {
             dplyr::select("estimate_95CI_lower"),
           as.data.frame(summ$upper) %>%
             dplyr::rename("estimate_95CI_upper" = "V2") %>%
-            dplyr::select("estimate_95CI_upper")),
+            dplyr::select("estimate_95CI_upper")
+        ),
         dplyr::bind_cols(
-          data.frame(outcome = 2L,
-                     strata_level = summ$strata,
-                     time = summ$time,
-                     n_event = summ$n.event[,3],
-                     n_risk = summ$n.risk[,1],
-                     estimate_type = "Cumulative failure probability"),
+          data.frame(
+            outcome = 2L,
+            strata_level = summ$strata,
+            time = summ$time,
+            n_event = summ$n.event[, 3],
+            n_risk = summ$n.risk[, 1],
+            estimate_type = "Cumulative failure probability"
+          ),
           as.data.frame(summ$pstate) %>%
             dplyr::rename("estimate" = "V3") %>%
             dplyr::select("estimate"),
@@ -886,26 +1141,46 @@ competingRiskSurvival <- function(survData, times, variables, timeGap) {
             dplyr::select("estimate_95CI_lower"),
           as.data.frame(summ$upper) %>%
             dplyr::rename("estimate_95CI_upper" = "V3") %>%
-            dplyr::select("estimate_95CI_upper"))) %>%
+            dplyr::select("estimate_95CI_upper")
+        )
+      ) %>%
         dplyr::mutate(outcome = dplyr::if_else(.data$outcome == 1,
-                                               "outcome",
-                                               "competing outcome"
+          "outcome",
+          "competing outcome"
         )) %>%
         dplyr::mutate(analysis_type = "Competing risk")
 
-      estimates[[i+1]] <-  estimates[[i+1]] %>%
+      estimates[[i + 1]] <- estimates[[i + 1]] %>%
         dplyr::mutate(strata_name = paste(name, collapse = " and ")) %>%
-        dplyr::relocate("strata_level",.after = "strata_name")
+        dplyr::relocate("strata_level", .after = "strata_name") %>%
+        dplyr::mutate(strata = .data$strata_level) # to use in below join
 
-      for(j in seq_along(name)) {
-        estimates[[i+1]] <- estimates[[i+1]] %>%
-          dplyr::mutate(strata_level= stringr::str_replace(string = .data$strata_level,
-            pattern = paste0(name[j], "="), replacement = "")) %>%
-          dplyr::mutate(strata_level= stringr::str_replace(string = .data$strata_level,
-                                                           pattern = ",",
-                                                           replacement = " and"))
-
+      for (j in seq_along(name)) {
+        estimates[[i + 1]] <- estimates[[i + 1]] %>%
+          dplyr::mutate(strata_level = stringr::str_replace(
+            string = .data$strata_level,
+            pattern = paste0(name[j], "="), replacement = ""
+          )) %>%
+          dplyr::mutate(strata_level = stringr::str_replace(
+            string = .data$strata_level,
+            pattern = ",",
+            replacement = " and"
+          ))
       }
+
+      # keep estimated probabilities only up to the end of follow up for that group
+      maxTimePoints <- fitSummary[[i + 1]] %>%
+        dplyr::select("strata", "outcome", "max_time")
+
+      estimates[[i + 1]] <- estimates[[i + 1]] %>%
+        dplyr::left_join(maxTimePoints,
+          by = c("strata", "outcome")
+        ) %>%
+        dplyr::filter(.data$time <= .data$max_time) %>%
+        dplyr::select(!c("max_time", "strata"))
+
+      fitSummary[[i + 1]] <- fitSummary[[i + 1]] %>%
+        dplyr::select(!c("max_time", "strata"))
     }
     cli::cli_progress_done()
   }
@@ -921,9 +1196,13 @@ competingRiskSurvival <- function(survData, times, variables, timeGap) {
     dplyr::mutate(n_events = c(.data$n_events[1], diff(.data$n_events))) %>%
     dplyr::ungroup() %>%
     dplyr::mutate(timeGap = timeGap[1]) %>%
-    dplyr::select(.data$time, .data$n_events, .data$timeGap, .data$outcome, .data$strata_name, .data$strata_level)
+    dplyr::select(
+      "time", "n_events",
+      "timeGap", "outcome",
+      "strata_name", "strata_level"
+    )
 
-  for(t in timeGap[-1]) {
+  for (t in timeGap[-1]) {
     number_events <- dplyr::union_all(
       number_events,
       estimates %>%
@@ -933,12 +1212,15 @@ competingRiskSurvival <- function(survData, times, variables, timeGap) {
         dplyr::mutate(n_events = c(.data$n_events[1], diff(.data$n_events))) %>%
         dplyr::ungroup() %>%
         dplyr::mutate(timeGap = t) %>%
-        dplyr::select(.data$time, .data$n_events, .data$timeGap, .data$outcome, .data$strata_name, .data$strata_level)
+        dplyr::select(
+          "time", "n_events", "timeGap", "outcome", "strata_name",
+          "strata_level"
+        )
     )
   }
 
   estimates <- estimates %>%
-    dplyr::select(- .data$n_event)
+    dplyr::select(!"n_event")
 
   attr(estimates, "events") <- number_events
   attr(estimates, "summary") <- dplyr::bind_rows(fitSummary)
@@ -947,7 +1229,6 @@ competingRiskSurvival <- function(survData, times, variables, timeGap) {
   # add summary attribute
 
   return(estimates)
-
 }
 
 addCohortDetails <- function(x,
@@ -958,64 +1239,62 @@ addCohortDetails <- function(x,
                              outcomeCohortTable,
                              competingOutcomeCohortId,
                              competingOutcomeCohortTable = NULL,
-                             summary = FALSE){
-
-  outcomeCohortName = CDMConnector::cohortSet(cdm[[outcomeCohortTable]]) %>%
+                             summary = FALSE) {
+  outcomeCohortName <- CDMConnector::cohortSet(cdm[[outcomeCohortTable]]) %>%
     dplyr::filter(.data$cohort_definition_id ==
-                    .env$outcomeCohortId) %>%
+      .env$outcomeCohortId) %>%
     dplyr::pull("cohort_name")
 
- x <- x %>%
-    dplyr::mutate(cdm_name = attr(cdm, "cdm_name"),
-                  result_type = "Survival estimate",
-                  group_name = "Cohort",
-                  group_level =
-                    CDMConnector::cohortSet(cdm[[targetCohortTable]]) %>%
-                    dplyr::filter(.data$cohort_definition_id ==
-                                    .env$targetCohortId) %>%
-                    dplyr::pull("cohort_name"),
-                  variable_type = NA,)
+  x <- x %>%
+    dplyr::mutate(
+      cdm_name = attr(cdm, "cdm_name"),
+      result_type = "Survival estimate",
+      group_name = "Cohort",
+      group_level =
+        CDMConnector::cohortSet(cdm[[targetCohortTable]]) %>%
+          dplyr::filter(.data$cohort_definition_id ==
+            .env$targetCohortId) %>%
+          dplyr::pull("cohort_name"),
+      variable_type = NA,
+    )
 
- if(!is.null(competingOutcomeCohortTable)){
-   competingOutcomeCohortName = CDMConnector::cohortSet(cdm[[competingOutcomeCohortTable]]) %>%
-     dplyr::filter(.data$cohort_definition_id ==
-                     .env$outcomeCohortId) %>%
-     dplyr::pull("cohort_name")
+  if (!is.null(competingOutcomeCohortTable)) {
+    competingOutcomeCohortName <- CDMConnector::cohortSet(cdm[[competingOutcomeCohortTable]]) %>%
+      dplyr::filter(.data$cohort_definition_id ==
+        .env$competingOutcomeCohortId) %>%
+      dplyr::pull("cohort_name")
 
-   if(competingOutcomeCohortName == outcomeCohortName) {
-     competingOutcomeCohortName <- paste0(competingOutcomeCohortName, "_competing_outcome")
-   }
+    if (competingOutcomeCohortName == outcomeCohortName) {
+      competingOutcomeCohortName <- paste0(competingOutcomeCohortName, "_competing_outcome")
+    }
 
-   if(!summary) {
-     x <- x %>%
-       dplyr::mutate(outcome = dplyr::if_else(
-         .data$outcome == "outcome", outcomeCohortName, competingOutcomeCohortName
-       ))
-   }
-     x <- x %>%
-       dplyr::mutate(analysis_type = "Competing risk")
+    if (!summary) {
+      x <- x %>%
+        dplyr::mutate(outcome = dplyr::if_else(
+          .data$outcome == "outcome", outcomeCohortName, competingOutcomeCohortName
+        ))
+    }
+    x <- x %>%
+      dplyr::mutate(analysis_type = "Competing risk")
+  } else {
+    if (!summary) {
+      x <- x %>%
+        dplyr::mutate(outcome = dplyr::if_else(
+          .data$outcome == "outcome", outcomeCohortName, "no competing outcome"
+        ))
+    }
+    x <- x %>%
+      dplyr::mutate(analysis_type = "Single event")
+  }
 
- } else {
-   if(!summary) {
-     x <- x %>%
-       dplyr::mutate(outcome = dplyr::if_else(
-         .data$outcome == "outcome", outcomeCohortName, "no competing outcome"
-       ))
-   }
-   x <- x %>%
-     dplyr::mutate(analysis_type = "Single event")
- }
-
- return(x)
-
+  return(x)
 }
 
-empty_estimates <- function(){
-dplyr::tibble()
-
+empty_estimates <- function() {
+  dplyr::tibble()
 }
 
-var_order <- function(estimates){
+var_order <- function(estimates) {
   estimates %>%
     dplyr::relocate("cdm_name") %>%
     dplyr::relocate("result_type", .after = "cdm_name") %>%
@@ -1026,7 +1305,5 @@ var_order <- function(estimates){
     dplyr::relocate("variable", .after = "strata_level") %>%
     dplyr::relocate("variable_level", .after = "variable") %>%
     dplyr::relocate("variable_type", .after = "variable_level") %>%
-    dplyr::relocate("estimate_type", .after = "variable_level")
-
+    dplyr::relocate("estimate_type", .after = "variable_type")
 }
-

@@ -8,19 +8,18 @@ cohorts in the OMOP Common Data Model}
 estimateCompetingRiskSurvival(
   cdm,
   targetCohortTable,
-  targetCohortId = 1,
+  targetCohortId = NULL,
   outcomeCohortTable,
-  outcomeCohortId = 1,
+  outcomeCohortId = NULL,
   outcomeDateVariable = "cohort_start_date",
   competingOutcomeCohortTable,
-  competingOutcomeCohortId = 1,
+  competingOutcomeCohortId = NULL,
   competingOutcomeDateVariable = "cohort_start_date",
   censorOnCohortExit = FALSE,
   censorOnDate = NULL,
   followUpDays = Inf,
   strata = NULL,
   timeGap = c(1, 7, 30, 365),
-  times = NULL,
   minCellCount = 5,
   returnParticipants = FALSE
 )
@@ -62,9 +61,6 @@ estimates. First day will be day zero with risk estimates provided
 for times up to the end of follow-up, with a gap in days equivalent
 to timeGap.}
 
-\item{times}{vector of time points at which to give survival estimates,
-if NULL estimates at all times are calculated}
-
 \item{minCellCount}{The minimum number of events to reported, below which
 results will be obscured. If 0, all results will be reported.}
 
@@ -84,14 +80,15 @@ cohorts in the OMOP Common Data Model
 }
 \examples{
 cdm <- mockMGUS2cdm()
-surv <- estimateCompetingRiskSurvival(cdm,
-                       targetCohortTable = "mgus_diagnosis",
-                       targetCohortId = 1,
-                       outcomeCohortTable = "death_cohort",
-                       outcomeCohortId = 1,
-                       competingOutcomeCohortTable = "progression",
-                       competingOutcomeCohortId = 1,
-                       timeGap = 7
+surv <- estimateCompetingRiskSurvival(
+  cdm = cdm,
+  targetCohortTable = "mgus_diagnosis",
+  targetCohortId = 1,
+  outcomeCohortTable = "death_cohort",
+  outcomeCohortId = 1,
+  competingOutcomeCohortTable = "progression",
+  competingOutcomeCohortId = 1,
+  timeGap = 7
 )
 
 }

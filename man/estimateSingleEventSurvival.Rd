@@ -7,16 +7,15 @@
 estimateSingleEventSurvival(
   cdm,
   targetCohortTable,
-  targetCohortId = 1,
+  targetCohortId = NULL,
   outcomeCohortTable,
-  outcomeCohortId = 1,
+  outcomeCohortId = NULL,
   outcomeDateVariable = "cohort_start_date",
   censorOnCohortExit = FALSE,
   censorOnDate = NULL,
   followUpDays = Inf,
   strata = NULL,
   timeGap = c(1, 7, 30, 365),
-  times = NULL,
   minCellCount = 5,
   returnParticipants = FALSE
 )
@@ -51,9 +50,6 @@ estimates. First day will be day zero with risk estimates provided
 for times up to the end of follow-up, with a gap in days equivalent
 to timeGap.}
 
-\item{times}{vector of time points at which to give survival estimates,
-if NULL estimates at all times are calculated}
-
 \item{minCellCount}{The minimum number of events to reported, below which
 results will be obscured. If 0, all results will be reported.}
 
@@ -72,12 +68,13 @@ Estimate survival for a given event of interest using cohorts in the OMOP Common
 }
 \examples{
 cdm <- mockMGUS2cdm()
-surv <- estimateSingleEventSurvival(cdm,
-                       targetCohortTable = "mgus_diagnosis",
-                       targetCohortId = 1,
-                       outcomeCohortTable = "death_cohort",
-                       outcomeCohortId = 1,
-                       timeGap = 7
+surv <- estimateSingleEventSurvival(
+  cdm = cdm,
+  targetCohortTable = "mgus_diagnosis",
+  targetCohortId = 1,
+  outcomeCohortTable = "death_cohort",
+  outcomeCohortId = 1,
+  timeGap = 7
 )
 
 }

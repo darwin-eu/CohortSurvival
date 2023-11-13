@@ -137,16 +137,15 @@ benchmarkCohortSurvival <- function(cdm,
   checkStrata(strata, target_cohort)
   targetCohortId <- 1
 
-  target_cohort <- addCohortCountAttr(target_cohort)
-  DBI::dbWithTransaction(attr(cdm, "dbcon"), {
-    DBI::dbWriteTable(attr(cdm, "dbcon"),
-                      name = DBI::Id(
-                        schema = attr(cdm, "write_schema"),
-                        table = targetCohortTable),
-                      target_cohort,
-                      overwrite = TRUE
-    )
-  })
+  if(!is.null(censorOnDate)) {
+    target_cohort <- target_cohort %>%
+      dplyr::filter(
+        .data$cohort_start_date < .env$censorOnDate
+      )
+  }
+  DBI::dbWriteTable(attr(cdm, "dbcon"), CDMConnector::inSchema(
+    schema = attr(cdm, "write_schema"), table = targetCohortTable
+  ), target_cohort, overwrite = TRUE)
 
   t <- tictoc::toc(quiet = TRUE)
   timings[["target_cohort"]] <- dplyr::tibble(
@@ -184,16 +183,9 @@ benchmarkCohortSurvival <- function(cdm,
   }
   outcomeCohortId <- 1
 
-  outcome_cohort <- addCohortCountAttr(outcome_cohort)
-  DBI::dbWithTransaction(attr(cdm, "dbcon"), {
-    DBI::dbWriteTable(attr(cdm, "dbcon"),
-                      name = DBI::Id(
-                        schema = attr(cdm, "write_schema"),
-                        table = outcomeCohortTable),
-                      outcome_cohort,
-                      overwrite = TRUE
-    )
-  })
+  DBI::dbWriteTable(attr(cdm, "dbcon"), CDMConnector::inSchema(
+    schema = attr(cdm, "write_schema"), table = outcomeCohortTable
+  ), outcome_cohort, overwrite = TRUE)
 
   t <- tictoc::toc(quiet = TRUE)
   timings[["outcome_cohort"]] <- dplyr::tibble(
@@ -218,16 +210,9 @@ benchmarkCohortSurvival <- function(cdm,
       cli::cli_abort("{competingOutcomeDateVariable} must be `cohort_start_date` or `cohort_end_date`")
     }
     competingOutcomeCohortId <- 1
-    competing_outcome_cohort <- addCohortCountAttr(competing_outcome_cohort)
-    DBI::dbWithTransaction(attr(cdm, "dbcon"), {
-      DBI::dbWriteTable(attr(cdm, "dbcon"),
-                        name = DBI::Id(
-                          schema = attr(cdm, "write_schema"),
-                          table = competingOutcomeCohortTable),
-                        competing_outcome_cohort,
-                        overwrite = TRUE
-      )
-    })
+    DBI::dbWriteTable(attr(cdm, "dbcon"), CDMConnector::inSchema(
+      schema = attr(cdm, "write_schema"), table = competingOutcomeCohortTable
+    ), competing_outcome_cohort, overwrite = TRUE)
 
     cdm <- CDMConnector::cdm_from_con(attr(cdm, "dbcon"),
                                       attr(cdm, "cdm_schema"),
@@ -369,6 +354,13 @@ benchmarkCohortSurvival <- function(cdm,
       competingOutcomeCohortId = competingOutcomeCohortId,
       competingOutcomeCohortTable = competingOutcomeCohortTable)
 
+
+    t <- tictoc::toc(quiet = TRUE)
+    timings[["counts_obscured"]] <- dplyr::tibble(
+      task = paste0("counts obscured < ",minCellCount),
+      time_taken_secs = as.numeric(t$toc - t$tic)
+    )
+    tictoc::tic()
 
     t <- tictoc::toc(quiet = TRUE)
     timings[["counts_obscured"]] <- dplyr::tibble(

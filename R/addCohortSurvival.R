@@ -112,7 +112,7 @@ addCohortSurvival <- function(x,
         .data$days_to_exit < .data$days_end_cohort,
         .data$days_to_exit, .data$days_end_cohort
       )) %>%
-      dplyr::select(-.data$days_end_cohort) %>%
+      dplyr::select(!"days_end_cohort") %>%
       CDMConnector::computeQuery()
   }
 
@@ -130,7 +130,7 @@ addCohortSurvival <- function(x,
         .data$days_to_exit < .data$days_to_censor,
         .data$days_to_exit, .data$days_to_censor
       )) %>%
-      dplyr::select(- c(.data$days_to_censor, .data$censor_date)) %>%
+      dplyr::select(!c("days_to_censor", "censor_date")) %>%
       CDMConnector::computeQuery()
   }
 
@@ -214,12 +214,12 @@ validateExtractSurvivalInputs <- function(cdm,
     outcomeCohortTable
   ))
 
-#  checkIsCohort(cohortTable) # change when mock is changed
   checkIsCohort_exp(cohortTable)
-  checkPatientRows(cohortTable)
   checkExposureCohortId(cohortTable)
 
   checkIsCohort(cdm[[outcomeCohortTable]])
+
+  checkCensorOnDate(cohortTable, censorOnDate)
 
   errorMessage <- checkmate::makeAssertCollection()
   checkmate::assertIntegerish(outcomeCohortId,

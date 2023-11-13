@@ -46,6 +46,19 @@ mockMGUS2cdm <- function() {
     ) %>%
     dplyr::relocate("cohort_definition_id")
 
+  mgus2Pr2 <- mgus2 %>%
+    dplyr::filter(.data$pstat == 1) %>%
+    dplyr::select("subject_id", "cohort_start_date_progression") %>%
+    dplyr::rename("cohort_start_date" = "cohort_start_date_progression") %>%
+    dplyr::mutate(cohort_end_date = .data$cohort_start_date)
+  mgus2Pr2 <- mgus2Pr2 %>%
+    dplyr::mutate(cohort_definition_id = 1L) %>%
+    dplyr::union_all(
+      mgus2Pr2 %>%
+        dplyr::mutate(cohort_definition_id = 2 + dplyr::row_number() %% 2)
+    ) %>%
+    dplyr::relocate("cohort_definition_id")
+
   mgus2Death <- mgus2 %>%
     dplyr::filter(.data$death == 1) %>%
     dplyr::select("subject_id", "cohort_start_date_death") %>%
@@ -92,101 +105,45 @@ mockMGUS2cdm <- function() {
   db <- DBI::dbConnect(duckdb::duckdb(), ":memory:")
 
   # person
-  DBI::dbWithTransaction(db, {
-    DBI::dbWriteTable(db, "person",
-                      mgus2Person,
-                      overwrite = TRUE
-    )
-  })
+  DBI::dbWriteTable(db, "person", mgus2Person, overwrite = TRUE)
 
   # obs
-  DBI::dbWithTransaction(db, {
-    DBI::dbWriteTable(db, "observation_period",
-                      mgus2OP,
-                      overwrite = TRUE
-    )
-  })
+  DBI::dbWriteTable(db, "observation_period", mgus2OP, overwrite = TRUE)
 
   # cohort diag
-  DBI::dbWithTransaction(db, {
-    DBI::dbWriteTable(db, "mgus_diagnosis",
-                      mgus2Diag,
-                      overwrite = TRUE
-    )
-  })
+  DBI::dbWriteTable(db, "mgus_diagnosis", mgus2Diag, overwrite = TRUE)
+  DBI::dbWriteTable(db, "mgus_diagnosis_set", dplyr::tibble(
+    cohort_definition_id = 1, cohort_name = "mgus_diagnosis"
+  ), overwrite = TRUE)
 
   # cohort progression
-  DBI::dbWithTransaction(db, {
-    DBI::dbWriteTable(db,  "progression",
-                      mgus2Pr,
-                      overwrite = TRUE
-    )
-  })
+  DBI::dbWriteTable(db,  "progression", mgus2Pr, overwrite = TRUE)
+  DBI::dbWriteTable(db, "progression_set", dplyr::tibble(
+    cohort_definition_id = 1, cohort_name = "progression"
+  ), overwrite = TRUE)
+
+  # cohort progression types
+  DBI::dbWriteTable(db,  "progression_type", mgus2Pr2, overwrite = TRUE)
+  DBI::dbWriteTable(db, "progression_type_set", dplyr::tibble(
+    cohort_definition_id = 1:3,
+    cohort_name = c("any_progression", "progression_type1", "progression_type2")
+  ), overwrite = TRUE)
 
   # cohort death
-  DBI::dbWithTransaction(db, {
-    DBI::dbWriteTable(db, "death_cohort",
-                      mgus2Death,
-                      overwrite = TRUE
-    )
-  })
+  DBI::dbWriteTable(db, "death_cohort", mgus2Death, overwrite = TRUE)
+  DBI::dbWriteTable(db, "death_cohort_set", dplyr::tibble(
+    cohort_definition_id = 1, cohort_name = "death_cohort"
+  ), overwrite = TRUE)
 
-  DBI::dbWithTransaction(db, {
-    DBI::dbWriteTable(db, "visit_occurrence",
-                      visitOccurrence,
-                      overwrite = TRUE
-    )
-  })
-
+  DBI::dbWriteTable(db, "visit_occurrence", visitOccurrence, overwrite = TRUE)
 
   cdm <- CDMConnector::cdm_from_con(
     con = db,
-    cohort_tables = c(
-      "mgus_diagnosis", "progression",
-      "death_cohort"
-    ),
+    cohort_tables = c("mgus_diagnosis", "progression", "progression_type", "death_cohort"),
     cdm_schema = "main",
     write_schema = "main",
     cdm_name = "mock"
   )
 
-  cdm$mgus_diagnosis <- addCohortCountAttr(cdm$mgus_diagnosis,
-                                           name="mgus_diagnosis")
-  cdm$progression <- addCohortCountAttr(cdm$progression,
-                                        name="progression")
-  cdm$death_cohort <- addCohortCountAttr(cdm$death_cohort,
-                                         name="death_cohort")
-
   return(cdm)
-}
-
-
-#' Function to add attributes to cohort table
-#' it adds cohort_count, cohort_set, cohort_count, cohort_attrition
-#'
-#' @noRd
-#'
-addCohortCountAttr <- function(cohort, name = "cohort") {
-  cohortCount <- cohort %>%
-    dplyr::group_by(.data$cohort_definition_id) %>%
-    dplyr::summarise(
-      number_records = dplyr::n(),
-      number_subjects = dplyr::n_distinct(.data$subject_id)
-    ) %>%
-    dplyr::collect()
-
-  attr(cohort, "cohort_count") <- cohortCount
-  attr(cohort, "cohort_set") <- cohortCount %>%
-    dplyr::select("cohort_definition_id") %>%
-    dplyr::mutate(cohort_name = .env$name)
-
-  attr(cohort, "cohort_attrition") <- cohortCount %>%
-    dplyr::mutate(
-      "reason" = "Qualifying initial records",
-      "reason_id" = 1,
-      "excluded_records" = 0,
-      "excluded_subjects" = 0
-    )
-
-  return(cohort)
 }

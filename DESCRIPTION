@@ -1,6 +1,6 @@
 Package: CohortSurvival
 Title: Estimate survival using the OMOP Common Data Model
-Version: 0.2
+Version: 0.2.1
 Authors@R: c(
     person("Edward", "Burn", email = "edward.burn@ndorms.ox.ac.uk", 
     role = c("aut", "cre"), 
@@ -28,17 +28,17 @@ Imports:
     DBI,
     dplyr,
     dbplyr,
-    duckdb,
     magrittr,
+    methods,
     lubridate,
+    broom,
     PatientProfiles,
     rlang (>= 0.4.11),
     survival,
-    tibble,
-    tidyr,
     scales,
     stringr,
-    methods
+    tibble,
+    tidyr
 Suggests: 
     testthat (>= 3.0.0),
     CodelistGenerator,
@@ -46,7 +46,9 @@ Suggests:
     knitr,
     tictoc,
     rmarkdown,
-    ggplot2
+    ggplot2,
+    duckdb
 Config/testthat/edition: 3
+Config/testthat/parallel: true
 VignetteBuilder: knitr
 URL: https://darwin-eu.github.io/CohortSurvival/

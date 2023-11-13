@@ -156,28 +156,67 @@ For single event analyses, we can extract restricted mean survival and
 median survival
 
 ``` r
-MGUS_death %>% dplyr::filter(estimate_type == "Survival summary") %>%
+survivalSummary(MGUS_death) %>% 
   tidyr::pivot_wider(names_from = "variable_type", values_from = "estimate") %>%
-  dplyr::mutate("Restricted mean survival (se)" = paste0(round(restricted_mean), " (", round(restricted_mean_std_error, 2), ")"),
-                "Median survival (95% CI)" = paste0(median_survival, " (", median_survival_95CI_lower, " to ", median_survival_95CI_higher, ")")
+  dplyr::mutate("Median survival (95% CI)" = paste0(median_survival, " (", median_survival_95CI_lower, " to ", median_survival_95CI_higher, ")")
                 ) %>% 
-  dplyr::select(strata_name, strata_level,
-                "Restricted mean survival (se)", "Median survival (95% CI)")
-#> # A tibble: 9 × 4
-#>   strata_name       strata_level Restricted mean surviv…¹ Median survival (95%…²
-#>   <chr>             <chr>        <chr>                    <chr>                 
-#> 1 Overall           Overall      133 (4.34)               98 (92 to 103)        
-#> 2 age_group         <70          197 (8.35)               180 (158 to 206)      
-#> 3 age_group         >=70         86 (2.89)                71 (66 to 77)         
-#> 4 sex               F            143 (6.4)                108 (100 to 121)      
-#> 5 sex               M            125 (5.7)                88 (79 to 97)         
-#> 6 age_group and sex <70 and F    220 (12.97)              215 (179 to 260)      
-#> 7 age_group and sex <70 and M    183 (10.24)              158 (139 to 189)      
-#> 8 age_group and sex >=70 and F   96 (4.39)                82 (75 to 94)         
-#> 9 age_group and sex >=70 and M   80 (4.82)                61 (54 to 70)         
-#> # ℹ abbreviated names: ¹​`Restricted mean survival (se)`,
-#> #   ²​`Median survival (95% CI)`
+  dplyr::select(strata_name, strata_level, "Median survival (95% CI)")
+#> # A tibble: 9 × 3
+#>   strata_name       strata_level `Median survival (95% CI)`
+#>   <chr>             <chr>        <chr>                     
+#> 1 Overall           Overall      98 (92 to 103)            
+#> 2 age_group         <70          180 (158 to 206)          
+#> 3 age_group         >=70         71 (66 to 77)             
+#> 4 sex               F            108 (100 to 121)          
+#> 5 sex               M            88 (79 to 97)             
+#> 6 age_group and sex <70 and F    215 (179 to 260)          
+#> 7 age_group and sex <70 and M    158 (139 to 189)          
+#> 8 age_group and sex >=70 and F   82 (75 to 94)             
+#> 9 age_group and sex >=70 and M   61 (54 to 70)
 ```
+
+## Estimating survival with competing risk
+
+The package also allows to estimate survival of both an outcome and
+competing risk outcome. We can then stratify, see information on events,
+summarise the estimates and check the contributing participants in the
+same way we did for the single event survival analysis.
+
+``` r
+MGUS_death_prog <- estimateCompetingRiskSurvival(cdm,
+  targetCohortTable = "mgus_diagnosis",
+  outcomeCohortTable = "progression",
+  competingOutcomeCohortTable = "death_cohort"
+)
+
+plotCumulativeIncidence(MGUS_death_prog, 
+                        colour = "outcome")
+```
+
+<img src="man/figures/README-unnamed-chunk-11-1.png" width="100%" />
+
+## Estimating survival with competing risk and strata
+
+Similarly, we can ask for a competing risk survival and stratification
+of the results by variables added previously to the cohort given. The
+in-built function allows us to plot the results of the strata levels by
+discarding the ones for the overall cohort.
+
+``` r
+MGUS_death_prog <-  estimateCompetingRiskSurvival(cdm,
+  targetCohortTable = "mgus_diagnosis",
+  outcomeCohortTable = "progression",
+  competingOutcomeCohortTable = "death_cohort",
+  strata = list(c("sex"))
+)
+
+plotCumulativeIncidence(MGUS_death_prog  %>%
+                          dplyr::filter(strata_name != "Overall"), 
+                        facet = "strata_level",
+                        colour = "outcome")
+```
+
+<img src="man/figures/README-unnamed-chunk-12-1.png" width="100%" />
 
 ### Disconnect from the cdm database connection
 

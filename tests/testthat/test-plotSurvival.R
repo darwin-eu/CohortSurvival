@@ -1,7 +1,7 @@
 test_that("basic Survival plot", {
 
   cdm <- mockMGUS2cdm()
-  surv <- estimateSurvival(cdm,
+  surv <- estimateSingleEventSurvival(cdm,
                            targetCohortTable = "mgus_diagnosis",
                            targetCohortId = 1,
                            outcomeCohortTable = "death_cohort",
@@ -18,7 +18,7 @@ test_that("basic Survival plot", {
 test_that("plot years on x axis", {
 
   cdm <- mockMGUS2cdm()
-  surv <- estimateSurvival(cdm,
+  surv <- estimateSingleEventSurvival(cdm,
                            targetCohortTable = "mgus_diagnosis",
                            targetCohortId = 1,
                            outcomeCohortTable = "death_cohort",
@@ -35,7 +35,7 @@ test_that("plot years on x axis", {
 test_that("plot facets", {
 
   cdm <- mockMGUS2cdm()
-  surv <- estimateSurvival(cdm,
+  surv <- estimateSingleEventSurvival(cdm,
                            targetCohortTable = "mgus_diagnosis",
                            targetCohortId = 1,
                            outcomeCohortTable = "death_cohort",
@@ -54,7 +54,7 @@ test_that("plot facets", {
 test_that("plot facets - multiple column", {
 
   cdm <- mockMGUS2cdm()
-  surv <- estimateSurvival(cdm,
+  surv <- estimateSingleEventSurvival(cdm,
                            targetCohortTable = "mgus_diagnosis",
                            targetCohortId = 1,
                            outcomeCohortTable = "death_cohort",
@@ -73,7 +73,7 @@ test_that("plot facets - multiple column", {
 test_that("plot colour", {
 
   cdm <- mockMGUS2cdm()
-  surv <- estimateSurvival(cdm,
+  surv <- estimateSingleEventSurvival(cdm,
                            targetCohortTable = "mgus_diagnosis",
                            targetCohortId = 1,
                            outcomeCohortTable = "death_cohort",
@@ -93,7 +93,7 @@ test_that("plot colour", {
 test_that("basic cumulative incidence plot", {
 
   cdm <- mockMGUS2cdm()
-  surv <- estimateSurvival(cdm,
+  surv <- estimateSingleEventSurvival(cdm,
                            targetCohortTable = "mgus_diagnosis",
                            targetCohortId = 1,
                            outcomeCohortTable = "death_cohort",
@@ -110,7 +110,7 @@ test_that("basic cumulative incidence plot", {
 test_that("plot facets for cumulative incidence plots", {
 
   cdm <- mockMGUS2cdm()
-  surv <- estimateSurvival(cdm,
+  surv <- estimateSingleEventSurvival(cdm,
                            targetCohortTable = "mgus_diagnosis",
                            targetCohortId = 1,
                            outcomeCohortTable = "death_cohort",
@@ -130,7 +130,7 @@ test_that("plot facets for cumulative incidence plots", {
 test_that("plot colour for cumulative incidence plots", {
 
   cdm <- mockMGUS2cdm()
-  surv <- estimateSurvival(cdm,
+  surv <- estimateSingleEventSurvival(cdm,
                            targetCohortTable = "mgus_diagnosis",
                            targetCohortId = 1,
                            outcomeCohortTable = "death_cohort",

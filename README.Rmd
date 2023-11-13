@@ -125,13 +125,47 @@ plotSurvival(MGUS_death,
 For single event analyses, we can extract restricted mean survival and median survival
 
 ```{r}
-MGUS_death %>% dplyr::filter(estimate_type == "Survival summary") %>%
+survivalSummary(MGUS_death) %>% 
   tidyr::pivot_wider(names_from = "variable_type", values_from = "estimate") %>%
-  dplyr::mutate("Restricted mean survival (se)" = paste0(round(restricted_mean), " (", round(restricted_mean_std_error, 2), ")"),
-                "Median survival (95% CI)" = paste0(median_survival, " (", median_survival_95CI_lower, " to ", median_survival_95CI_higher, ")")
+  dplyr::mutate("Median survival (95% CI)" = paste0(median_survival, " (", median_survival_95CI_lower, " to ", median_survival_95CI_higher, ")")
                 ) %>% 
-  dplyr::select(strata_name, strata_level,
-                "Restricted mean survival (se)", "Median survival (95% CI)")
+  dplyr::select(strata_name, strata_level, "Median survival (95% CI)")
+
+```
+
+
+## Estimating survival with competing risk
+
+The package also allows to estimate survival of both an outcome and competing risk outcome. We can then stratify, see information on events, summarise the estimates and check the contributing participants in the same way we did for the single event survival analysis.
+
+```{r, fig.width=5}
+MGUS_death_prog <- estimateCompetingRiskSurvival(cdm,
+  targetCohortTable = "mgus_diagnosis",
+  outcomeCohortTable = "progression",
+  competingOutcomeCohortTable = "death_cohort"
+)
+
+plotCumulativeIncidence(MGUS_death_prog, 
+                        colour = "outcome")
+```
+
+
+## Estimating survival with competing risk and strata
+
+Similarly, we can ask for a competing risk survival and stratification of the results by variables added previously to the cohort given. The in-built function allows us to plot the results of the strata levels by discarding the ones for the overall cohort.
+
+```{r}
+MGUS_death_prog <-  estimateCompetingRiskSurvival(cdm,
+  targetCohortTable = "mgus_diagnosis",
+  outcomeCohortTable = "progression",
+  competingOutcomeCohortTable = "death_cohort",
+  strata = list(c("sex"))
+)
+
+plotCumulativeIncidence(MGUS_death_prog  %>%
+                          dplyr::filter(strata_name != "Overall"), 
+                        facet = "strata_level",
+                        colour = "outcome")
 
 ```
 
