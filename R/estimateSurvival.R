@@ -640,12 +640,15 @@ estimateSurvival <- function(cdm,
       ) %>%
       dplyr::mutate(estimate = unname(.data$estimate))
 
+    # round estimates
+    survivalEstimates <- survivalEstimates %>%
+      dplyr::mutate(estimate = round(.data$estimate, 4))
+
     # obscure counts below minCellCount
     survivalEstimates <- suppressSurvivalCounts(survivalEstimates, minCellCount)
   } else {
     survivalEstimates <- surv
   }
-
 
 
   return(survivalEstimates)
