@@ -4,7 +4,7 @@ pkgdown_sha: ~
 articles:
   a01_Single_event_of_interest: a01_Single_event_of_interest.html
   a02_Competing_risk_survival: a02_Competing_risk_survival.html
-last_built: 2023-11-20T16:36Z
+last_built: 2023-11-20T16:47Z
 urls:
   reference: https://darwin-eu.github.io/CohortSurvival/reference
   article: https://darwin-eu.github.io/CohortSurvival/articles
