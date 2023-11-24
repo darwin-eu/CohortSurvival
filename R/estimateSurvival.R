@@ -600,9 +600,9 @@ estimateSurvival <- function(cdm,
       dplyr::mutate(
         result_type = "Survival estimate",
         variable = "Outcome",
-        variable_level = CDMConnector::cohortSet(cdm[[targetCohortTable]]) %>%
+        variable_level = CDMConnector::cohortSet(cdm[[outcomeCohortTable]]) %>%
           dplyr::filter(.data$cohort_definition_id ==
-            .env$targetCohortId) %>%
+            .env$outcomeCohortId) %>%
           dplyr::pull("cohort_name"),
         estimate_type = "Survival summary"
       ) %>%

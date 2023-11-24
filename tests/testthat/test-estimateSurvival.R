@@ -38,6 +38,12 @@ test_that("mgus example: no Competing risk", {
 
   expect_true(tibble::is_tibble(attr(surv, "summary")))
 
+  expect_true(all(surv$variable_level == "death_cohort"))
+  expect_true(all(attr(surv, "event")$outcome == "death_cohort"))
+  expect_true(all(attr(surv, "summary")$variable_level == "death_cohort"))
+
+
+
   # mgus example: Competing risk
   survCR <- estimateSurvival(cdm,
     targetCohortTable = "mgus_diagnosis",
@@ -277,6 +283,24 @@ test_that("multiple exposures, multiple outcomes: single event", {
                       dplyr::filter(cohort_definition_id %in%  c(1,2)) %>%
                       dplyr::pull("cohort_name")))
   expect_equal(unique(surv$variable_level),
+               CDMConnector::cohort_set(cdm$cohort1) %>%
+                 dplyr::filter(cohort_definition_id %in%  c(2,3)) %>%
+                 dplyr::pull("cohort_name"))
+
+  expect_equal(sort(unique(attr(surv, "event")$group_level)),
+               sort(CDMConnector::cohort_set(cdm$exposure_cohort) %>%
+                      dplyr::filter(cohort_definition_id %in%  c(1,2)) %>%
+                      dplyr::pull("cohort_name")))
+  expect_equal(unique(attr(surv, "event")$outcome),
+               CDMConnector::cohort_set(cdm$cohort1) %>%
+                 dplyr::filter(cohort_definition_id %in%  c(2,3)) %>%
+                 dplyr::pull("cohort_name"))
+
+  expect_equal(sort(unique(attr(surv, "summary")$group_level)),
+               sort(CDMConnector::cohort_set(cdm$exposure_cohort) %>%
+                      dplyr::filter(cohort_definition_id %in%  c(1,2)) %>%
+                      dplyr::pull("cohort_name")))
+  expect_equal(unique(attr(surv, "summary")$variable_level),
                CDMConnector::cohort_set(cdm$cohort1) %>%
                  dplyr::filter(cohort_definition_id %in%  c(2,3)) %>%
                  dplyr::pull("cohort_name"))
