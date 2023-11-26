@@ -180,6 +180,18 @@ test_that("mgus example: Competing risk, strata", {
     paste(expand.grid(c(24:96), c("M", "F"))$Var1, expand.grid(c(24:96), c("M", "F"))$Var2, sep = " and ")
   )))
 
+
+  # strata with only one value
+  cdm$mgus_diagnosis <- cdm$mgus_diagnosis %>% dplyr::mutate(a = "X")
+  survCR <- estimateSurvival(cdm,
+                             targetCohortTable = "mgus_diagnosis",
+                             targetCohortId = 1,
+                             outcomeCohortTable = "progression",
+                             outcomeCohortId = 1,
+                             competingOutcomeCohortTable = "death_cohort",
+                             competingOutcomeCohortId = 1,
+                             strata = list("a" = "a"))
+
   CDMConnector::cdmDisconnect(cdm)
 })
 
@@ -276,7 +288,8 @@ test_that("multiple exposures, multiple outcomes: single event", {
                                       targetCohortTable = "exposure_cohort",
                                       targetCohortId = c(1,2),
                                       outcomeCohortTable = "cohort1",
-                                      outcomeCohortId = c(2,3)
+                                      outcomeCohortId = c(2,3),
+                                      minCellCount = 0
   )
   expect_equal(sort(unique(surv$group_level)),
                sort(CDMConnector::cohort_set(cdm$exposure_cohort) %>%
@@ -592,12 +605,14 @@ test_that("funcionality with created dataset", {
   expect_true(all(surv %>% dplyr::select(analysis_type) %>% dplyr::pull() == "Single event"))
 
   expect_true(all(attr(surv, "events") %>% dplyr::select(variable_level) %>% dplyr::pull() %in% c("timeGap 1", "timeGap 7", "timeGap 30", "timeGap 365")))
-  expect_true(all(attr(surv, "events") %>% dplyr::group_by(variable_level) %>% dplyr::summarise(n = sum(estimate, na.rm = T)) %>% dplyr::select(n) %>%
-                    dplyr::pull() == c(3, 3, 3, 3)))
+  expect_true(all(attr(surv, "events") %>%
+                    dplyr::filter(time==0,
+                                  variable_type== "n_risk") %>%
+                    dplyr::pull("estimate") %in%  c(3)))
 
   CDMConnector::cdmDisconnect(cdm)
 
-  # Compting events
+  # Competing events
   outcome_cohort <- dplyr::tibble(
     cohort_definition_id = c(1, 1, 1),
     subject_id = c(2, 3, 3),
@@ -656,19 +671,12 @@ test_that("funcionality with created dataset", {
 
   expect_true(all(surv2 %>% dplyr::select(analysis_type) %>% dplyr::pull() == "Competing risk"))
   expect_true(all(surv2 %>% dplyr::select(outcome) %>% dplyr::pull() %in% c("cohort_1", "cohort_1_competing_outcome", "outcome", "competing outcome", "none")))
-  expect_true(all(attr(surv2, "events") %>% dplyr::filter(!is.na(estimate) & variable_level == "timeGap 1" & outcome == "cohort_1") %>% dplyr::select(time) == c(0:981)))
-  expect_true(all(attr(surv2, "events") %>%
-                    dplyr::filter(variable_level == "timeGap 1") %>%
-                    dplyr::select(time) == c(0:981)))
-  expect_true(all(attr(surv2, "events") %>%
-                    dplyr::filter(variable_level == "timeGap 7") %>%
-                    dplyr::select(time) == c(seq(0,981, by = 7), 981)))
   expect_true(all(attr(surv2, "events") %>%
                     dplyr::filter(variable_level == "timeGap 30") %>%
-                    dplyr::select(time) == c(seq(0,981, by = 30), 981)))
+                    dplyr::pull("time") %in%  c(seq(0,981, by = 30), 981)))
   expect_true(all(attr(surv2, "events") %>%
                     dplyr::filter(variable_level == "timeGap 365") %>%
-                    dplyr::select(time) == c(seq(0,981, by = 365), 981)))
+                    dplyr::pull("time") %in%  c(seq(0,981, by = 365), 981)))
 
   CDMConnector::cdmDisconnect(cdm)
 
@@ -737,9 +745,8 @@ test_that("funcionality with created dataset", {
    expect_true(all(surv4 %>% dplyr::select(analysis_type) %>% dplyr::pull() == "Single event"))
 
    expect_true(all(attr(surv4, "events") %>%
-                     dplyr::filter(!is.na(estimate) & variable_level == "timeGap 1") %>%
-                     dplyr::select(time) == c(0:10)))
-
+                     dplyr::filter(variable_level == "timeGap 1") %>%
+                     dplyr::pull("time") %in%  c(0:10)))
   CDMConnector::cdmDisconnect(cdm)
 
   outcome_cohort <- dplyr::tibble(
@@ -787,11 +794,6 @@ test_that("funcionality with created dataset", {
                      dplyr::select(estimate) %>% dplyr::pull() - c(rep(0, 6), rep(0.333, 3), rep(0.667, 22), 1) < c(0.01)))
    expect_true(all(surv5 %>% dplyr::filter(strata_name == "Overall") %>% dplyr::select(analysis_type) %>% dplyr::pull() == "Single event"))
 
-   expect_true(all(attr(surv5, "events") %>%
-                     dplyr::filter(strata_name == "Overall") %>%
-                     dplyr::filter(!is.na(estimate) & variable_level == "timeGap 1") %>%
-                     dplyr::select(time) == c(0:31)))
-
    expect_true(all(surv5 %>% dplyr::filter(strata_name == "age_group; sex" &
                                              strata_level == "20;29; Female") %>%
                      dplyr::select(time) %>% dplyr::pull() == c(0:31)))
@@ -805,11 +807,11 @@ test_that("funcionality with created dataset", {
                      dplyr::select(estimate) %>% dplyr::pull() - c(rep(0, 9), rep(1, 23)) < c(0.01)))
    expect_true(all(surv5 %>% dplyr::filter(strata_name == "age_group; sex" & strata_level == "20;29; Female") %>% dplyr::select(analysis_type) %>% dplyr::pull() == "Single event"))
 
-   expect_true(all(attr(surv5, "events") %>% dplyr::filter(estimate_type == "Survival events") %>%
+   expect_true(all(attr(surv5, "events") %>%
                      dplyr::filter(strata_name == "age_group and sex" &
                                      strata_level == "20;29 and Female") %>%
-                     dplyr::filter(!is.na(estimate) & variable_level == "timeGap 1") %>%
-                     dplyr::select(time) == c(0:31)))
+                     dplyr::filter(variable_level == "timeGap 1") %>%
+                     dplyr::pull("time") %in%  c(0:31)))
 
    expect_true(all(surv5 %>% dplyr::filter(estimate_type == "Cumulative failure probability" & variable_type == "estimate" & strata_name == "blood_type" & strata_level == "B") %>% dplyr::select(time) %>% dplyr::pull() == c(0:31)))
    expect_true(all(surv5 %>% dplyr::filter(estimate_type == "Cumulative failure probability" & variable_type == "n_risk" & strata_name == "blood_type" & strata_level == "B") %>% dplyr::select(estimate) %>% dplyr::pull() == c(rep(2, 7), rep(1, 25))))
@@ -857,12 +859,6 @@ test_that("funcionality with created dataset", {
                      dplyr::select(estimate) %>% dplyr::pull() - c(rep(0, 6), rep(0.5, 25), 1) < c(0.01)))
    expect_true(all(surv6 %>% dplyr::select(analysis_type) %>% dplyr::pull() == "Single event"))
 
-   expect_true(all(attr(surv6, "events") %>% dplyr::filter(!is.na(estimate) &
-                                                             variable_level == "timeGap 1") %>%
-                     dplyr::select(time) == c(0:31)))
-   expect_true(all(attr(surv6, "events")  %>% dplyr::group_by(variable_level) %>%
-                     dplyr::summarise(n = sum(estimate, na.rm = T)) %>% dplyr::select(n) %>% dplyr::pull() == c(2, 2, 2, 2)))
-
   CDMConnector::cdmDisconnect(cdm)
 
   outcome_cohort <- dplyr::tibble(
@@ -903,9 +899,6 @@ test_that("funcionality with created dataset", {
                      dplyr::filter(variable_type == "estimate") %>%
                      dplyr::select(estimate)%>% dplyr::pull() - c(rep(0, 6), 0.5, 0.5, 0.5, 1) < c(0.01)))
    expect_true(all(surv7 %>% dplyr::select(analysis_type) %>% dplyr::pull() == "Single event"))
-
-   expect_true(all(attr(surv7, "events")  %>% dplyr::filter(!is.na(estimate) & variable_level == "timeGap 1") %>% dplyr::select(time) == c(0:9)))
-   expect_true(all(attr(surv7, "events")  %>% dplyr::group_by(variable_level) %>% dplyr::summarise(n = sum(estimate, na.rm = T)) %>% dplyr::select(n) %>% dplyr::pull() == c(2, 2, 2, 2)))
 
   CDMConnector::cdmDisconnect(cdm)
 })
@@ -965,7 +958,7 @@ test_that("different exposure cohort ids", {
       targetCohortId = 1,
       outcomeCohortTable = "cohort2",
       outcomeCohortId = 1,
-      minCellCount = 1
+      minCellCount = 0
     )
    expect_true(all(compareNA(surv8 %>% dplyr::select(time) %>% dplyr::pull() %>% unique(), c(0:9))))
    expect_true(all(surv8 %>% dplyr::filter(estimate == "n_risk") %>% dplyr::select(estimate) %>% dplyr::pull() == c(rep(2, 2), rep(1, 8))))
@@ -975,8 +968,11 @@ test_that("different exposure cohort ids", {
                      dplyr::select(estimate) %>% dplyr::pull() - c(0, rep(0.5, 8), 1) < c(0.01)))
    expect_true(all(surv8 %>% dplyr::select(analysis_type) %>% dplyr::pull() == "Single event"))
 
-   expect_true(all(attr(surv8, "events") %>% dplyr::filter(!is.na(estimate) & variable_level == "timeGap 1") %>% dplyr::select(time) == c(0:9)))
-   expect_true(all(attr(surv8, "events") %>% dplyr::group_by(variable_level) %>% dplyr::summarise(n = sum(estimate, na.rm = T)) %>% dplyr::select(n) %>% dplyr::pull() == c(2, 2, 2, 2)))
+   expect_true(all(attr(surv8, "events") %>% dplyr::filter(!is.na(estimate) & variable_type =="n_risk" & variable_level == "timeGap 1") %>% dplyr::select(time) == c(0:9)))
+   expect_true(all(attr(surv8, "events") %>%
+                     dplyr::filter(variable_type =="n_risk") %>%
+                     dplyr::filter(time==0) %>% dplyr::select(estimate) %>%
+                     dplyr::pull() == c(2, 2, 2, 2)))
 
   surv9 <-
     estimateSingleEventSurvival(
@@ -995,9 +991,11 @@ test_that("different exposure cohort ids", {
                      dplyr::select(estimate) %>% dplyr::pull() - c(rep(0, 8), 1) < c(0.01)))
    expect_true(all(surv9 %>% dplyr::select(analysis_type) %>% dplyr::pull() == "Single event"))
 
-   expect_true(all(attr(surv9, "events") %>% dplyr::filter(!is.na(estimate) & variable_level == "timeGap 1") %>% dplyr::select(time) == c(0:8)))
-   expect_true(all(attr(surv9, "events") %>% dplyr::filter(estimate_type == "Survival events") %>% dplyr::group_by(variable_level) %>% dplyr::summarise(n = sum(estimate, na.rm = T)) %>% dplyr::select(n) %>% dplyr::pull() == c(1, 1, 1, 1)))
-
+   expect_true(all(attr(surv9, "events") %>% dplyr::filter(!is.na(estimate) & variable_level == "timeGap 1") %>% dplyr::pull("time") %in%  c(0:8)))
+   expect_true(all(attr(surv9, "events") %>%
+                     dplyr::filter(variable_type =="n_risk") %>%
+                     dplyr::filter(time==0) %>% dplyr::select(estimate) %>%
+                     dplyr::pull() %in%  c(1)))
   CDMConnector::cdm_disconnect(cdm)
   })
 
@@ -1093,7 +1091,7 @@ test_that("within cohort survival", {
     timeGap = 7,
     minCellCount = 0
   )
-  expect_true(sum(attr(surv, "events")%>% dplyr::select(estimate) %>% sum()) == 3)
+  expect_true(max(attr(surv, "events") %>% dplyr::select(estimate) %>% dplyr::pull(), na.rm = TRUE) == 3)
 
   CDMConnector::cdmDisconnect(cdm)
 })
@@ -1248,6 +1246,17 @@ test_that("strata specific survival", {
                  dplyr::pull()
   )
 
+
+  # strata with only one value
+  cdm$exposure_cohort <- cdm$exposure_cohort %>% dplyr::mutate(a = "X")
+  surv <- estimateSingleEventSurvival(cdm,
+                                      targetCohortTable = "exposure_cohort",
+                                      outcomeCohortTable = "cohort1",
+                                      strata = list("sex", "a"),
+                                      minCellCount = 1
+  )
+
+
   CDMConnector::cdmDisconnect(cdm)
 
 
@@ -1395,3 +1404,35 @@ CDMConnector::cdm_disconnect(cdm)
 
 })
 
+test_that("min cell count", {
+  cdm <- mockMGUS2cdm()
+  surv <- estimateSingleEventSurvival(cdm,
+                                      targetCohortTable = "mgus_diagnosis",
+                                      outcomeCohortTable = "death_cohort",
+                                      strata = list(
+                                        "age" = c("age")
+                                      ),
+                                      timeGap = 7,
+                                      minCellCount = 35)
+
+  expect_true(nrow(attr(surv, "events") %>%
+    dplyr::filter(variable_type == "n_risk") %>%
+    dplyr::filter(estimate < 35)) == 0)
+  expect_true(nrow(attr(surv, "summary") %>%
+                     dplyr::filter(variable_type == "n_records") %>%
+                     dplyr::filter(estimate < 35)) == 0)
+
+  result <- estimateCompetingRiskSurvival(
+    cdm = cdm,
+    targetCohortTable = "mgus_diagnosis",
+    outcomeCohortTable = "progression_type",
+    competingOutcomeCohortTable = "death_cohort",
+    minCellCount = 35
+  )
+  expect_true(nrow(attr(result, "events") %>%
+                     dplyr::filter(variable_type == "n_risk") %>%
+                     dplyr::filter(estimate < 35)) == 0)
+
+CDMConnector::cdm_disconnect(cdm)
+
+})
