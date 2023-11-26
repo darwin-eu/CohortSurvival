@@ -26,7 +26,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">CohortSurvival</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.3</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.4</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -146,7 +146,7 @@ same way we did for the single event survival analysis.</p>
 <span></span>
 <span><span class="va">MGUS_death_prog</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> </span>
 <span>  <span class="fu"><a href="https://pillar.r-lib.org/reference/glimpse.html" class="external-link">glimpse</a></span><span class="op">(</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Rows: 3,400</span></span>
+<span><span class="co">#&gt; Rows: 2,550</span></span>
 <span><span class="co">#&gt; Columns: 14</span></span>
 <span><span class="co">#&gt; $ cdm_name       <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "mock", "mock", "mock", "mock", "mock", "mock", "mock",…</span></span>
 <span><span class="co">#&gt; $ result_type    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "Survival estimate", "Survival estimate", "Survival est…</span></span>
@@ -156,12 +156,12 @@ same way we did for the single event survival analysis.</p>
 <span><span class="co">#&gt; $ strata_level   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "Overall", "Overall", "Overall", "Overall", "Overall", …</span></span>
 <span><span class="co">#&gt; $ variable       <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "Outcome", "Outcome", "Outcome", "Outcome", "Outcome", …</span></span>
 <span><span class="co">#&gt; $ variable_level <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "progression", "progression", "progression", "progressi…</span></span>
-<span><span class="co">#&gt; $ variable_type  <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "n_risk", "estimate", "estimate_95CI_lower", "estimate_…</span></span>
+<span><span class="co">#&gt; $ variable_type  <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "estimate", "estimate_95CI_lower", "estimate_95CI_upper…</span></span>
 <span><span class="co">#&gt; $ estimate_type  <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "Cumulative failure probability", "Cumulative failure p…</span></span>
-<span><span class="co">#&gt; $ time           <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> 0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3, 4, 4, 4…</span></span>
+<span><span class="co">#&gt; $ time           <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> 0, 0, 0, 1, 1, 1, 2, 2, 2, 3, 3, 3, 4, 4, 4, 5, 5, 5, 6…</span></span>
 <span><span class="co">#&gt; $ analysis_type  <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "Competing risk", "Competing risk", "Competing risk", "…</span></span>
 <span><span class="co">#&gt; $ outcome        <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "progression", "progression", "progression", "progressi…</span></span>
-<span><span class="co">#&gt; $ estimate       <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> 1384.0000, 0.0000, 0.0000, 0.0000, 1384.0000, 0.0000, N…</span></span></code></pre></div>
+<span><span class="co">#&gt; $ estimate       <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> 0.0000, 0.0000, 0.0000, 0.0000, NA, NA, 0.0014, 0.0004,…</span></span></code></pre></div>
 <p>As we can see above our results have been outputted in long format.
 We can plot these results like so.</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
