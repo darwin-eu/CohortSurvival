@@ -10,7 +10,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">CohortSurvival</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.4</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.5</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -58,7 +58,49 @@
 <dd><p>Result from estimateSingleEventSurvival</p></dd>
 
 </dl></div>
+    <div class="section level2">
+    <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
+    
 
+<p>A tibble containing a summary of observed survival</p>
+    </div>
+
+    <div class="section level2">
+    <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># \donttest{</span></span></span>
+<span class="r-in"><span><span class="va">cdm</span> <span class="op">&lt;-</span> <span class="fu"><a href="mockMGUS2cdm.html">mockMGUS2cdm</a></span><span class="op">(</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">surv</span> <span class="op">&lt;-</span> <span class="fu"><a href="estimateSingleEventSurvival.html">estimateSingleEventSurvival</a></span><span class="op">(</span><span class="va">cdm</span>,</span></span>
+<span class="r-in"><span>                                    targetCohortTable <span class="op">=</span> <span class="st">"mgus_diagnosis"</span>,</span></span>
+<span class="r-in"><span>                                    outcomeCohortTable <span class="op">=</span> <span class="st">"death_cohort"</span><span class="op">)</span></span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> - Getting survival for target cohort 'mgus_diagnosis' and outcome cohort</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> 'death_cohort'</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Getting overall estimates</span>
+<span class="r-in"><span><span class="fu">survivalSummary</span><span class="op">(</span><span class="va">surv</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 17 × 13</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    cdm_name result_type group_name group_level strata_name strata_level variable</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>   </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 1</span> mock     Survival e… Cohort     mgus_diagn… Overall     Overall      Outcome </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 2</span> mock     Survival e… Cohort     mgus_diagn… Overall     Overall      Outcome </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 3</span> mock     Survival e… Cohort     mgus_diagn… Overall     Overall      Outcome </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 4</span> mock     Survival e… Cohort     mgus_diagn… Overall     Overall      Outcome </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 5</span> mock     Survival e… Cohort     mgus_diagn… Overall     Overall      Outcome </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 6</span> mock     Survival e… Cohort     mgus_diagn… Overall     Overall      Outcome </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 7</span> mock     Survival e… Cohort     mgus_diagn… Overall     Overall      Outcome </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 8</span> mock     Survival e… Cohort     mgus_diagn… Overall     Overall      Outcome </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 9</span> mock     Survival e… Cohort     mgus_diagn… Overall     Overall      Outcome </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">10</span> mock     Survival e… Cohort     mgus_diagn… Overall     Overall      Outcome </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">11</span> mock     Survival e… Cohort     mgus_diagn… Overall     Overall      Outcome </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">12</span> mock     Survival e… Cohort     mgus_diagn… Overall     Overall      Outcome </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">13</span> mock     Survival e… Cohort     mgus_diagn… Overall     Overall      Outcome </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">14</span> mock     Survival e… Cohort     mgus_diagn… Overall     Overall      Outcome </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">15</span> mock     Survival e… Cohort     mgus_diagn… Overall     Overall      Outcome </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">16</span> mock     Survival e… Cohort     mgus_diagn… Overall     Overall      Outcome </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">17</span> mock     Survival e… Cohort     mgus_diagn… Overall     Overall      Outcome </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># ℹ 6 more variables: variable_level &lt;chr&gt;, variable_type &lt;chr&gt;, outcome &lt;chr&gt;,</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#   analysis_type &lt;chr&gt;, estimate &lt;dbl&gt;, estimate_type &lt;chr&gt;</span></span>
+<span class="r-in"><span><span class="co"># }</span></span></span>
+</code></pre></div>
+    </div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
     </nav></aside></div>
 
