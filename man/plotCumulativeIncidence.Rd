@@ -32,6 +32,19 @@ plotCumulativeIncidence(
 
 \item{colour_name}{Colour legend name}
 }
+\value{
+A plot of cumulative incidence over time
+}
 \description{
 Plot cumulative incidence
+}
+\examples{
+\donttest{
+cdm <- mockMGUS2cdm()
+surv <- estimateSingleEventSurvival(cdm,
+                                    targetCohortTable = "mgus_diagnosis",
+                                    outcomeCohortTable = "death_cohort")
+plot <- plotCumulativeIncidence(surv)
+plot
+}
 }

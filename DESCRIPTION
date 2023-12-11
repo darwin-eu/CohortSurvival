@@ -1,6 +1,6 @@
 Package: CohortSurvival
-Title: Estimate survival using the OMOP Common Data Model
-Version: 0.2.4
+Title: Estimate Survival from Common Data Model Cohorts
+Version: 0.2.5
 Authors@R: c(
     person("Edward", "Burn", email = "edward.burn@ndorms.ox.ac.uk", 
     role = c("aut", "cre"), 
@@ -16,7 +16,7 @@ Authors@R: c(
     person("Danielle", "Newby", email = "danielle.newby@ndorms.ox.ac.uk", 
     role = c("ctb"), 
     comment = c(ORCID = "0000-0002-3001-1478")))
-Description: Estimate survival using data mapped to the Observational Medical Outcomes Partnership (OMOP) common data model. Survival can be estimated based on user-defined study cohorts.
+Description: Estimate survival using data mapped to the Observational Medical Outcomes Partnership common data model. Survival can be estimated based on user-defined study cohorts.
 License: Apache License (>= 2)
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
@@ -51,4 +51,4 @@ Suggests:
 Config/testthat/edition: 3
 Config/testthat/parallel: true
 VignetteBuilder: knitr
-URL: https://darwin-eu.github.io/CohortSurvival/
+URL: https://darwin-eu-dev.github.io/CohortSurvival/

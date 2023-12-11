@@ -150,7 +150,7 @@ plotSurvival(MGUS_death,
 
 <img src="man/figures/README-unnamed-chunk-9-1.png" width="100%" />
 
-### Summary statisitics on survival
+### Summary statistics on survival
 
 For single event analyses, we can extract restricted mean survival and
 median survival

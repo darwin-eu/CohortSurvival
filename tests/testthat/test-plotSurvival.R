@@ -1,4 +1,5 @@
 test_that("basic Survival plot", {
+  skip_on_cran()
 
   cdm <- mockMGUS2cdm()
   surv <- estimateSingleEventSurvival(cdm,
@@ -16,6 +17,7 @@ test_that("basic Survival plot", {
 })
 
 test_that("plot years on x axis", {
+  skip_on_cran()
 
   cdm <- mockMGUS2cdm()
   surv <- estimateSingleEventSurvival(cdm,
@@ -33,6 +35,7 @@ test_that("plot years on x axis", {
 })
 
 test_that("plot facets", {
+  skip_on_cran()
 
   cdm <- mockMGUS2cdm()
   surv <- estimateSingleEventSurvival(cdm,
@@ -52,6 +55,7 @@ test_that("plot facets", {
 })
 
 test_that("plot facets - multiple column", {
+  skip_on_cran()
 
   cdm <- mockMGUS2cdm()
   surv <- estimateSingleEventSurvival(cdm,
@@ -71,6 +75,7 @@ test_that("plot facets - multiple column", {
 })
 
 test_that("plot colour", {
+  skip_on_cran()
 
   cdm <- mockMGUS2cdm()
   surv <- estimateSingleEventSurvival(cdm,
@@ -91,6 +96,7 @@ test_that("plot colour", {
 })
 
 test_that("basic cumulative incidence plot", {
+  skip_on_cran()
 
   cdm <- mockMGUS2cdm()
   surv <- estimateSingleEventSurvival(cdm,
@@ -108,6 +114,7 @@ test_that("basic cumulative incidence plot", {
 })
 
 test_that("plot facets for cumulative incidence plots", {
+  skip_on_cran()
 
   cdm <- mockMGUS2cdm()
   surv <- estimateSingleEventSurvival(cdm,
@@ -126,8 +133,8 @@ test_that("plot facets for cumulative incidence plots", {
 
 })
 
-
 test_that("plot colour for cumulative incidence plots", {
+  skip_on_cran()
 
   cdm <- mockMGUS2cdm()
   surv <- estimateSingleEventSurvival(cdm,

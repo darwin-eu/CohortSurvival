@@ -67,6 +67,7 @@ outputted as an attribute of the output
 Estimate survival for a given event of interest using cohorts in the OMOP Common Data Model
 }
 \examples{
+\donttest{
 cdm <- mockMGUS2cdm()
 surv <- estimateSingleEventSurvival(
   cdm = cdm,
@@ -76,5 +77,6 @@ surv <- estimateSingleEventSurvival(
   outcomeCohortId = 1,
   timeGap = 7
 )
+}
 
 }

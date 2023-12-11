@@ -40,6 +40,8 @@ test_that("working example", {
 })
 
 test_that("another working example", {
+  skip_on_cran()
+
   if (Sys.getenv("EUNOMIA_DATA_FOLDER") == "") {
     Sys.setenv("EUNOMIA_DATA_FOLDER" = tempdir())
   }
@@ -144,7 +146,9 @@ test_that("another working example", {
 })
 
 test_that("censorOnCohortExit", {
-  cohort <- dplyr::tibble(
+  skip_on_cran()
+
+   cohort <- dplyr::tibble(
     cohort_definition_id = c(1,1,1),
     subject_id = c(1,2,3),
     cohort_start_date = c(as.Date("2020-01-01"),
@@ -228,6 +232,8 @@ test_that("censorOnCohortExit", {
 })
 
 test_that("censorOnDate", {
+  skip_on_cran()
+
   cohort <- dplyr::tibble(
     cohort_definition_id = c(1,1,1),
     subject_id = c(1,2,3),
@@ -305,6 +311,8 @@ test_that("censorOnDate", {
 })
 
 test_that("followUpDays", {
+  skip_on_cran()
+
   cohort <- dplyr::tibble(
     cohort_definition_id = c(1,1,1),
     subject_id = c(1,2,3),
@@ -388,6 +396,7 @@ test_that("followUpDays", {
   })
 
 test_that("expected errors", {
+  skip_on_cran()
   cdm <- PatientProfiles::mockPatientProfiles()
   cdm[["cohort1"]] <- cdm[["cohort1"]] %>%
     dplyr::filter(cohort_start_date != "2020-01-01")
@@ -467,6 +476,7 @@ test_that("expected errors", {
 })
 
 test_that("expected errors2 - index cohort to have one row per person", {
+  skip_on_cran()
   cdm <- PatientProfiles::mockPatientProfiles()
   expect_error(cdm$cohort1 %>%
                 addCohortSurvival(
@@ -478,6 +488,7 @@ test_that("expected errors2 - index cohort to have one row per person", {
 })
 
 test_that("within cohort survival", {
+  skip_on_cran()
   cohort <- dplyr::tibble(
     cohort_definition_id = c(1,1,1),
     subject_id = c(1,2,3),
@@ -550,6 +561,7 @@ test_that("within cohort survival", {
 })
 
 test_that("allow overwrite of time and status", {
+  skip_on_cran()
   cohort <- dplyr::tibble(
     cohort_definition_id = c(1,1,1),
     subject_id = c(1,2,3),
@@ -608,6 +620,7 @@ test_that("allow overwrite of time and status", {
 })
 
 test_that("multiple records per person", {
+  skip_on_cran()
 
   exposure_cohort <- dplyr::tibble(
     subject_id = c(1, 1, 2, 2, 3),

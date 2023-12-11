@@ -1,3 +1,20 @@
+# Copyright 2023 DARWIN EU®
+#
+# This file is part of CohortSurvival
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+
 #' Estimate performance of estimateSurvival function for benchmarking
 #'
 #' @param cdm CDM reference
@@ -29,15 +46,16 @@
 #' @return tibble with performance of estimateSurvival function information,
 #' according to the selected input parameters
 #' @export
-#' @importFrom tictoc
 #'
 #' @examples
+#' \donttest{
 #' cdm <- mockMGUS2cdm()
 #' cdm$condition_occurrence <- cdm$death_cohort %>%
 #' dplyr::rename("condition_start_date" = "cohort_start_date",
 #'              "condition_end_date" = "cohort_end_date")
 #' surv_timings <- benchmarkCohortSurvival(
 #' cdm, targetSize = 100, outcomeSize = 20)
+#'}
 #'
 benchmarkCohortSurvival <- function(cdm,
                                     targetSize,

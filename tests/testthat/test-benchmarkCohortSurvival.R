@@ -1,4 +1,6 @@
 test_that("mgus example: benchmark", {
+  skip_on_cran()
+
   cdm <- mockMGUS2cdm()
   cdm$condition_occurrence <- cdm$death_cohort %>%
     dplyr::rename("condition_start_date" = "cohort_start_date",
@@ -56,6 +58,8 @@ test_that("mgus example: benchmark", {
 })
 
 test_that("expected errors benchmark", {
+  skip_on_cran()
+
   cdm <- mockMGUS2cdm()
   cdm$condition_occurrence <- cdm$death_cohort %>%
     dplyr::rename("condition_start_date" = "cohort_start_date",

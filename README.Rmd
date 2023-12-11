@@ -120,7 +120,7 @@ plotSurvival(MGUS_death,
              facet= "strata_name")
 ```
 
-### Summary statisitics on survival
+### Summary statistics on survival
 
 For single event analyses, we can extract restricted mean survival and median survival
 

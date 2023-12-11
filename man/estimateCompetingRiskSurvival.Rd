@@ -79,6 +79,7 @@ Estimate survival for a given event and competing risk of interest using
 cohorts in the OMOP Common Data Model
 }
 \examples{
+\donttest{
 cdm <- mockMGUS2cdm()
 surv <- estimateCompetingRiskSurvival(
   cdm = cdm,
@@ -90,5 +91,6 @@ surv <- estimateCompetingRiskSurvival(
   competingOutcomeCohortId = 1,
   timeGap = 7
 )
+}
 
 }

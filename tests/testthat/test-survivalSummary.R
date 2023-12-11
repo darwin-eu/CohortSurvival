@@ -1,5 +1,7 @@
 test_that("survival summary", {
-  cdm <- mockMGUS2cdm()
+  skip_on_cran()
+
+    cdm <- mockMGUS2cdm()
   surv <- estimateSingleEventSurvival(cdm,
                                       targetCohortTable = "mgus_diagnosis",
                                       targetCohortId = 1,

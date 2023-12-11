@@ -33,8 +33,19 @@ plotSurvival(
 \item{colour_name}{Colour legend name}
 }
 \value{
-A ggplot with the survival results plotted
+A plot of survival probabilities over time
 }
 \description{
 Plot survival results
+}
+\examples{
+\donttest{
+cdm <- mockMGUS2cdm()
+surv <- estimateSingleEventSurvival(cdm,
+                                    targetCohortTable = "mgus_diagnosis",
+                                    outcomeCohortTable = "death_cohort")
+plot <- plotSurvival(surv)
+plot
+}
+
 }

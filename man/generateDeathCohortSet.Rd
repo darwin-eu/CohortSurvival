@@ -33,3 +33,22 @@ A cohort table with a death cohort in cdm
 \description{
 To create a death cohort
 }
+\examples{
+\donttest{
+library(CDMConnector)
+library(CohortSurvival)
+cdm <- PatientProfiles::mockPatientProfiles()
+deathTable <- dplyr::tibble(
+  person_id = c(1,2,3),
+  death_date = c(as.Date("2020-01-01"),
+                 as.Date("2020-01-02"),
+                 as.Date("2020-01-01")))
+DBI::dbWithTransaction(attr(cdm, "dbcon"), {
+  DBI::dbWriteTable(attr(cdm, "dbcon"), "death",
+                    deathTable, overwrite = TRUE)
+})
+cdm$death <- dplyr::tbl(attr(cdm, "dbcon"), "death")
+cdm <- generateDeathCohortSet(cdm=cdm,
+                              name = "death_cohort")
+}
+}

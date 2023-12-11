@@ -1,4 +1,5 @@
 test_that("basic example", {
+  skip_on_cran()
 
   cdm <- PatientProfiles::mockPatientProfiles()
   deathTable <- dplyr::tibble(
@@ -25,6 +26,7 @@ test_that("basic example", {
 })
 
 test_that("first death record per person", {
+  skip_on_cran()
   # check that in the case of multiple death records per person
   # only the first will be used
   cdm <- PatientProfiles::mockPatientProfiles()
@@ -56,6 +58,7 @@ test_that("first death record per person", {
 })
 
 test_that("test death in observation criteria", {
+  skip_on_cran()
 
   observation_period <- tibble::tibble(
     observation_period_id = c(1, 2),
@@ -98,6 +101,7 @@ test_that("test death in observation criteria", {
 })
 
 test_that("test different cohort table name", {
+  skip_on_cran()
 
   cdm <- PatientProfiles::mockPatientProfiles()
 
@@ -125,6 +129,7 @@ test_that("test different cohort table name", {
 })
 
 test_that("test subsetting death table by a cohort table", {
+  skip_on_cran()
 
   cohort1 <- tibble::tibble(
     cohort_definition_id = c(1,1,2),
@@ -176,6 +181,7 @@ test_that("test subsetting death table by a cohort table", {
 })
 
 test_that("test expected errors", {
+  skip_on_cran()
 
   cohort1 <- tibble::tibble(
     cohort_definition_id = c(1,1,1),
@@ -214,6 +220,7 @@ test_that("test expected errors", {
 })
 
 test_that("test single permanent table created", {
+  skip_on_cran()
 
   cdm <- PatientProfiles::mockPatientProfiles()
   deathTable <- dplyr::tibble(

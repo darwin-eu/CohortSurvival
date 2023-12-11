@@ -12,3 +12,9 @@ CDM reference containing data from the survival::mgus2 dataset
 \description{
 Create mock CDM reference with survival::mgus2 dataset
 }
+\examples{
+ \donttest{
+cdm <- mockMGUS2cdm()
+cdm$person
+}
+}

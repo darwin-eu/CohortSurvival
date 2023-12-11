@@ -16,3 +16,13 @@ a given analysis
 \description{
 Participants contributing to a survival analysis
 }
+\examples{
+\donttest{
+cdm <- mockMGUS2cdm()
+surv <- estimateSingleEventSurvival(cdm,
+                                    targetCohortTable = "mgus_diagnosis",
+                                    outcomeCohortTable = "death_cohort",
+                                    returnParticipants = TRUE)
+survivalParticipants(surv)
+}
+}

@@ -4,14 +4,14 @@
 \name{CohortSurvival-package}
 \alias{CohortSurvival}
 \alias{CohortSurvival-package}
-\title{CohortSurvival: Estimate survival using the OMOP Common Data Model}
+\title{CohortSurvival: Estimate Survival from Common Data Model Cohorts}
 \description{
-Estimate survival using data mapped to the Observational Medical Outcomes Partnership (OMOP) common data model. Survival can be estimated based on user-defined study cohorts.
+Estimate survival using data mapped to the Observational Medical Outcomes Partnership common data model. Survival can be estimated based on user-defined study cohorts.
 }
 \seealso{
 Useful links:
 \itemize{
-  \item \url{https://darwin-eu.github.io/CohortSurvival/}
+  \item \url{https://darwin-eu-dev.github.io/CohortSurvival/}
 }
 
 }

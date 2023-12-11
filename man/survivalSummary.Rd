@@ -9,6 +9,18 @@ survivalSummary(x)
 \arguments{
 \item{x}{Result from estimateSingleEventSurvival}
 }
+\value{
+A tibble containing a summary of observed survival
+}
 \description{
 Survival summary
+}
+\examples{
+\donttest{
+cdm <- mockMGUS2cdm()
+surv <- estimateSingleEventSurvival(cdm,
+                                    targetCohortTable = "mgus_diagnosis",
+                                    outcomeCohortTable = "death_cohort")
+survivalSummary(surv)
+}
 }

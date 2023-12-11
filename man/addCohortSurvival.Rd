@@ -46,6 +46,7 @@ whether the patient had the event (value: 1), or did not have the event
 Add survival information to a cohort table
 }
 \examples{
+\donttest{
 cohort <- dplyr::tibble(
 cohort_definition_id = c(1,1,1),
 subject_id = c(1,2,3),
@@ -63,5 +64,6 @@ cdm$cohort1 <- cdm$cohort1 \%>\%
     outcomeCohortTable = "cohort2",
     outcomeCohortId = 1
   )
+  }
 
 }

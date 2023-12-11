@@ -101,6 +101,8 @@ test_that("mgus example: no Competing risk", {
 })
 
 test_that("mgus example: no Competing risk, strata", {
+  skip_on_cran()
+
   cdm <- mockMGUS2cdm()
   cdm[["mgus_diagnosis"]] <- cdm[["mgus_diagnosis"]] %>%
     dplyr::mutate(mspike_r = round(mspike, digits = 0))
@@ -143,6 +145,7 @@ test_that("mgus example: no Competing risk, strata", {
 })
 
 test_that("mgus example: Competing risk, strata", {
+  skip_on_cran()
   cdm <- mockMGUS2cdm()
   cdm[["mgus_diagnosis"]] <- cdm[["mgus_diagnosis"]] %>%
     dplyr::mutate(mspike_r = round(mspike, digits = 0))
@@ -196,6 +199,7 @@ test_that("mgus example: Competing risk, strata", {
 })
 
 test_that("multiple exposures, multiple outcomes: single event", {
+  skip_on_cran()
 
   observation_period <- dplyr::tibble(
     observation_period_id = c(1, 2, 3, 4, 5),
@@ -338,6 +342,7 @@ test_that("multiple exposures, multiple outcomes: single event", {
   })
 
 test_that("multiple exposures, multiple outcomes: competing risk", {
+  skip_on_cran()
 
   observation_period <- dplyr::tibble(
     observation_period_id = c(1, 2, 3, 4, 5,6),
@@ -523,6 +528,7 @@ test_that("multiple exposures, multiple outcomes: competing risk", {
 })
 
 test_that("funcionality with created dataset", {
+  skip_on_cran()
   exposure_cohort <- dplyr::tibble(
     subject_id = c(1, 2, 3),
     cohort_definition_id = c(1, 1, 1),
@@ -904,6 +910,7 @@ test_that("funcionality with created dataset", {
 })
 
 test_that("different exposure cohort ids", {
+  skip_on_cran()
   cohort <- dplyr::tibble(
     cohort_definition_id = c(1, 1, 2),
     subject_id = c(1, 2, 3),
@@ -1000,6 +1007,7 @@ test_that("different exposure cohort ids", {
   })
 
 test_that("expected errors", {
+  skip_on_cran()
   cdm <- mockMGUS2cdm()
 
   expect_error(estimateSurvival("cdm", targetCohortTable = "mgus_diagnosis", outcomeCohortTable = "progression"))
@@ -1017,6 +1025,7 @@ test_that("expected errors", {
 })
 
 test_that("return participants", {
+  skip_on_cran()
   cdm <- mockMGUS2cdm()
   surv1 <- estimateSingleEventSurvival(cdm,
     targetCohortTable = "mgus_diagnosis",
@@ -1049,6 +1058,7 @@ test_that("return participants", {
 })
 
 test_that("within cohort survival", {
+  skip_on_cran()
   cohort <- dplyr::tibble(
     cohort_definition_id = c(1, 1, 1),
     subject_id = c(1, 2, 3),
@@ -1097,6 +1107,7 @@ test_that("within cohort survival", {
 })
 
 test_that("strata specific survival", {
+  skip_on_cran()
 
   exposure_cohort <- dplyr::tibble(
     subject_id = c(1, 2, 3, 4, 5),
@@ -1263,6 +1274,7 @@ test_that("strata specific survival", {
 })
 
 test_that("multiple rows per person - same observation period", {
+  skip_on_cran()
 
   exposure_cohort <- dplyr::tibble(
     subject_id = c(1, 1, 2, 2, 3,4),
@@ -1360,6 +1372,7 @@ CDMConnector::cdm_disconnect(cdm)
 })
 
 test_that("multiple outcomes competing risk", {
+  skip_on_cran()
   cdm <- mockMGUS2cdm()
 
   result <- estimateCompetingRiskSurvival(
@@ -1387,7 +1400,8 @@ test_that("multiple outcomes competing risk", {
 })
 
 test_that("empty cohort table", {
-cdm <- mockMGUS2cdm()
+  skip_on_cran()
+  cdm <- mockMGUS2cdm()
 
 cdm$progression_type <- cdm$progression_type %>%
   dplyr::filter(.data$cohort_definition_id != 1) %>%
@@ -1405,6 +1419,7 @@ CDMConnector::cdm_disconnect(cdm)
 })
 
 test_that("min cell count", {
+  skip_on_cran()
   cdm <- mockMGUS2cdm()
   surv <- estimateSingleEventSurvival(cdm,
                                       targetCohortTable = "mgus_diagnosis",

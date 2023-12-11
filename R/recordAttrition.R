@@ -1,6 +1,6 @@
 # Copyright 2023 DARWIN EU®
 #
-# This file is part of IncidencePrevalence
+# This file is part of CohortSurvival
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
