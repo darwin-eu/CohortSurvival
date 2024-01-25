@@ -1,19 +1,25 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-# CohortSurvival <img src="man/figures/hexsticker.png" align="right" height="139"/>
+# CohortSurvival <a href="https://darwin-eu-dev.github.io/CohortSurvival/"><img src="man/figures/logo.png" align="right" height="138" /></a>
 
+<!-- badges: start -->
 [![CRANstatus](https://www.r-pkg.org/badges/version/CohortSurvival)](https://CRAN.R-project.org/package=CohortSurvival)
 [![codecov.io](https://codecov.io/github/darwin-eu/CohortSurvival/coverage.svg?branch=main)](https://codecov.io/github/darwin-eu/CohortSurvival?branch=main)
 [![R-CMD-check](https://github.com/darwin-eu/CohortSurvival/workflows/R-CMD-check/badge.svg)](https://github.com/darwin-eu/CohortSurvival/actions)
 [![Lifecycle:Experimental](https://img.shields.io/badge/Lifecycle-Experimental-339999)](https://lifecycle.r-lib.org/articles/stages.html)
+<!-- badges: end -->
 
-CohortSurvival contains functions for extracting and summarising
-survival data using the OMOP common data model.
+
+CohortSurvival contains functions for extracting and summarising survival data using the OMOP common data model.
 
 ## Installation
 
-You can install the development version of CohortSurvival like so:
+You can install the released version of CohortSurvival from CRAN:
+
+```r
+install.packages("CohortSurvival")
+```
 
 ``` r
 install.packages("remotes")
