@@ -52,3 +52,4 @@ Config/testthat/edition: 3
 Config/testthat/parallel: true
 VignetteBuilder: knitr
 URL: https://darwin-eu-dev.github.io/CohortSurvival/
+BugReports: https://github.com/darwin-eu/CohortSurvival/issues
