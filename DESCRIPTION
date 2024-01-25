@@ -42,7 +42,6 @@ Imports:
 Suggests: 
     testthat (>= 3.0.0),
     CodelistGenerator,
-    roxygen2,
     knitr,
     tictoc,
     rmarkdown,
