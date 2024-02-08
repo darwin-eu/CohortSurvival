@@ -12,8 +12,7 @@ test_that("basic Survival plot", {
   plot <- plotSurvival(surv)
   expect_true(ggplot2::is.ggplot(plot))
 
-  DBI::dbDisconnect(attr(cdm, "dbcon"), shutdown = TRUE)
-
+  CDMConnector::cdmDisconnect(cdm)
 })
 
 test_that("plot years on x axis", {
@@ -30,7 +29,7 @@ test_that("plot years on x axis", {
   plot <- plotSurvival(surv, xscale = c("years"))
   expect_true(ggplot2::is.ggplot(plot))
 
-  DBI::dbDisconnect(attr(cdm, "dbcon"), shutdown = TRUE)
+  CDMConnector::cdmDisconnect(cdm)
 
 })
 
@@ -50,7 +49,7 @@ test_that("plot facets", {
                       facet = "strata_level")
   expect_true(ggplot2::is.ggplot(plot))
 
-  DBI::dbDisconnect(attr(cdm, "dbcon"), shutdown = TRUE)
+  CDMConnector::cdmDisconnect(cdm)
 
 })
 
@@ -70,7 +69,7 @@ test_that("plot facets - multiple column", {
                       facet = c("cdm_name","strata_level"))
   expect_true(ggplot2::is.ggplot(plot))
 
-  DBI::dbDisconnect(attr(cdm, "dbcon"), shutdown = TRUE)
+  CDMConnector::cdmDisconnect(cdm)
 
 })
 
@@ -91,7 +90,7 @@ test_that("plot colour", {
                        colour = "strata_level")
 
   expect_true(ggplot2::is.ggplot(plot))
-  DBI::dbDisconnect(attr(cdm, "dbcon"), shutdown = TRUE)
+  CDMConnector::cdmDisconnect(cdm)
 
 })
 
@@ -109,7 +108,7 @@ test_that("basic cumulative incidence plot", {
   plot <- plotCumulativeIncidence(surv, xscale = "years")
   expect_true(ggplot2::is.ggplot(plot))
 
-  DBI::dbDisconnect(attr(cdm, "dbcon"), shutdown = TRUE)
+  CDMConnector::cdmDisconnect(cdm)
 
 })
 
@@ -129,7 +128,7 @@ test_that("plot facets for cumulative incidence plots", {
                                  facet = "strata_level")
   expect_true(ggplot2::is.ggplot(plot))
 
-  DBI::dbDisconnect(attr(cdm, "dbcon"), shutdown = TRUE)
+  CDMConnector::cdmDisconnect(cdm)
 
 })
 
@@ -152,7 +151,6 @@ test_that("plot colour for cumulative incidence plots", {
   expect_true(ggplot2::is.ggplot(plot))
 
 
-  DBI::dbDisconnect(attr(cdm, "dbcon"), shutdown = TRUE)
+  CDMConnector::cdmDisconnect(cdm)
 
 })
-

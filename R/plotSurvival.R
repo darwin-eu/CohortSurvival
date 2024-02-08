@@ -47,6 +47,9 @@ plotSurvival <- function(result,
                          colour = NULL,
                          colour_name = NULL){
 
+  result <- result %>%
+    splitNameLevel(name = "additional_name", level = "additional_level") %>%
+    dplyr::mutate(time = as.numeric(.data$time))
 
  plot <- plotEstimates(result = result %>%
                   dplyr::filter(.data$estimate_type ==
@@ -109,6 +112,9 @@ plotCumulativeIncidence <- function(result,
                                     colour = NULL,
                                     colour_name = NULL){
 
+  result <- result %>%
+    splitNameLevel(name = "additional_name", level = "additional_level") %>%
+    dplyr::mutate(time = as.numeric(.data$time))
 
   plot <- plotEstimates(result = result %>%
                   dplyr::filter(.data$estimate_type ==
@@ -235,8 +241,8 @@ plotEstimates <- function(result,
 getPlotData <- function(estimates, facetVars, colourVars){
 
   plotData <- estimates %>%
-    tidyr::pivot_wider(names_from = "variable_type",
-                       values_from = "estimate")
+    tidyr::pivot_wider(names_from = "estimate_name",
+                       values_from = "estimate_value")
 
   if(!is.null(facetVars)){
     plotData <- plotData %>%

@@ -3,8 +3,7 @@
 
 # CohortSurvival <img src="man/figures/hexsticker.png" align="right" height="139"/>
 
-[![CRANstatus](https://www.r-pkg.org/badges/version/CohortSurvival)](https://CRAN.R-project.org/package=CohortSurvival)
-[![codecov.io](https://codecov.io/github/darwin-eu/CohortSurvival/coverage.svg?branch=main)](https://codecov.io/github/darwin-eu/CohortSurvival?branch=main)
+[![CRANstatus](https://www.r-pkg.org/badges/version/CohortSurvival)](https://CRAN.R-project.org/package=CohortSurvival)[![codecov.io](https://codecov.io/github/darwin-eu/CohortSurvival/coverage.svg?branch=main)](https://app.codecov.io/github/darwin-eu/CohortSurvival?branch=main)
 [![R-CMD-check](https://github.com/darwin-eu/CohortSurvival/workflows/R-CMD-check/badge.svg)](https://github.com/darwin-eu/CohortSurvival/actions)
 [![Lifecycle:Experimental](https://img.shields.io/badge/Lifecycle-Experimental-339999)](https://lifecycle.r-lib.org/articles/stages.html)
 
@@ -72,7 +71,7 @@ cdm$mgus_diagnosis %>%
   glimpse()
 #> Rows: ??
 #> Columns: 10
-#> Database: DuckDB 0.8.1 [eburn@Windows 10 x64:R 4.2.1/:memory:]
+#> Database: DuckDB v0.9.2 [eburn@Windows 10 x64:R 4.2.1/:memory:]
 #> $ cohort_definition_id <int> 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1…
 #> $ subject_id           <dbl> 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15…
 #> $ cohort_start_date    <date> 1981-01-01, 1968-01-01, 1980-01-01, 1977-01-01, …
@@ -92,7 +91,7 @@ cdm$progression %>%
   glimpse()
 #> Rows: ??
 #> Columns: 4
-#> Database: DuckDB 0.8.1 [eburn@Windows 10 x64:R 4.2.1/:memory:]
+#> Database: DuckDB v0.9.2 [eburn@Windows 10 x64:R 4.2.1/:memory:]
 #> $ cohort_definition_id <int> 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1…
 #> $ subject_id           <dbl> 56, 81, 83, 111, 124, 127, 147, 163, 165, 167, 18…
 #> $ cohort_start_date    <date> 1978-01-30, 1985-01-15, 1974-08-17, 1993-01-14, …
@@ -106,7 +105,7 @@ cdm$death_cohort %>%
   glimpse()
 #> Rows: ??
 #> Columns: 4
-#> Database: DuckDB 0.8.1 [eburn@Windows 10 x64:R 4.2.1/:memory:]
+#> Database: DuckDB v0.9.2 [eburn@Windows 10 x64:R 4.2.1/:memory:]
 #> $ cohort_definition_id <int> 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1…
 #> $ subject_id           <dbl> 1, 2, 3, 4, 5, 6, 7, 8, 10, 11, 12, 13, 14, 15, 1…
 #> $ cohort_start_date    <date> 1981-01-31, 1968-01-26, 1980-02-16, 1977-04-03, …
@@ -157,7 +156,7 @@ median survival
 
 ``` r
 survivalSummary(MGUS_death) %>% 
-  tidyr::pivot_wider(names_from = "variable_type", values_from = "estimate") %>%
+  tidyr::pivot_wider(names_from = "estimate_name", values_from = "estimate_value") %>%
   dplyr::mutate("Median survival (95% CI)" = paste0(median_survival, " (", median_survival_95CI_lower, " to ", median_survival_95CI_higher, ")")
                 ) %>% 
   dplyr::select(strata_name, strata_level, "Median survival (95% CI)")
@@ -190,7 +189,7 @@ MGUS_death_prog <- estimateCompetingRiskSurvival(cdm,
 )
 
 plotCumulativeIncidence(MGUS_death_prog, 
-                        colour = "outcome")
+                        colour = "variable_level")
 ```
 
 <img src="man/figures/README-unnamed-chunk-11-1.png" width="100%" />
@@ -213,7 +212,7 @@ MGUS_death_prog <-  estimateCompetingRiskSurvival(cdm,
 plotCumulativeIncidence(MGUS_death_prog  %>%
                           dplyr::filter(strata_name != "Overall"), 
                         facet = "strata_level",
-                        colour = "outcome")
+                        colour = "variable_level")
 ```
 
 <img src="man/figures/README-unnamed-chunk-12-1.png" width="100%" />

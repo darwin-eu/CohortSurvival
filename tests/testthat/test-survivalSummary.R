@@ -7,7 +7,7 @@ test_that("survival summary", {
                                       targetCohortId = 1,
                                       outcomeCohortTable = "death_cohort",
                                       outcomeCohortId = 1,
-                                      timeGap = 7
+                                      eventGap = 7
   )
 
   tibble::is_tibble(survivalSummary(surv))

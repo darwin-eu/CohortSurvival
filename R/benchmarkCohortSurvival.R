@@ -31,11 +31,11 @@
 #' @param followUpDays Number of days to follow up individuals (lower bound 1,
 #' upper bound Inf)
 #' @param strata strata
-#' @param timeGap Days between time points for which to report survival
+#' @param eventGap Days between time points for which to report survival
 #' estimates. First day will be day zero with risk estimates provided
 #' for times up to the end of follow-up, with a gap in days equivalent
-#' to timeGap.
-#' @param times vector of time points at which to give survival estimates,
+#' to eventGap.
+#' @param estimateGap vector of time points at which to give survival estimates,
 #' if NULL estimates at all times are calculated
 #' @param minCellCount The minimum number of events to reported, below which
 #' results will be obscured. If 0, all results will be reported.
@@ -52,7 +52,8 @@
 #' cdm <- mockMGUS2cdm()
 #' cdm$condition_occurrence <- cdm$death_cohort %>%
 #' dplyr::rename("condition_start_date" = "cohort_start_date",
-#'              "condition_end_date" = "cohort_end_date")
+#'              "condition_end_date" = "cohort_end_date") %>%
+#'              dplyr::compute()
 #' surv_timings <- benchmarkCohortSurvival(
 #' cdm, targetSize = 100, outcomeSize = 20)
 #'}
@@ -67,8 +68,8 @@ benchmarkCohortSurvival <- function(cdm,
                                     censorOnDate = NULL,
                                     followUpDays = Inf,
                                     strata = NULL,
-                                    timeGap = c(1, 7, 30, 365),
-                                    times = NULL,
+                                    eventGap = 30,
+                                    estimateGap = 1,
                                     minCellCount = 5,
                                     returnParticipants = FALSE) {
 
@@ -113,13 +114,12 @@ benchmarkCohortSurvival <- function(cdm,
                                add = errorMessage
                                )
   }
-  checkmate::assertIntegerish(timeGap,
+  checkmate::assertIntegerish(eventGap,
                               lower = 1,
                               add = errorMessage
   )
-  checkmate::assertIntegerish(times,
-                              lower = 0,
-                              null.ok = TRUE,
+  checkmate::assertIntegerish(estimateGap,
+                              lower = 1,
                               add = errorMessage
   )
   checkmate::assertIntegerish(minCellCount,
@@ -150,7 +150,8 @@ benchmarkCohortSurvival <- function(cdm,
       "cohort_end_date" = "observation_period_end_date"
     ) %>%
     PatientProfiles::addDemographics(cdm) %>%
-    dplyr::collect()
+    dplyr::collect() %>%
+    dplyr::as_tibble()
 
   checkStrata(strata, target_cohort)
   targetCohortId <- 1
@@ -161,9 +162,6 @@ benchmarkCohortSurvival <- function(cdm,
         .data$cohort_start_date < .env$censorOnDate
       )
   }
-  DBI::dbWriteTable(attr(cdm, "dbcon"), CDMConnector::inSchema(
-    schema = attr(cdm, "write_schema"), table = targetCohortTable
-  ), target_cohort, overwrite = TRUE)
 
   t <- tictoc::toc(quiet = TRUE)
   timings[["target_cohort"]] <- dplyr::tibble(
@@ -172,38 +170,45 @@ benchmarkCohortSurvival <- function(cdm,
   )
   tictoc::tic()
 
-  cdm <- CDMConnector::cdm_from_con(attr(cdm, "dbcon"),
-                                    attr(cdm, "cdm_schema"),
-                                    attr(cdm, "write_schema"),
-                                    cohort_tables = c(targetCohortTable),
-                                    cdm_name = "benchmark")
-
   outcomeCohortTable <- "benchmark_outcome"
-  min_obs <- cdm[[targetCohortTable]] %>%
-    dplyr::select("cohort_start_date") %>%
-    dplyr::pull() %>% min()
-  max_obs <- cdm[[targetCohortTable]] %>%
-    dplyr::select("cohort_end_date") %>%
-    dplyr::pull() %>% max()
   outcome_cohort <- dplyr::tibble(
-    subject_id = cdm[[targetCohortTable]] %>%
+    subject_id = target_cohort %>%
       dplyr::select("subject_id") %>%
       dplyr::pull() %>%
       sample(outcomeSize, replace = TRUE),
-    cohort_definition_id = 1,
-    cohort_start_date = sample(seq(as.Date(min_obs), as.Date(max_obs), by="day"), outcomeSize),
-    cohort_end_date = .data$cohort_start_date
-  )
+    cohort_definition_id = 1
+  ) %>%
+    dplyr::left_join(
+      cdm$observation_period,
+      by = c("subject_id" = "person_id"),
+      copy = TRUE
+    )
+
+  start_dates <- outcome_cohort %>% dplyr::select(.data$observation_period_start_date) %>% dplyr::pull()
+  end_dates <- outcome_cohort %>% dplyr::select(.data$observation_period_end_date) %>% dplyr::pull()
+
+  cohort_dates <- c()
+  for(i in 1:length(start_dates)) {
+    cohort_dates[i] <- as.character(sample(seq(start_dates[i], end_dates[i], by = "day"), 1))
+  }
+
+  outcome_cohort <- outcome_cohort %>%
+    dplyr::mutate(
+      cohort_start_date = as.Date(cohort_dates),
+      cohort_end_date = .data$cohort_start_date
+    ) %>%
+    dplyr::select(
+      "subject_id",
+      "cohort_definition_id",
+      "cohort_start_date",
+      "cohort_end_date"
+    )
 
   columnCheck <- outcomeDateVariable %in% colnames(outcome_cohort)
   if(!columnCheck) {
     cli::cli_abort("{outcomeDateVariable} must be `cohort_start_date` or `cohort_end_date`")
   }
   outcomeCohortId <- 1
-
-  DBI::dbWriteTable(attr(cdm, "dbcon"), CDMConnector::inSchema(
-    schema = attr(cdm, "write_schema"), table = outcomeCohortTable
-  ), outcome_cohort, overwrite = TRUE)
 
   t <- tictoc::toc(quiet = TRUE)
   timings[["outcome_cohort"]] <- dplyr::tibble(
@@ -215,32 +220,72 @@ benchmarkCohortSurvival <- function(cdm,
   if(!is.null(competingOutcomeSize)) {
     competingOutcomeCohortTable <- "benchmark_competing_outcome"
     competing_outcome_cohort <- dplyr::tibble(
-      subject_id = cdm[[targetCohortTable]] %>%
+      subject_id = target_cohort %>%
         dplyr::select("subject_id") %>%
         dplyr::pull() %>%
         sample(competingOutcomeSize, replace = TRUE),
-      cohort_definition_id = 1,
-      cohort_start_date = sample(seq(as.Date(min_obs), as.Date(max_obs), by="day"), competingOutcomeSize),
-      cohort_end_date = .data$cohort_start_date
-    )
+      cohort_definition_id = 1
+    ) %>%
+      dplyr::left_join(
+        cdm$observation_period,
+        by = c("subject_id" = "person_id"),
+        copy = TRUE
+      )
+
+    start_dates <- competing_outcome_cohort %>% dplyr::select(.data$observation_period_start_date) %>% dplyr::pull()
+    end_dates <- competing_outcome_cohort %>% dplyr::select(.data$observation_period_end_date) %>% dplyr::pull()
+
+    cohort_dates <- c()
+    for(i in 1:length(start_dates)) {
+      cohort_dates[i] <- as.character(sample(seq(start_dates[i], end_dates[i], by = "day"), 1))
+    }
+
+    competing_outcome_cohort <- competing_outcome_cohort %>%
+      dplyr::mutate(
+        cohort_start_date = as.Date(cohort_dates),
+        cohort_end_date = .data$cohort_start_date
+      ) %>%
+      dplyr::select(
+        "subject_id",
+        "cohort_definition_id",
+        "cohort_start_date",
+        "cohort_end_date"
+      )
+
     columnCheck2 <- competingOutcomeDateVariable %in% colnames(competing_outcome_cohort)
     if(!columnCheck2) {
       cli::cli_abort("{competingOutcomeDateVariable} must be `cohort_start_date` or `cohort_end_date`")
     }
     competingOutcomeCohortId <- 1
-    DBI::dbWriteTable(attr(cdm, "dbcon"), CDMConnector::inSchema(
-      schema = attr(cdm, "write_schema"), table = competingOutcomeCohortTable
-    ), competing_outcome_cohort, overwrite = TRUE)
 
-    cdm <- CDMConnector::cdm_from_con(attr(cdm, "dbcon"),
-                                      attr(cdm, "cdm_schema"),
-                                      attr(cdm, "write_schema"),
-                                      cohort_tables = c(targetCohortTable,
-                                                        outcomeCohortTable,
-                                                        competingOutcomeCohortTable),
-                                      cdm_name = "benchmark")
-    # this could be a problem if they have other tables loaded (K)
+    person = cdm$person %>%
+      dplyr::collect()
 
+    observation_period = cdm$observation_period %>%
+      dplyr::collect()
+
+    cdm1 <- omopgenerics::cdmFromTables(
+      tables = list(
+        person = person,
+        observation_period = observation_period
+      ),
+      cohortTables = list(
+        benchmark_target = target_cohort,
+        benchmark_outcome = outcome_cohort,
+        benchmark_competing_outcome = competing_outcome_cohort
+      ),
+      cdmName = "benchmark"
+    )
+
+    db <- DBI::dbConnect(duckdb::duckdb(), ":memory:")
+    cdm2 = CDMConnector::copy_cdm_to(db,
+                                     cdm1,
+                                     schema = "main",
+                                     overwrite = TRUE)
+
+    # Add schema information
+    attr(cdm2, "cdm_schema") <- "main"
+    attr(cdm2, "write_schema") <- "main"
 
     t <- tictoc::toc(quiet = TRUE)
     timings[["competing_outcome_cohort"]] <- dplyr::tibble(
@@ -251,19 +296,42 @@ benchmarkCohortSurvival <- function(cdm,
   } else {
     competingOutcomeCohortTable <- NULL
     competingOutcomeCohortId <- 1
-    cdm <- CDMConnector::cdm_from_con(attr(cdm, "dbcon"),
-                                      attr(cdm, "cdm_schema"),
-                                      attr(cdm, "write_schema"),
-                                      cohort_tables = c(targetCohortTable, outcomeCohortTable),
-                                      cdm_name = "benchmark")
+
+    person = cdm$person %>%
+      dplyr::collect()
+
+    observation_period = cdm$observation_period %>%
+      dplyr::collect()
+
+    cdm1 <- omopgenerics::cdmFromTables(
+      tables = list(
+        person = person,
+        observation_period = observation_period
+      ),
+      cohortTables = list(
+        benchmark_target = target_cohort,
+        benchmark_outcome = outcome_cohort
+      ),
+      cdmName = "benchmark"
+    )
+
+    db <- DBI::dbConnect(duckdb::duckdb(), ":memory:")
+    cdm2 = CDMConnector::copy_cdm_to(db,
+                                     cdm1,
+                                     schema = "main",
+                                     overwrite = TRUE)
+
+    # Add schema information
+    attr(cdm2, "cdm_schema") <- "main"
+    attr(cdm2, "write_schema") <- "main"
   }
 
-  workingExposureTable <- cdm[[targetCohortTable]]
+  workingExposureTable <- cdm2[[targetCohortTable]]
 
   # addCohortSurvival for primary event of interest
   workingExposureTable <- workingExposureTable %>%
     addCohortSurvival(
-      cdm = cdm,
+      cdm = cdm2,
       outcomeCohortTable = outcomeCohortTable,
       outcomeCohortId = outcomeCohortId,
       outcomeDateVariable = outcomeDateVariable,
@@ -287,7 +355,7 @@ benchmarkCohortSurvival <- function(cdm,
   if (!is.null(competingOutcomeCohortTable)) {
     workingExposureTable <- workingExposureTable %>%
       addCohortSurvival(
-        cdm = cdm,
+        cdm = cdm2,
         outcomeCohortTable = competingOutcomeCohortTable,
         outcomeCohortId = outcomeCohortId,
         outcomeDateVariable = competingOutcomeDateVariable,
@@ -331,11 +399,7 @@ benchmarkCohortSurvival <- function(cdm,
   }
 
   # time points to extract survival estimates
-  if(!is.null(times)) {
-    timepoints <- times
-  } else {
-    timepoints <- seq(0, max(survData$outcome_time), by = 1)
-  }
+    timepoints <- seq(0, max(survData$outcome_time), by = estimateGap)
 
   # fit survival, with strata
   if (is.null(competingOutcomeCohortTable)) {
@@ -343,14 +407,14 @@ benchmarkCohortSurvival <- function(cdm,
       survData = survData,
       times = timepoints,
       variables = strata,
-      timeGap = timeGap
+      eventGap = eventGap
     )
   } else {
     survivalEstimates <- competingRiskSurvival(
       survData = survData,
       times = timepoints,
       variables = strata,
-      timeGap = timeGap
+      eventGap = eventGap
     )
   }
 
@@ -364,7 +428,7 @@ benchmarkCohortSurvival <- function(cdm,
   if(nrow(survivalEstimates)>0){
     survivalEstimates <- addCohortDetails(
       x = survivalEstimates,
-      cdm = cdm,
+      cdm = cdm2,
       targetCohortId = targetCohortId,
       targetCohortTable = targetCohortTable,
       outcomeCohortId = outcomeCohortId,
@@ -389,49 +453,49 @@ benchmarkCohortSurvival <- function(cdm,
 
     # add attributes
     if(isTRUE(returnParticipants)){
-      participantsRef <-  survDataDb %>%
-        dplyr::select("cohort_definition_id",
-                      "subject_id",
-                      "cohort_start_date",
-                      "cohort_end_date") %>%
-        CDMConnector::computeQuery(
-          name = paste0(attr(cdm, "write_prefix"), "participants"),
-          FALSE, attr(cdm, "write_schema"), TRUE
-        )
+      participantsRef <- survDataDb %>%
+        dplyr::select(
+          "cohort_definition_id",
+          "subject_id",
+          "cohort_start_date",
+          "cohort_end_date"
+        ) %>%
+        CDMConnector::computeQuery()
 
-      participantsSetRef <- participantsRef %>%
+      attr(participantsRef, "cohort_set") <- participantsRef %>%
         dplyr::select("cohort_definition_id") %>%
         dplyr::distinct() %>%
-        dplyr::mutate(cohort_name = paste0("survival_participants_",
-                                           .data$cohort_definition_id)) %>%
-        CDMConnector::computeQuery(
-          name = paste0(attr(cdm, "write_prefix"), "participants_set"),
-          FALSE, attr(cdm, "write_schema"), TRUE
-        )
+        dplyr::mutate(cohort_name = paste0(
+          "survival_participants_",
+          as.integer(.data$cohort_definition_id)
+        )) %>%
+        dplyr::collect()
 
-      participantsCountRef <-  participantsRef %>%
+      attr(participantsRef, "cohort_attrition") <- participantsRef %>%
         dplyr::group_by(.data$cohort_definition_id) %>%
         dplyr::summarise(
           number_records = dplyr::n(),
           number_subjects = dplyr::n_distinct(.data$subject_id),
           .groups = "drop"
         ) %>%
-        CDMConnector::computeQuery(
-          name = paste0(attr(cdm, "write_prefix"), "participants_count"),
-          FALSE, attr(cdm, "write_schema"), TRUE
-        )
+        dplyr::mutate(
+          "reason_id" = 1,
+          "reason" = "Initial qualifying events",
+          "excluded_records" = 0,
+          "excluded_subjects" = 0
+        ) %>%
+        dplyr::collect()
 
-      attr(survivalEstimates, "participants") <- CDMConnector::newGeneratedCohortSet(
-        cohortRef = participantsRef,
-        cohortSetRef = participantsSetRef,
-        cohortCountRef = participantsCountRef
+      attr(participantsRef, "tbl_name") <- "survival_participants"
+
+      attr(survivalEstimates, "participants") <- omopgenerics::newCohortTable(
+        participantsRef
       )
-
     }
 
     attr(survivalEstimates, "events") <- addCohortDetails(
       x = attr(survivalEstimates, "events"),
-      cdm = cdm,
+      cdm = cdm2,
       targetCohortId = targetCohortId,
       targetCohortTable = targetCohortTable,
       outcomeCohortId = outcomeCohortId,
@@ -444,11 +508,11 @@ benchmarkCohortSurvival <- function(cdm,
     dplyr::mutate(time_taken_secs = round(.data$time_taken_secs, 2)) %>%
     dplyr::mutate(time_taken_mins = round(.data$time_taken_secs / 60, 2)) %>%
     dplyr::mutate(time_taken_hours = round(.data$time_taken_mins / 60, 2)) %>%
-    dplyr::mutate(dbms = CDMConnector::dbms(cdm)) %>%
-    dplyr::mutate(person_n = cdm$person %>%
+    dplyr::mutate(dbms = "duckdb") %>%
+    dplyr::mutate(person_n = cdm2$person %>%
                     dplyr::count() %>%
                     dplyr::pull()) %>%
-    dplyr::mutate(db_min_observation_start = cdm$observation_period %>%
+    dplyr::mutate(db_min_observation_start = cdm2$observation_period %>%
                     dplyr::summarise(
                       db_min_obs_start =
                         min(.data$observation_period_start_date,
@@ -456,7 +520,7 @@ benchmarkCohortSurvival <- function(cdm,
                         )
                     ) %>%
                     dplyr::pull()) %>%
-    dplyr::mutate(max_observation_end = cdm$observation_period %>%
+    dplyr::mutate(max_observation_end = cdm2$observation_period %>%
                     dplyr::summarise(
                       max_observation_end =
                         max(.data$observation_period_end_date,
@@ -474,33 +538,4 @@ benchmarkCohortSurvival <- function(cdm,
   }
 
   return(timings)
-}
-
-insertTable <- function(x,
-                        cdm,
-                        name,
-                        overwrite = TRUE) {
-  con <- attr(cdm, "dbcon")
-  writeSchema <- attr(cdm, "write_schema")
-  checkTableExist <- name %in% CDMConnector::listTables(con, writeSchema)
-  if (checkTableExist) {
-    if (overwrite) {
-      DBI::dbRemoveTable(con, CDMConnector::inSchema(writeSchema, name))
-    } else {
-      stop(paste0("'", name, "' table already exists."))
-    }
-  }
-  DBI::dbCreateTable(con, CDMConnector::inSchema(writeSchema, name), x)
-  DBI::dbAppendTable(con, CDMConnector::inSchema(writeSchema, name), x)
-  if (methods::is(con, "duckdb_connection")) {
-    ref <- dplyr::tbl(con, paste(c(writeSchema, name), collapse = "."))
-  } else if (length(writeSchema) == 2) {
-    ref <- dplyr::tbl(con,
-                      dbplyr::in_catalog(writeSchema[[1]], writeSchema[[2]], name))
-  } else if (length(writeSchema) == 1) {
-    ref <- dplyr::tbl(con, dbplyr::in_schema(writeSchema, name))
-  } else {
-    ref <- dplyr::tbl(con, name)
-  }
-  return(ref)
 }

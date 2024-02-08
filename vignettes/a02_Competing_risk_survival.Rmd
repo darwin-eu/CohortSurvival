@@ -66,14 +66,14 @@ As we can see above our results have been outputted in long format. We can plot 
 
 ```{r}
 plotCumulativeIncidence(MGUS_death_prog, 
-                        colour = "outcome")
+                        colour = "variable_level")
 ```
 
 Our returned results also have attributes containing information that summarises survival. 
 
 ```{r}
 MGUS_death_prog %>% dplyr::filter(estimate_type == "Survival summary") %>%
-  tidyr::pivot_wider(names_from = "variable_type", values_from = "estimate")
+  tidyr::pivot_wider(names_from = "estimate_name", values_from = "estimate_value")
 ```
 
 
@@ -98,14 +98,14 @@ As we can see as well as results for each strata, we'll always also have overall
 plotCumulativeIncidence(MGUS_death_prog  %>%
                           dplyr::filter(strata_name != "Overall"), 
                         facet = "strata_level",
-                        colour = "outcome")
+                        colour = "variable_level")
 ```
 
 And we also now have summary statistics for each of the strata as well as overall.
 
 ```{r}
 MGUS_death_prog %>% dplyr::filter(estimate_type == "Survival summary") %>%
-  tidyr::pivot_wider(names_from = "variable_type", values_from = "estimate")
+  tidyr::pivot_wider(names_from = "estimate_name", values_from = "estimate_value")
 ```
 
 ## Summarising participants

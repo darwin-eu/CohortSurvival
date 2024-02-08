@@ -37,18 +37,53 @@ To create a death cohort
 \donttest{
 library(CDMConnector)
 library(CohortSurvival)
-cdm <- PatientProfiles::mockPatientProfiles()
+observation_period <- dplyr::tibble(
+  observation_period_id = c(1, 2, 3, 4, 5,6),
+  person_id = c(1, 2, 3, 4, 5,6),
+  observation_period_start_date = c(
+    rep(as.Date("1980-07-20"),6)
+  ),
+  observation_period_end_date = c(
+    rep(as.Date("2023-05-20"),6)
+  ),
+  period_type_concept_id = c(rep(0,6))
+)
+
 deathTable <- dplyr::tibble(
   person_id = c(1,2,3),
   death_date = c(as.Date("2020-01-01"),
                  as.Date("2020-01-02"),
                  as.Date("2020-01-01")))
-DBI::dbWithTransaction(attr(cdm, "dbcon"), {
-  DBI::dbWriteTable(attr(cdm, "dbcon"), "death",
-                    deathTable, overwrite = TRUE)
-})
-cdm$death <- dplyr::tbl(attr(cdm, "dbcon"), "death")
-cdm <- generateDeathCohortSet(cdm=cdm,
-                              name = "death_cohort")
+
+person <- dplyr::tibble(
+  person_id = c(1, 2, 3, 4, 5),
+  year_of_birth = c(rep("1990", 5)),
+  month_of_birth = c(rep("02", 5)),
+  day_of_birth = c(rep("11", 5)),
+  gender_concept_id = c(rep(0,5)),
+  ethnicity_concept_id = c(rep(0,5)),
+  race_concept_id = c(rep(0,5))
+)
+
+cdm <- omopgenerics::cdmFromTables(
+  tables = list(
+    person = person,
+    observation_period = observation_period,
+    death = deathTable
+  ),
+  cdmName = "mock_es"
+)
+ db <- DBI::dbConnect(duckdb::duckdb(), ":memory:")
+cdm2 = CDMConnector::copy_cdm_to(db,
+                                 cdm,
+                                 schema = "main",
+                                 overwrite = TRUE)
+
+attr(cdm2, "cdm_schema") <- "main"
+attr(cdm2, "write_schema") <- "main"
+
+cdm2 <- generateDeathCohortSet(cdm=cdm2,
+                               name = "death_cohort",
+                               overwrite = TRUE)
 }
 }

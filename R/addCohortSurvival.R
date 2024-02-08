@@ -36,21 +36,12 @@
 #'
 #' @examples
 #' \donttest{
-#' cohort <- dplyr::tibble(
-#' cohort_definition_id = c(1,1,1),
-#' subject_id = c(1,2,3),
-#' cohort_start_date = c(as.Date("2020-01-01"),
-#'                       as.Date("2020-01-02"),
-#'                       as.Date("2020-01-01")),
-#' cohort_end_date = c(as.Date("2020-04-01"),
-#'                     as.Date("2020-08-02"),
-#'                     as.Date("2020-03-01"))
-#' )
-#' cdm <- PatientProfiles::mockPatientProfiles(cohort1 = cohort)
-#' cdm$cohort1 <- cdm$cohort1 %>%
+#'
+#' cdm <- mockMGUS2cdm()
+#' cdm$mgus_diagnosis <- cdm$mgus_diagnosis %>%
 #'   addCohortSurvival(
 #'     cdm = cdm,
-#'     outcomeCohortTable = "cohort2",
+#'     outcomeCohortTable = "death_cohort",
 #'     outcomeCohortId = 1
 #'   )
 #'   }

@@ -15,8 +15,8 @@ benchmarkCohortSurvival(
   censorOnDate = NULL,
   followUpDays = Inf,
   strata = NULL,
-  timeGap = c(1, 7, 30, 365),
-  times = NULL,
+  eventGap = 30,
+  estimateGap = 1,
   minCellCount = 5,
   returnParticipants = FALSE
 )
@@ -46,12 +46,12 @@ upper bound Inf)}
 
 \item{strata}{strata}
 
-\item{timeGap}{Days between time points for which to report survival
+\item{eventGap}{Days between time points for which to report survival
 estimates. First day will be day zero with risk estimates provided
 for times up to the end of follow-up, with a gap in days equivalent
-to timeGap.}
+to eventGap.}
 
-\item{times}{vector of time points at which to give survival estimates,
+\item{estimateGap}{vector of time points at which to give survival estimates,
 if NULL estimates at all times are calculated}
 
 \item{minCellCount}{The minimum number of events to reported, below which
@@ -73,7 +73,8 @@ Estimate performance of estimateSurvival function for benchmarking
 cdm <- mockMGUS2cdm()
 cdm$condition_occurrence <- cdm$death_cohort \%>\%
 dplyr::rename("condition_start_date" = "cohort_start_date",
-             "condition_end_date" = "cohort_end_date")
+             "condition_end_date" = "cohort_end_date") \%>\%
+             dplyr::compute()
 surv_timings <- benchmarkCohortSurvival(
 cdm, targetSize = 100, outcomeSize = 20)
 }

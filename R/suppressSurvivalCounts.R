@@ -18,7 +18,7 @@ suppressSurvivalCounts <- function(result,
                            minCellCount = 5) {
 
   checkmate::assertTRUE(all(c(
-    "variable", "estimate", "estimate_type", "group_name", "group_level",
+    "variable_name", "estimate_value", "estimate_type", "group_name", "group_level",
     "strata_name", "strata_level"
   ) %in%
     colnames(result)))
@@ -29,29 +29,29 @@ suppressSurvivalCounts <- function(result,
 
   if (minCellCount > 1) {
     toObscure <- result %>%
-      dplyr::filter(.data$variable_type == "n_start") %>%
-      dplyr::mutate(estimate = as.integer(.data$estimate)) %>%
-      dplyr::filter(.data$estimate > 0 & .data$estimate < .env$minCellCount) %>%
+      dplyr::filter(.data$estimate_name == "n_start") %>%
+      dplyr::mutate(estimate_value = as.integer(.data$estimate_value)) %>%
+      dplyr::filter(.data$estimate_value > 0 & .data$estimate_value < .env$minCellCount) %>%
       dplyr::select("group_name", "group_level", "strata_name", "strata_level")
 
 
 for(i in seq_along(toObscure$group_name)){
   result <- result %>%
-    dplyr::mutate(estimate = dplyr::if_else(
+    dplyr::mutate(estimate_value = dplyr::if_else(
       .data$group_name == toObscure$group_name[i] &
       .data$group_level == toObscure$group_level[i] &
       .data$strata_name == toObscure$strata_name[i]  &
       .data$strata_level == toObscure$strata_level[i]  &
-      .data$variable_type == "n_start", paste0("<", minCellCount),
-      as.character(.data$estimate))) %>%
-    dplyr::mutate(estimate = dplyr::if_else(
+      .data$estimate_name == "n_start", paste0("<", minCellCount),
+      as.character(.data$estimate_value))) %>%
+    dplyr::mutate(estimate_value = dplyr::if_else(
       .data$group_name == toObscure$group_name[i] &
         .data$group_level == toObscure$group_level[i] &
         .data$strata_name == toObscure$strata_name[i]  &
         .data$strata_level == toObscure$strata_level[i]  &
-        .data$variable_type != "n_start",
+        .data$estimate_name != "n_start",
       as.character(NA),
-      as.character(.data$estimate)))
+      as.character(.data$estimate_value)))
 }
   }
 

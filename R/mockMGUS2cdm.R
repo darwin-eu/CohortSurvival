@@ -42,6 +42,7 @@ mockMGUS2cdm <- function() {
         lubridate::years(.data$age)
     )
 
+
   mgus2Diag <- mgus2 %>%
     dplyr::select(
       "subject_id", "cohort_start_date_diag",
@@ -56,6 +57,14 @@ mockMGUS2cdm <- function() {
     dplyr::relocate("cohort_end_date", .after = "cohort_start_date") %>%
     dplyr::mutate(age_group = dplyr::if_else(.data$age < 70, "<70", ">=70"))
 
+  mgus2Diag <- dplyr::as_tibble(mgus2Diag)
+
+  attr(mgus2Diag, "cohort_set") <- dplyr::tibble(
+    cohort_definition_id = 1, cohort_name = "mgus_diagnosis"
+  )
+  attr(mgus2Diag, "cohort_attrition") <- addAttrition(mgus2Diag, attr(mgus2Diag, "cohort_set"))
+
+
   mgus2Pr <- mgus2 %>%
     dplyr::filter(.data$pstat == 1) %>%
     dplyr::select("subject_id", "cohort_start_date_progression") %>%
@@ -65,6 +74,14 @@ mockMGUS2cdm <- function() {
       cohort_definition_id = 1L
     ) %>%
     dplyr::relocate("cohort_definition_id")
+
+  mgus2Pr <- dplyr::as_tibble(mgus2Pr)
+
+  attr(mgus2Pr, "cohort_set") <- dplyr::tibble(
+    cohort_definition_id = 1, cohort_name = "progression"
+  )
+  attr(mgus2Pr, "cohort_attrition") <- addAttrition(mgus2Pr, attr(mgus2Pr, "cohort_set"))
+
 
   mgus2Pr2 <- mgus2 %>%
     dplyr::filter(.data$pstat == 1) %>%
@@ -79,6 +96,14 @@ mockMGUS2cdm <- function() {
     ) %>%
     dplyr::relocate("cohort_definition_id")
 
+  mgus2Pr2 <- dplyr::as_tibble(mgus2Pr2)
+
+  attr(mgus2Pr2, "cohort_set") <- dplyr::tibble(
+    cohort_definition_id = 1:3,
+    cohort_name = c("any_progression", "progression_type_1", "progression_type_2")
+  )
+  attr(mgus2Pr2, "cohort_attrition") <- addAttrition(mgus2Pr2, attr(mgus2Pr2, "cohort_set"))
+
   mgus2Death <- mgus2 %>%
     dplyr::filter(.data$death == 1) %>%
     dplyr::select("subject_id", "cohort_start_date_death") %>%
@@ -89,6 +114,13 @@ mockMGUS2cdm <- function() {
     ) %>%
     dplyr::relocate("cohort_definition_id")
 
+  mgus2Death <- dplyr::as_tibble(mgus2Death)
+
+  attr(mgus2Death, "cohort_set") <- dplyr::tibble(
+    cohort_definition_id = 1, cohort_name = "death_cohort"
+  )
+  attr(mgus2Death, "cohort_attrition") <- addAttrition(mgus2Death, attr(mgus2Death, "cohort_set"))
+
   mgus2Person <- mgus2 %>%
     dplyr::rename("person_id" = "subject_id") %>%
     dplyr::mutate(
@@ -97,11 +129,14 @@ mockMGUS2cdm <- function() {
       ),
       year_of_birth = lubridate::year(mgus2$observation_period_start_date),
       month_of_birth = lubridate::month(mgus2$observation_period_start_date),
-      day_of_birth = lubridate::day(mgus2$observation_period_start_date)
+      day_of_birth = lubridate::day(mgus2$observation_period_start_date),
+      race_concept_id = 0L,
+      ethnicity_concept_id = 0L
     ) %>%
     dplyr::select(
       "person_id", "gender_concept_id",
-      "year_of_birth", "month_of_birth", "day_of_birth"
+      "year_of_birth", "month_of_birth", "day_of_birth",
+      "race_concept_id", "ethnicity_concept_id"
     )
 
   mgus2OP <- mgus2 %>%
@@ -109,6 +144,10 @@ mockMGUS2cdm <- function() {
     dplyr::select(
       "person_id", "observation_period_start_date",
       "cohort_start_date_death"
+    ) %>%
+    dplyr::mutate(
+      observation_period_id = sample(c(1:1000000), dim(mgus2)[1]),
+      period_type_concept_id = 44814725L
     ) %>%
     dplyr::rename("observation_period_end_date" = "cohort_start_date_death")
 
@@ -119,51 +158,60 @@ mockMGUS2cdm <- function() {
     person_id = 1,
     visit_concept_id = 5,
     visit_start_date = c("2020-01-01"),
-    visit_end_date = c("2020-01-01")
+    visit_end_date = c("2020-01-01"),
+    visit_type_concept_id = 44818518L
   )
 
   db <- DBI::dbConnect(duckdb::duckdb(), ":memory:")
 
-  # person
-  DBI::dbWriteTable(db, "person", mgus2Person, overwrite = TRUE)
+  cdm <- omopgenerics::cdmFromTables(tables = list(
+                                       person = mgus2Person,
+                                       observation_period = mgus2OP,
+                                       visit_occurrence = visitOccurrence
+                                       ),
+                                     cohortTables = list(
+                                       death_cohort = mgus2Death,
+                                       mgus_diagnosis = mgus2Diag,
+                                       progression = mgus2Pr,
+                                       progression_type = mgus2Pr2
+                                     ),
+                                     cdmName = "mock")
 
-  # obs
-  DBI::dbWriteTable(db, "observation_period", mgus2OP, overwrite = TRUE)
+  cdm2 = CDMConnector::copy_cdm_to(db,
+                            cdm,
+                            schema = "main",
+                            overwrite = TRUE)
 
-  # cohort diag
-  DBI::dbWriteTable(db, "mgus_diagnosis", mgus2Diag, overwrite = TRUE)
-  DBI::dbWriteTable(db, "mgus_diagnosis_set", dplyr::tibble(
-    cohort_definition_id = 1, cohort_name = "mgus_diagnosis"
-  ), overwrite = TRUE)
+  # Add schema information
+  attr(cdm2, "cdm_schema") <- "main"
+  attr(cdm2, "write_schema") <- "main"
 
-  # cohort progression
-  DBI::dbWriteTable(db,  "progression", mgus2Pr, overwrite = TRUE)
-  DBI::dbWriteTable(db, "progression_set", dplyr::tibble(
-    cohort_definition_id = 1, cohort_name = "progression"
-  ), overwrite = TRUE)
+  return(cdm2)
+}
 
-  # cohort progression types
-  DBI::dbWriteTable(db,  "progression_type", mgus2Pr2, overwrite = TRUE)
-  DBI::dbWriteTable(db, "progression_type_set", dplyr::tibble(
-    cohort_definition_id = 1:3,
-    cohort_name = c("any_progression", "progression_type1", "progression_type2")
-  ), overwrite = TRUE)
-
-  # cohort death
-  DBI::dbWriteTable(db, "death_cohort", mgus2Death, overwrite = TRUE)
-  DBI::dbWriteTable(db, "death_cohort_set", dplyr::tibble(
-    cohort_definition_id = 1, cohort_name = "death_cohort"
-  ), overwrite = TRUE)
-
-  DBI::dbWriteTable(db, "visit_occurrence", visitOccurrence, overwrite = TRUE)
-
-  cdm <- CDMConnector::cdm_from_con(
-    con = db,
-    cohort_tables = c("mgus_diagnosis", "progression", "progression_type", "death_cohort"),
-    cdm_schema = "main",
-    write_schema = "main",
-    cdm_name = "mock"
-  )
-
-  return(cdm)
+addAttrition <- function(cohort, set) {
+  cohort |>
+    dplyr::group_by(.data$cohort_definition_id) |>
+    dplyr::summarise(
+      number_records = dplyr::n(),
+      number_subjects = dplyr::n_distinct(.data$subject_id)
+    ) |>
+    dplyr::left_join(
+      set |> dplyr::select("cohort_definition_id"),
+      by = "cohort_definition_id",
+      copy = TRUE
+    ) |>
+    dplyr::mutate(
+      "number_records" = dplyr::if_else(
+        is.na(.data$number_records), 0, .data$number_records
+      ),
+      "number_subjects" = dplyr::if_else(
+        is.na(.data$number_subjects), 0, .data$number_subjects
+      ),
+      "reason_id" = 1,
+      "reason" = "Initial qualifying events",
+      "excluded_records" = 0,
+      "excluded_subjects" = 0
+    ) |>
+    dplyr::collect()
 }

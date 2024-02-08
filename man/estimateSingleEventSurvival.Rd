@@ -15,7 +15,8 @@ estimateSingleEventSurvival(
   censorOnDate = NULL,
   followUpDays = Inf,
   strata = NULL,
-  timeGap = c(1, 7, 30, 365),
+  eventGap = 30,
+  estimateGap = 1,
   minCellCount = 5,
   returnParticipants = FALSE
 )
@@ -45,10 +46,13 @@ upper bound Inf)}
 
 \item{strata}{strata}
 
-\item{timeGap}{Days between time points for which to report survival
+\item{eventGap}{Days between time points for which to report survival
+events, which are grouped into the specified intervals.}
+
+\item{estimateGap}{Days between time points for which to report survival
 estimates. First day will be day zero with risk estimates provided
 for times up to the end of follow-up, with a gap in days equivalent
-to timeGap.}
+to eventGap.}
 
 \item{minCellCount}{The minimum number of events to reported, below which
 results will be obscured. If 0, all results will be reported.}
@@ -75,7 +79,7 @@ surv <- estimateSingleEventSurvival(
   targetCohortId = 1,
   outcomeCohortTable = "death_cohort",
   outcomeCohortId = 1,
-  timeGap = 7
+  eventGap = 7
 )
 }
 

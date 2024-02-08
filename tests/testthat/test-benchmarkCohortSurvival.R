@@ -4,10 +4,12 @@ test_that("mgus example: benchmark", {
   cdm <- mockMGUS2cdm()
   cdm$condition_occurrence <- cdm$death_cohort %>%
     dplyr::rename("condition_start_date" = "cohort_start_date",
-                  "condition_end_date" = "cohort_end_date")
+                  "condition_end_date" = "cohort_end_date") %>%
+    dplyr::compute()
   cdm$drug_exposure <- cdm$progression %>%
     dplyr::rename("drug_exposure_start_date" = "cohort_start_date",
-                  "drug_exposure_end_date" = "cohort_end_date")
+                  "drug_exposure_end_date" = "cohort_end_date")%>%
+    dplyr::compute()
   timings <- benchmarkCohortSurvival(cdm, targetSize = 1000, outcomeSize = 47)
   timings_p <- benchmarkCohortSurvival(cdm, targetSize = 1000, outcomeSize = 47, returnParticipants = TRUE)
   timings_s <- benchmarkCohortSurvival(cdm, targetSize = 100, outcomeSize = 5, strata = list("sex" = c("sex")))
@@ -63,7 +65,8 @@ test_that("expected errors benchmark", {
   cdm <- mockMGUS2cdm()
   cdm$condition_occurrence <- cdm$death_cohort %>%
     dplyr::rename("condition_start_date" = "cohort_start_date",
-                  "condition_end_date" = "cohort_end_date")
+                  "condition_end_date" = "cohort_end_date") %>%
+    dplyr::compute()
   expect_error(benchmarkCohortSurvival("cdm"))
   expect_error(benchmarkCohortSurvival(cdm))
   expect_error(benchmarkCohortSurvival(cdm, targetSize = "size"))
@@ -76,8 +79,8 @@ test_that("expected errors benchmark", {
   expect_error(benchmarkCohortSurvival(cdm, targetSize = 100, outcomSize = 40, censorOnDate = TRUE))
   expect_error(benchmarkCohortSurvival(cdm, targetSize = 100, outcomSize = 40, followUpDays = "Inf"))
   expect_error(benchmarkCohortSurvival(cdm, targetSize = 100, outcomSize = 40, strata = c("age" = "age")))
-  expect_error(benchmarkCohortSurvival(cdm, targetSize = 100, outcomSize = 40, timeGap = list(1,2)))
-  expect_error(benchmarkCohortSurvival(cdm, targetSize = 100, outcomSize = 40, times = list(1,2,3)))
+  expect_error(benchmarkCohortSurvival(cdm, targetSize = 100, outcomSize = 40, eventGap = list(1,2)))
+  expect_error(benchmarkCohortSurvival(cdm, targetSize = 100, outcomSize = 40, estimateGap = 1))
   expect_error(benchmarkCohortSurvival(cdm, targetSize = 100, outcomSize = 40, minCellCount = FALSE))
   expect_error(benchmarkCohortSurvival(cdm, targetSize = 100, outcomSize = 40, returnParticipants = "TRUE"))
 

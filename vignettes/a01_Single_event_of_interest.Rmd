@@ -60,7 +60,7 @@ plotSurvival(MGUS_death)
 Our returned results also have attributes containing information that summarises survival. 
 ```{r}
 survivalSummary(MGUS_death) %>% 
-  tidyr::pivot_wider(names_from = "variable_type", values_from = "estimate") %>%
+  tidyr::pivot_wider(names_from = "estimate_name", values_from = "estimate_value") %>%
   dplyr::mutate(
     "Median survival (95% CI)" = paste0(median_survival, 
                                         " (", median_survival_95CI_lower, 
@@ -93,7 +93,7 @@ And we also now have summary statistics for each of the strata as well as overal
 
 ```{r}
 survivalSummary(MGUS_death) %>%
-  tidyr::pivot_wider(names_from = "variable_type", values_from = "estimate") %>%
+  tidyr::pivot_wider(names_from = "estimate_name", values_from = "estimate_value") %>%
   dplyr::mutate("Median survival (95% CI)" = paste0(median_survival, " (", median_survival_95CI_lower, " to ", median_survival_95CI_higher, ")")
                 ) %>% 
   dplyr::select(strata_name, strata_level,"Median survival (95% CI)")
