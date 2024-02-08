@@ -10,7 +10,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">CohortSurvival</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.5</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.0</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -64,8 +64,8 @@
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span> <span class="co"># \donttest{</span></span></span>
 <span class="r-in"><span><span class="va">cdm</span> <span class="op">&lt;-</span> <span class="fu">mockMGUS2cdm</span><span class="op">(</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">cdm</span><span class="op">$</span><span class="va">person</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># Source:   table&lt;person&gt; [?? x 5]</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># Database: DuckDB v0.9.2 [unknown@Linux 6.2.0-1018-azure:R 4.3.2/:memory:]</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># Source:   table&lt;person&gt; [?? x 7]</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># Database: DuckDB v0.9.2 [unknown@Linux 6.2.0-1019-azure:R 4.3.2/:memory:]</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    person_id gender_concept_id year_of_birth month_of_birth day_of_birth</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>             <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>          <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;int&gt;</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 1</span>         1              <span style="text-decoration: underline;">8</span>532          <span style="text-decoration: underline;">1</span>893              1            1</span>
@@ -79,6 +79,7 @@
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 9</span>         9              <span style="text-decoration: underline;">8</span>532          <span style="text-decoration: underline;">1</span>908              1            1</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">10</span>        10              <span style="text-decoration: underline;">8</span>532          <span style="text-decoration: underline;">1</span>902              1            1</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># ℹ more rows</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># ℹ 2 more variables: race_concept_id &lt;int&gt;, ethnicity_concept_id &lt;int&gt;</span></span>
 <span class="r-in"><span><span class="co"># }</span></span></span>
 </code></pre></div>
     </div>
@@ -87,7 +88,7 @@
 
 
     <footer><div class="pkgdown-footer-left">
-  <p></p><p>Developed by Edward Burn.</p>
+  <p></p><p>Developed by Edward Burn, Kim Lopez.</p>
 </div>
 
 <div class="pkgdown-footer-right">

@@ -58,6 +58,9 @@
     <loc>https://darwin-eu.github.io/CohortSurvival/reference/reexports.html</loc>
   </url>
   <url>
+    <loc>https://darwin-eu.github.io/CohortSurvival/reference/splitNameLevel.html</loc>
+  </url>
+  <url>
     <loc>https://darwin-eu.github.io/CohortSurvival/reference/survivalParticipants.html</loc>
   </url>
   <url>
@@ -65,5 +68,8 @@
   </url>
   <url>
     <loc>https://darwin-eu.github.io/CohortSurvival/reference/tidyeval.html</loc>
+  </url>
+  <url>
+    <loc>https://darwin-eu.github.io/CohortSurvival/reference/uniteNameLevel.html</loc>
   </url>
 </urlset>

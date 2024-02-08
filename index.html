@@ -26,7 +26,7 @@
     
     <a class="navbar-brand me-2" href="index.html">CohortSurvival</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.5</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.0</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -60,7 +60,7 @@
   <main id="main" class="col-md-9"><div class="section level1">
 <div class="page-header"><h1 id="cohortsurvival-">CohortSurvival <img src="reference/figures/hexsticker.png" align="right" height="139"><a class="anchor" aria-label="anchor" href="#cohortsurvival-"></a>
 </h1></div>
-<p><a href="https://CRAN.R-project.org/package=CohortSurvival" class="external-link"><img src="https://www.r-pkg.org/badges/version/CohortSurvival" alt="CRANstatus"></a> <a href="https://codecov.io/github/darwin-eu/CohortSurvival?branch=main" class="external-link"><img src="https://codecov.io/github/darwin-eu/CohortSurvival/coverage.svg?branch=main" alt="codecov.io"></a> <a href="https://github.com/darwin-eu/CohortSurvival/actions" class="external-link"><img src="https://github.com/darwin-eu/CohortSurvival/workflows/R-CMD-check/badge.svg" alt="R-CMD-check"></a> <a href="https://lifecycle.r-lib.org/articles/stages.html" class="external-link"><img src="https://img.shields.io/badge/Lifecycle-Experimental-339999" alt="Lifecycle:Experimental"></a></p>
+<p><a href="https://CRAN.R-project.org/package=CohortSurvival" class="external-link"><img src="https://www.r-pkg.org/badges/version/CohortSurvival" alt="CRANstatus"></a><a href="https://app.codecov.io/github/darwin-eu/CohortSurvival?branch=main" class="external-link"><img src="https://codecov.io/github/darwin-eu/CohortSurvival/coverage.svg?branch=main" alt="codecov.io"></a> <a href="https://github.com/darwin-eu/CohortSurvival/actions" class="external-link"><img src="https://github.com/darwin-eu/CohortSurvival/workflows/R-CMD-check/badge.svg" alt="R-CMD-check"></a> <a href="https://lifecycle.r-lib.org/articles/stages.html" class="external-link"><img src="https://img.shields.io/badge/Lifecycle-Experimental-339999" alt="Lifecycle:Experimental"></a></p>
 <p>CohortSurvival contains functions for extracting and summarising survival data using the OMOP common data model.</p>
 <div class="section level2">
 <h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
@@ -108,7 +108,7 @@
 <span>  <span class="fu"><a href="https://pillar.r-lib.org/reference/glimpse.html" class="external-link">glimpse</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Rows: ??</span></span>
 <span><span class="co">#&gt; Columns: 10</span></span>
-<span><span class="co">#&gt; Database: DuckDB 0.8.1 [eburn@Windows 10 x64:R 4.2.1/:memory:]</span></span>
+<span><span class="co">#&gt; Database: DuckDB v0.9.2 [eburn@Windows 10 x64:R 4.2.1/:memory:]</span></span>
 <span><span class="co">#&gt; $ cohort_definition_id &lt;int&gt; 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1…</span></span>
 <span><span class="co">#&gt; $ subject_id           &lt;dbl&gt; 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15…</span></span>
 <span><span class="co">#&gt; $ cohort_start_date    &lt;date&gt; 1981-01-01, 1968-01-01, 1980-01-01, 1977-01-01, …</span></span>
@@ -127,7 +127,7 @@
 <span>  <span class="fu"><a href="https://pillar.r-lib.org/reference/glimpse.html" class="external-link">glimpse</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Rows: ??</span></span>
 <span><span class="co">#&gt; Columns: 4</span></span>
-<span><span class="co">#&gt; Database: DuckDB 0.8.1 [eburn@Windows 10 x64:R 4.2.1/:memory:]</span></span>
+<span><span class="co">#&gt; Database: DuckDB v0.9.2 [eburn@Windows 10 x64:R 4.2.1/:memory:]</span></span>
 <span><span class="co">#&gt; $ cohort_definition_id &lt;int&gt; 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1…</span></span>
 <span><span class="co">#&gt; $ subject_id           &lt;dbl&gt; 56, 81, 83, 111, 124, 127, 147, 163, 165, 167, 18…</span></span>
 <span><span class="co">#&gt; $ cohort_start_date    &lt;date&gt; 1978-01-30, 1985-01-15, 1974-08-17, 1993-01-14, …</span></span>
@@ -140,7 +140,7 @@
 <span>  <span class="fu"><a href="https://pillar.r-lib.org/reference/glimpse.html" class="external-link">glimpse</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Rows: ??</span></span>
 <span><span class="co">#&gt; Columns: 4</span></span>
-<span><span class="co">#&gt; Database: DuckDB 0.8.1 [eburn@Windows 10 x64:R 4.2.1/:memory:]</span></span>
+<span><span class="co">#&gt; Database: DuckDB v0.9.2 [eburn@Windows 10 x64:R 4.2.1/:memory:]</span></span>
 <span><span class="co">#&gt; $ cohort_definition_id &lt;int&gt; 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1…</span></span>
 <span><span class="co">#&gt; $ subject_id           &lt;dbl&gt; 1, 2, 3, 4, 5, 6, 7, 8, 10, 11, 12, 13, 14, 15, 1…</span></span>
 <span><span class="co">#&gt; $ cohort_start_date    &lt;date&gt; 1981-01-31, 1968-01-26, 1980-02-16, 1977-04-03, …</span></span>
@@ -186,7 +186,7 @@
 <p>For single event analyses, we can extract restricted mean survival and median survival</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="reference/survivalSummary.html">survivalSummary</a></span><span class="op">(</span><span class="va">MGUS_death</span><span class="op">)</span> <span class="op"><a href="reference/pipe.html">%&gt;%</a></span> </span>
-<span>  <span class="fu">tidyr</span><span class="fu">::</span><span class="fu"><a href="https://tidyr.tidyverse.org/reference/pivot_wider.html" class="external-link">pivot_wider</a></span><span class="op">(</span>names_from <span class="op">=</span> <span class="st">"variable_type"</span>, values_from <span class="op">=</span> <span class="st">"estimate"</span><span class="op">)</span> <span class="op"><a href="reference/pipe.html">%&gt;%</a></span></span>
+<span>  <span class="fu">tidyr</span><span class="fu">::</span><span class="fu"><a href="https://tidyr.tidyverse.org/reference/pivot_wider.html" class="external-link">pivot_wider</a></span><span class="op">(</span>names_from <span class="op">=</span> <span class="st">"estimate_name"</span>, values_from <span class="op">=</span> <span class="st">"estimate_value"</span><span class="op">)</span> <span class="op"><a href="reference/pipe.html">%&gt;%</a></span></span>
 <span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span><span class="st">"Median survival (95% CI)"</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="va">median_survival</span>, <span class="st">" ("</span>, <span class="va">median_survival_95CI_lower</span>, <span class="st">" to "</span>, <span class="va">median_survival_95CI_higher</span>, <span class="st">")"</span><span class="op">)</span></span>
 <span>                <span class="op">)</span> <span class="op"><a href="reference/pipe.html">%&gt;%</a></span> </span>
 <span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">strata_name</span>, <span class="va">strata_level</span>, <span class="st">"Median survival (95% CI)"</span><span class="op">)</span></span>
@@ -216,7 +216,7 @@
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="reference/plotCumulativeIncidence.html">plotCumulativeIncidence</a></span><span class="op">(</span><span class="va">MGUS_death_prog</span>, </span>
-<span>                        colour <span class="op">=</span> <span class="st">"outcome"</span><span class="op">)</span></span></code></pre></div>
+<span>                        colour <span class="op">=</span> <span class="st">"variable_level"</span><span class="op">)</span></span></code></pre></div>
 <p><img src="reference/figures/README-unnamed-chunk-11-1.png" width="100%"></p>
 </div>
 <div class="section level2">
@@ -234,7 +234,7 @@
 <span><span class="fu"><a href="reference/plotCumulativeIncidence.html">plotCumulativeIncidence</a></span><span class="op">(</span><span class="va">MGUS_death_prog</span>  <span class="op"><a href="reference/pipe.html">%&gt;%</a></span></span>
 <span>                          <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">strata_name</span> <span class="op">!=</span> <span class="st">"Overall"</span><span class="op">)</span>, </span>
 <span>                        facet <span class="op">=</span> <span class="st">"strata_level"</span>,</span>
-<span>                        colour <span class="op">=</span> <span class="st">"outcome"</span><span class="op">)</span></span></code></pre></div>
+<span>                        colour <span class="op">=</span> <span class="st">"variable_level"</span><span class="op">)</span></span></code></pre></div>
 <p><img src="reference/figures/README-unnamed-chunk-12-1.png" width="100%"></p>
 <div class="section level3">
 <h3 id="disconnect-from-the-cdm-database-connection">Disconnect from the cdm database connection<a class="anchor" aria-label="anchor" href="#disconnect-from-the-cdm-database-connection"></a>
@@ -271,6 +271,7 @@
 <h2 data-toc-skip>Developers</h2>
 <ul class="list-unstyled">
 <li>Edward Burn <br><small class="roles"> Author, maintainer </small> <a href="https://orcid.org/0000-0002-9286-1128" target="orcid.widget" aria-label="ORCID" class="external-link"><span class="fab fa-orcid orcid" aria-hidden="true"></span></a> </li>
+<li>Kim Lopez <br><small class="roles"> Author </small> <a href="https://orcid.org/0000-0002-8462-8668" target="orcid.widget" aria-label="ORCID" class="external-link"><span class="fab fa-orcid orcid" aria-hidden="true"></span></a> </li>
 <li><a href="authors.html">More about authors...</a></li>
 </ul>
 </div>
@@ -283,7 +284,7 @@
 
     <footer><div class="pkgdown-footer-left">
   <p></p>
-<p>Developed by Edward Burn.</p>
+<p>Developed by Edward Burn, Kim Lopez.</p>
 </div>
 
 <div class="pkgdown-footer-right">

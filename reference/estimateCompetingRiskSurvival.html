@@ -14,7 +14,7 @@ cohorts in the OMOP Common Data Model"><!-- mathjax --><script src="https://cdnj
     
     <a class="navbar-brand me-2" href="../index.html">CohortSurvival</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.5</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.0</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -69,7 +69,8 @@ cohorts in the OMOP Common Data Model</p>
 <span>  censorOnDate <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  followUpDays <span class="op">=</span> <span class="cn">Inf</span>,</span>
 <span>  strata <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  timeGap <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">7</span>, <span class="fl">30</span>, <span class="fl">365</span><span class="op">)</span>,</span>
+<span>  eventGap <span class="op">=</span> <span class="fl">30</span>,</span>
+<span>  estimateGap <span class="op">=</span> <span class="fl">1</span>,</span>
 <span>  minCellCount <span class="op">=</span> <span class="fl">5</span>,</span>
 <span>  returnParticipants <span class="op">=</span> <span class="cn">FALSE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
@@ -134,11 +135,16 @@ upper bound Inf)</p></dd>
 <dd><p>strata</p></dd>
 
 
-<dt>timeGap</dt>
+<dt>eventGap</dt>
+<dd><p>Days between time points for which to report survival
+events, which are grouped into the specified intervals.</p></dd>
+
+
+<dt>estimateGap</dt>
 <dd><p>Days between time points for which to report survival
 estimates. First day will be day zero with risk estimates provided
 for times up to the end of follow-up, with a gap in days equivalent
-to timeGap.</p></dd>
+to eventGap.</p></dd>
 
 
 <dt>minCellCount</dt>
@@ -174,7 +180,7 @@ outputted as an attribute of the output</p>
 <span class="r-in"><span>  outcomeCohortId <span class="op">=</span> <span class="fl">1</span>,</span></span>
 <span class="r-in"><span>  competingOutcomeCohortTable <span class="op">=</span> <span class="st">"progression"</span>,</span></span>
 <span class="r-in"><span>  competingOutcomeCohortId <span class="op">=</span> <span class="fl">1</span>,</span></span>
-<span class="r-in"><span>  timeGap <span class="op">=</span> <span class="fl">7</span></span></span>
+<span class="r-in"><span>  eventGap <span class="op">=</span> <span class="fl">7</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> - Getting survival for target cohort 'mgus_diagnosis' and outcome cohort</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> 'death_cohort' with competing outcome cohort 'progression'</span>
@@ -194,7 +200,7 @@ outputted as an attribute of the output</p>
 
 
     <footer><div class="pkgdown-footer-left">
-  <p></p><p>Developed by Edward Burn.</p>
+  <p></p><p>Developed by Edward Burn, Kim Lopez.</p>
 </div>
 
 <div class="pkgdown-footer-right">
