@@ -10,7 +10,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">CohortSurvival</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.0</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -54,10 +54,11 @@
 <span>  x <span class="op">=</span> <span class="st">"time"</span>,</span>
 <span>  xscale <span class="op">=</span> <span class="st">"days"</span>,</span>
 <span>  ylim <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="cn">NA</span><span class="op">)</span>,</span>
+<span>  cumulativeFailure <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  ribbon <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  facet <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  colour <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  colour_name <span class="op">=</span> <span class="cn">NULL</span></span>
+<span>  colourName <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -79,6 +80,11 @@
 <dd><p>Limits for the Y axis</p></dd>
 
 
+<dt>cumulativeFailure</dt>
+<dd><p>whether to plot the cumulative failure probability
+instead of the survival probability</p></dd>
+
+
 <dt>ribbon</dt>
 <dd><p>If TRUE, the plot will join points using a ribbon</p></dd>
 
@@ -91,7 +97,7 @@
 <dd><p>Variables to use for colours</p></dd>
 
 
-<dt>colour_name</dt>
+<dt>colourName</dt>
 <dd><p>Colour legend name</p></dd>
 
 </dl></div>
@@ -112,8 +118,7 @@
 <span class="r-msg co"><span class="r-pr">#&gt;</span> - Getting survival for target cohort 'mgus_diagnosis' and outcome cohort</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> 'death_cohort'</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Getting overall estimates</span>
-<span class="r-in"><span><span class="va">plot</span> <span class="op">&lt;-</span> <span class="fu">plotSurvival</span><span class="op">(</span><span class="va">surv</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="va">plot</span></span></span>
+<span class="r-in"><span><span class="fu">plotSurvival</span><span class="op">(</span><span class="va">surv</span><span class="op">)</span></span></span>
 <span class="r-plt img"><img src="plotSurvival-1.png" alt="" width="700" height="433"></span>
 <span class="r-in"><span><span class="co"># }</span></span></span>
 <span class="r-in"><span></span></span>

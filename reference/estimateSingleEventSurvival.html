@@ -10,7 +10,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">CohortSurvival</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.0</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -56,12 +56,14 @@
 <span>  <span class="va">outcomeCohortTable</span>,</span>
 <span>  outcomeCohortId <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  outcomeDateVariable <span class="op">=</span> <span class="st">"cohort_start_date"</span>,</span>
+<span>  outcomeWashout <span class="op">=</span> <span class="cn">Inf</span>,</span>
 <span>  censorOnCohortExit <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  censorOnDate <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  followUpDays <span class="op">=</span> <span class="cn">Inf</span>,</span>
 <span>  strata <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  eventGap <span class="op">=</span> <span class="fl">30</span>,</span>
 <span>  estimateGap <span class="op">=</span> <span class="fl">1</span>,</span>
+<span>  minimumSurvivalDays <span class="op">=</span> <span class="fl">1</span>,</span>
 <span>  minCellCount <span class="op">=</span> <span class="fl">5</span>,</span>
 <span>  returnParticipants <span class="op">=</span> <span class="cn">FALSE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
@@ -94,6 +96,10 @@
 <dd><p>Variable containing date of outcome event</p></dd>
 
 
+<dt>outcomeWashout</dt>
+<dd><p>Washout time in days for the outcome</p></dd>
+
+
 <dt>censorOnCohortExit</dt>
 <dd><p>If TRUE, an individual's follow up will be
 censored at their cohort exit</p></dd>
@@ -123,6 +129,11 @@ events, which are grouped into the specified intervals.</p></dd>
 estimates. First day will be day zero with risk estimates provided
 for times up to the end of follow-up, with a gap in days equivalent
 to eventGap.</p></dd>
+
+
+<dt>minimumSurvivalDays</dt>
+<dd><p>Minimum number of days required for the main cohort
+to have survived</p></dd>
 
 
 <dt>minCellCount</dt>

@@ -10,7 +10,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">CohortSurvival</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.0</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -55,6 +55,7 @@
 <span>  <span class="va">outcomeCohortTable</span>,</span>
 <span>  outcomeCohortId <span class="op">=</span> <span class="fl">1</span>,</span>
 <span>  outcomeDateVariable <span class="op">=</span> <span class="st">"cohort_start_date"</span>,</span>
+<span>  outcomeWashout <span class="op">=</span> <span class="cn">Inf</span>,</span>
 <span>  censorOnCohortExit <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  censorOnDate <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  followUpDays <span class="op">=</span> <span class="cn">Inf</span></span>
@@ -82,6 +83,10 @@
 
 <dt>outcomeDateVariable</dt>
 <dd><p>Variable containing date of outcome event</p></dd>
+
+
+<dt>outcomeWashout</dt>
+<dd><p>Washout time in days for the outcome</p></dd>
 
 
 <dt>censorOnCohortExit</dt>
@@ -120,10 +125,6 @@ whether the patient had the event (value: 1), or did not have the event
 <span class="r-in"><span>    outcomeCohortTable <span class="op">=</span> <span class="st">"death_cohort"</span>,</span></span>
 <span class="r-in"><span>    outcomeCohortId <span class="op">=</span> <span class="fl">1</span></span></span>
 <span class="r-in"><span>  <span class="op">)</span></span></span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>`cohortSet()` was deprecated in CDMConnector 1.3.</span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> Please use `settings()` instead.</span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> The deprecated feature was likely used in the <span style="color: #0000BB;">PatientProfiles</span> package.</span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span>   Please report the issue to the authors.</span>
 <span class="r-in"><span>  <span class="co"># }</span></span></span>
 <span class="r-in"><span></span></span>
 </code></pre></div>

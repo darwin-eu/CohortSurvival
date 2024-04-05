@@ -26,7 +26,7 @@
     
     <a class="navbar-brand me-2" href="index.html">CohortSurvival</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.0</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -183,25 +183,23 @@
 <div class="section level3">
 <h3 id="summary-statistics-on-survival">Summary statistics on survival<a class="anchor" aria-label="anchor" href="#summary-statistics-on-survival"></a>
 </h3>
-<p>For single event analyses, we can extract restricted mean survival and median survival</p>
+<p>We can summarise our results in a table.</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="reference/survivalSummary.html">survivalSummary</a></span><span class="op">(</span><span class="va">MGUS_death</span><span class="op">)</span> <span class="op"><a href="reference/pipe.html">%&gt;%</a></span> </span>
-<span>  <span class="fu">tidyr</span><span class="fu">::</span><span class="fu"><a href="https://tidyr.tidyverse.org/reference/pivot_wider.html" class="external-link">pivot_wider</a></span><span class="op">(</span>names_from <span class="op">=</span> <span class="st">"estimate_name"</span>, values_from <span class="op">=</span> <span class="st">"estimate_value"</span><span class="op">)</span> <span class="op"><a href="reference/pipe.html">%&gt;%</a></span></span>
-<span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span><span class="st">"Median survival (95% CI)"</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="va">median_survival</span>, <span class="st">" ("</span>, <span class="va">median_survival_95CI_lower</span>, <span class="st">" to "</span>, <span class="va">median_survival_95CI_higher</span>, <span class="st">")"</span><span class="op">)</span></span>
-<span>                <span class="op">)</span> <span class="op"><a href="reference/pipe.html">%&gt;%</a></span> </span>
-<span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">strata_name</span>, <span class="va">strata_level</span>, <span class="st">"Median survival (95% CI)"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; # A tibble: 9 × 3</span></span>
-<span><span class="co">#&gt;   strata_name       strata_level `Median survival (95% CI)`</span></span>
-<span><span class="co">#&gt;   &lt;chr&gt;             &lt;chr&gt;        &lt;chr&gt;                     </span></span>
-<span><span class="co">#&gt; 1 Overall           Overall      98 (92 to 103)            </span></span>
-<span><span class="co">#&gt; 2 age_group         &lt;70          180 (158 to 206)          </span></span>
-<span><span class="co">#&gt; 3 age_group         &gt;=70         71 (66 to 77)             </span></span>
-<span><span class="co">#&gt; 4 sex               F            108 (100 to 121)          </span></span>
-<span><span class="co">#&gt; 5 sex               M            88 (79 to 97)             </span></span>
-<span><span class="co">#&gt; 6 age_group and sex &lt;70 and F    215 (179 to 260)          </span></span>
-<span><span class="co">#&gt; 7 age_group and sex &lt;70 and M    158 (139 to 189)          </span></span>
-<span><span class="co">#&gt; 8 age_group and sex &gt;=70 and F   82 (75 to 94)             </span></span>
-<span><span class="co">#&gt; 9 age_group and sex &gt;=70 and M   61 (54 to 70)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu"><a href="reference/tableSurvival.html">tableSurvival</a></span><span class="op">(</span><span class="va">MGUS_death</span><span class="op">)</span> </span>
+<span><span class="co">#&gt; # A tibble: 9 × 10</span></span>
+<span><span class="co">#&gt;   cdm_name cohort         variable_level analysis_type outcome   age_group sex  </span></span>
+<span><span class="co">#&gt;   &lt;chr&gt;    &lt;chr&gt;          &lt;chr&gt;          &lt;chr&gt;         &lt;chr&gt;     &lt;chr&gt;     &lt;chr&gt;</span></span>
+<span><span class="co">#&gt; 1 mock     mgus_diagnosis death_cohort   single_event  death_co… overall   over…</span></span>
+<span><span class="co">#&gt; 2 mock     mgus_diagnosis death_cohort   single_event  death_co… &lt;70       over…</span></span>
+<span><span class="co">#&gt; 3 mock     mgus_diagnosis death_cohort   single_event  death_co… &gt;=70      over…</span></span>
+<span><span class="co">#&gt; 4 mock     mgus_diagnosis death_cohort   single_event  death_co… overall   F    </span></span>
+<span><span class="co">#&gt; 5 mock     mgus_diagnosis death_cohort   single_event  death_co… overall   M    </span></span>
+<span><span class="co">#&gt; 6 mock     mgus_diagnosis death_cohort   single_event  death_co… &lt;70       F    </span></span>
+<span><span class="co">#&gt; 7 mock     mgus_diagnosis death_cohort   single_event  death_co… &lt;70       M    </span></span>
+<span><span class="co">#&gt; 8 mock     mgus_diagnosis death_cohort   single_event  death_co… &gt;=70      F    </span></span>
+<span><span class="co">#&gt; 9 mock     mgus_diagnosis death_cohort   single_event  death_co… &gt;=70      M    </span></span>
+<span><span class="co">#&gt; # ℹ 3 more variables: number_records &lt;dbl&gt;, events &lt;dbl&gt;,</span></span>
+<span><span class="co">#&gt; #   `Median survival (95% CI)` &lt;chr&gt;</span></span></code></pre></div>
 </div>
 </div>
 <div class="section level2">
@@ -215,8 +213,8 @@
 <span>  competingOutcomeCohortTable <span class="op">=</span> <span class="st">"death_cohort"</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu"><a href="reference/plotCumulativeIncidence.html">plotCumulativeIncidence</a></span><span class="op">(</span><span class="va">MGUS_death_prog</span>, </span>
-<span>                        colour <span class="op">=</span> <span class="st">"variable_level"</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu"><a href="reference/plotSurvival.html">plotSurvival</a></span><span class="op">(</span><span class="va">MGUS_death_prog</span>, cumulativeFailure <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>             colour <span class="op">=</span> <span class="st">"variable_level"</span><span class="op">)</span></span></code></pre></div>
 <p><img src="reference/figures/README-unnamed-chunk-11-1.png" width="100%"></p>
 </div>
 <div class="section level2">
@@ -231,10 +229,11 @@
 <span>  strata <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"sex"</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu"><a href="reference/plotCumulativeIncidence.html">plotCumulativeIncidence</a></span><span class="op">(</span><span class="va">MGUS_death_prog</span>  <span class="op"><a href="reference/pipe.html">%&gt;%</a></span></span>
-<span>                          <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">strata_name</span> <span class="op">!=</span> <span class="st">"Overall"</span><span class="op">)</span>, </span>
-<span>                        facet <span class="op">=</span> <span class="st">"strata_level"</span>,</span>
-<span>                        colour <span class="op">=</span> <span class="st">"variable_level"</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu"><a href="reference/plotSurvival.html">plotSurvival</a></span><span class="op">(</span><span class="va">MGUS_death_prog</span>  <span class="op"><a href="reference/pipe.html">%&gt;%</a></span></span>
+<span>             <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">strata_name</span> <span class="op">!=</span> <span class="st">"Overall"</span><span class="op">)</span>, </span>
+<span>             cumulativeFailure <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>             facet <span class="op">=</span> <span class="st">"strata_level"</span>,</span>
+<span>             colour <span class="op">=</span> <span class="st">"variable_level"</span><span class="op">)</span></span></code></pre></div>
 <p><img src="reference/figures/README-unnamed-chunk-12-1.png" width="100%"></p>
 <div class="section level3">
 <h3 id="disconnect-from-the-cdm-database-connection">Disconnect from the cdm database connection<a class="anchor" aria-label="anchor" href="#disconnect-from-the-cdm-database-connection"></a>

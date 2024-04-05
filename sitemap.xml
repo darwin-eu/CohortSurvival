@@ -28,6 +28,9 @@
     <loc>https://darwin-eu.github.io/CohortSurvival/reference/addCohortSurvival.html</loc>
   </url>
   <url>
+    <loc>https://darwin-eu.github.io/CohortSurvival/reference/asSurvivalResult.html</loc>
+  </url>
+  <url>
     <loc>https://darwin-eu.github.io/CohortSurvival/reference/benchmarkCohortSurvival.html</loc>
   </url>
   <url>
@@ -49,9 +52,6 @@
     <loc>https://darwin-eu.github.io/CohortSurvival/reference/pipe.html</loc>
   </url>
   <url>
-    <loc>https://darwin-eu.github.io/CohortSurvival/reference/plotCumulativeIncidence.html</loc>
-  </url>
-  <url>
     <loc>https://darwin-eu.github.io/CohortSurvival/reference/plotSurvival.html</loc>
   </url>
   <url>
@@ -64,7 +64,7 @@
     <loc>https://darwin-eu.github.io/CohortSurvival/reference/survivalParticipants.html</loc>
   </url>
   <url>
-    <loc>https://darwin-eu.github.io/CohortSurvival/reference/survivalSummary.html</loc>
+    <loc>https://darwin-eu.github.io/CohortSurvival/reference/tableSurvival.html</loc>
   </url>
   <url>
     <loc>https://darwin-eu.github.io/CohortSurvival/reference/tidyeval.html</loc>

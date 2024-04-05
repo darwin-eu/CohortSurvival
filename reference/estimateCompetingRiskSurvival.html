@@ -14,7 +14,7 @@ cohorts in the OMOP Common Data Model"><!-- mathjax --><script src="https://cdnj
     
     <a class="navbar-brand me-2" href="../index.html">CohortSurvival</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.0</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -62,15 +62,18 @@ cohorts in the OMOP Common Data Model</p>
 <span>  <span class="va">outcomeCohortTable</span>,</span>
 <span>  outcomeCohortId <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  outcomeDateVariable <span class="op">=</span> <span class="st">"cohort_start_date"</span>,</span>
+<span>  outcomeWashout <span class="op">=</span> <span class="cn">Inf</span>,</span>
 <span>  <span class="va">competingOutcomeCohortTable</span>,</span>
 <span>  competingOutcomeCohortId <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  competingOutcomeDateVariable <span class="op">=</span> <span class="st">"cohort_start_date"</span>,</span>
+<span>  competingOutcomeWashout <span class="op">=</span> <span class="cn">Inf</span>,</span>
 <span>  censorOnCohortExit <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  censorOnDate <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  followUpDays <span class="op">=</span> <span class="cn">Inf</span>,</span>
 <span>  strata <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  eventGap <span class="op">=</span> <span class="fl">30</span>,</span>
 <span>  estimateGap <span class="op">=</span> <span class="fl">1</span>,</span>
+<span>  minimumSurvivalDays <span class="op">=</span> <span class="fl">1</span>,</span>
 <span>  minCellCount <span class="op">=</span> <span class="fl">5</span>,</span>
 <span>  returnParticipants <span class="op">=</span> <span class="cn">FALSE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
@@ -103,6 +106,10 @@ cohorts in the OMOP Common Data Model</p>
 <dd><p>Variable containing date of outcome event</p></dd>
 
 
+<dt>outcomeWashout</dt>
+<dd><p>Washout time in days for the outcome</p></dd>
+
+
 <dt>competingOutcomeCohortTable</dt>
 <dd><p>The competing outcome cohort table of interest.</p></dd>
 
@@ -114,6 +121,10 @@ cohorts in the OMOP Common Data Model</p>
 
 <dt>competingOutcomeDateVariable</dt>
 <dd><p>Variable containing date of competing outcome event</p></dd>
+
+
+<dt>competingOutcomeWashout</dt>
+<dd><p>Washout time in days for the competing outcome</p></dd>
 
 
 <dt>censorOnCohortExit</dt>
@@ -147,6 +158,11 @@ for times up to the end of follow-up, with a gap in days equivalent
 to eventGap.</p></dd>
 
 
+<dt>minimumSurvivalDays</dt>
+<dd><p>Minimum number of days required for the main cohort
+to have survived</p></dd>
+
+
 <dt>minCellCount</dt>
 <dd><p>The minimum number of events to reported, below which
 results will be obscured. If 0, all results will be reported.</p></dd>
@@ -176,21 +192,15 @@ outputted as an attribute of the output</p>
 <span class="r-in"><span>  cdm <span class="op">=</span> <span class="va">cdm</span>,</span></span>
 <span class="r-in"><span>  targetCohortTable <span class="op">=</span> <span class="st">"mgus_diagnosis"</span>,</span></span>
 <span class="r-in"><span>  targetCohortId <span class="op">=</span> <span class="fl">1</span>,</span></span>
-<span class="r-in"><span>  outcomeCohortTable <span class="op">=</span> <span class="st">"death_cohort"</span>,</span></span>
+<span class="r-in"><span>  outcomeCohortTable <span class="op">=</span> <span class="st">"progression"</span>,</span></span>
 <span class="r-in"><span>  outcomeCohortId <span class="op">=</span> <span class="fl">1</span>,</span></span>
-<span class="r-in"><span>  competingOutcomeCohortTable <span class="op">=</span> <span class="st">"progression"</span>,</span></span>
+<span class="r-in"><span>  competingOutcomeCohortTable <span class="op">=</span> <span class="st">"death_cohort"</span>,</span></span>
 <span class="r-in"><span>  competingOutcomeCohortId <span class="op">=</span> <span class="fl">1</span>,</span></span>
 <span class="r-in"><span>  eventGap <span class="op">=</span> <span class="fl">7</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> - Getting survival for target cohort 'mgus_diagnosis' and outcome cohort</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> 'death_cohort' with competing outcome cohort 'progression'</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">──</span> <span style="font-weight: bold;">No results for competing risk analysis</span> <span style="color: #00BBBB;">──────────────────────────────────────</span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Competing risk variable must have three levels.Do you have at least 1</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> individual for:</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> • 1) censored without event,</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> • 2) censored at outcome event of intest, and</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> • 3) censored at outcome competing event?</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> 'progression' with competing outcome cohort 'death_cohort'</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Getting overall estimates</span>
 <span class="r-in"><span><span class="co"># }</span></span></span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
