@@ -18,8 +18,6 @@
 #'
 #' @param cdm  CDM reference
 #'
-#' @param deathInObservation If TRUE, restricts deaths included to only those
-#' observed during an ongoing observation period.
 #' @param name name for the created death cohort table
 #' @param cohortTable name of the cohort table to create a death cohort for
 #' @param cohortId name of the cohort table to create a death cohort for
@@ -85,7 +83,6 @@
 generateDeathCohortSet <- function(
     cdm,
     name,
-    deathInObservation = FALSE,
     cohortTable = NULL,
     cohortId = NULL,
     overwrite = FALSE){
@@ -95,22 +92,16 @@ generateDeathCohortSet <- function(
   checkmate::assertNumeric(cohortId, any.missing = FALSE, null.ok = TRUE)
   checkmate::assertCharacter(name, min.chars = 1, any.missing = FALSE, len = 1)
 
-  # 1. deathInObservation
-  if (isTRUE(deathInObservation)){
-    x <-  cdm$death %>%
-      PatientProfiles::addInObservation(cdm,
-                                        indexDate = "death_date") %>%
-      dplyr::filter(.data$in_observation==1) %>%
-      dplyr::select("person_id", "death_date")
-  }else{
-    x <-  cdm$death
-  }
+  x <-  cdm$death %>%
+    PatientProfiles::addInObservation(indexDate = "death_date") %>%
+    dplyr::filter(.data$in_observation==1) %>%
+    dplyr::select("person_id", "death_date")
 
   x <- x %>%
     dplyr::select("person_id", "death_date") %>%
     dplyr::rename("subject_id" = "person_id")
 
-  # 2. cohortTable and cohortId
+  # 1. cohortTable and cohortId
   if (!is.null(cohortTable)){
     checkCdm(cdm, tables = c(cohortTable))
 
@@ -131,7 +122,7 @@ generateDeathCohortSet <- function(
     }
   }
 
-  # 3. table ref
+  # 2. table ref
   # tables to be deleted
   cohortRef <- x %>%
     dplyr::group_by(.data$subject_id) %>%
@@ -144,12 +135,12 @@ generateDeathCohortSet <- function(
       "cohort_definition_id", "subject_id", "cohort_start_date",
       "cohort_end_date"
     ) %>%
-    CDMConnector::computeQuery(
+    dplyr::ungroup() %>%
+    dplyr::compute(
       name = name,
       temporary = FALSE,
-      schema =  attr(cdm, "write_schema"),
-      overwrite = overwrite
-    )
+      overwrite = overwrite)
+
   attr(cohortRef, "tbl_name") <- name
 
   if (is.null(cohortTable)) {
@@ -161,7 +152,6 @@ generateDeathCohortSet <- function(
   cohortSetRef <- dplyr::tibble(
     "cohort_definition_id" = 1L,
     "cohort_name" = "death_cohort",
-    "death_in_observation" = deathInObservation,
     "cohort_table" = cohortTable,
     "cohort_id" = cohortId
   )
@@ -171,5 +161,3 @@ generateDeathCohortSet <- function(
 
   return(cdm)
 }
-
-

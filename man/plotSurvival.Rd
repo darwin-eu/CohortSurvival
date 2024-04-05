@@ -9,10 +9,11 @@ plotSurvival(
   x = "time",
   xscale = "days",
   ylim = c(0, NA),
+  cumulativeFailure = FALSE,
   ribbon = TRUE,
   facet = NULL,
   colour = NULL,
-  colour_name = NULL
+  colourName = NULL
 )
 }
 \arguments{
@@ -24,13 +25,16 @@ plotSurvival(
 
 \item{ylim}{Limits for the Y axis}
 
+\item{cumulativeFailure}{whether to plot the cumulative failure probability
+instead of the survival probability}
+
 \item{ribbon}{If TRUE, the plot will join points using a ribbon}
 
 \item{facet}{Variables to use for facets}
 
 \item{colour}{Variables to use for colours}
 
-\item{colour_name}{Colour legend name}
+\item{colourName}{Colour legend name}
 }
 \value{
 A plot of survival probabilities over time
@@ -44,8 +48,7 @@ cdm <- mockMGUS2cdm()
 surv <- estimateSingleEventSurvival(cdm,
                                     targetCohortTable = "mgus_diagnosis",
                                     outcomeCohortTable = "death_cohort")
-plot <- plotSurvival(surv)
-plot
+plotSurvival(surv)
 }
 
 }

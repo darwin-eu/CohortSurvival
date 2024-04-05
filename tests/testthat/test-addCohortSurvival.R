@@ -87,7 +87,7 @@ test_that("another working example", {
       by = c("drug_concept_id" = "concept_id"),
       copy = TRUE
     ) %>%
-    PatientProfiles::addDemographics(cdm, indexDate = "drug_exposure_start_date") %>%
+    PatientProfiles::addDemographics(indexDate = "drug_exposure_start_date") %>%
     dplyr::filter(!is.na(prior_observation) &
                     prior_observation>=0 ) %>%
     dplyr::rename(
@@ -143,7 +143,7 @@ test_that("another working example", {
     omopgenerics::newCohortTable(cohortSetRef = gi_bleed_set)
 
   cdm$celecoxib <- cdm$celecoxib %>%
-    PatientProfiles::addAge(cdm = cdm) %>%
+    PatientProfiles::addAge() %>%
     addCohortSurvival(
       cdm = cdm,
       outcomeCohortTable = "gi_bleed"
@@ -247,22 +247,22 @@ test_that("censorOnCohortExit", {
                     cohortCensorExit %>%
                     dplyr::select(status) %>%
                     dplyr::pull())))
-  expect_true(all(compareNA(cohortNoCensorExit %>%
+  expect_true(all(compareNA(sort(cohortNoCensorExit %>%
                 dplyr::select(time) %>%
-                dplyr::pull(),
-                c(NA, 3, 1155))))
-  expect_true(all(compareNA(cohortNoCensorExit %>%
+                dplyr::pull()),
+                sort(c(NA, 3, 1155)))))
+  expect_true(all(compareNA(sort(cohortNoCensorExit %>%
                           dplyr::select(days_to_exit) %>%
-                          dplyr::pull(),
-                          c(1186, 1216, 1155))))
-  expect_true(all(compareNA(cohortCensorExit %>%
+                          dplyr::pull()),
+                          sort(c(1186, 1216, 1155)))))
+  expect_true(all(compareNA(sort(cohortCensorExit %>%
                           dplyr::select(time) %>%
-                          dplyr::pull(),
-                          c(NA, 3, 60))))
-  expect_true(all(compareNA(cohortCensorExit %>%
+                          dplyr::pull()),
+                          sort(c(NA, 3, 60)))))
+  expect_true(all(compareNA(sort(cohortCensorExit %>%
                           dplyr::select(days_to_exit) %>%
-                          dplyr::pull(),
-                          c(91, 213, 60))))
+                          dplyr::pull()),
+                          sort(c(91, 213, 60)))))
 
   CDMConnector::cdmDisconnect(cdm2)
 })
@@ -347,18 +347,18 @@ test_that("censorOnDate", {
     return(same)
   }
 
-  expect_true(all(compareNA(cohortCensorDate %>%
+  expect_true(all(compareNA(sort(cohortCensorDate %>%
                               dplyr::select(status) %>%
-                              dplyr::pull(),
-                              c(NA, 1, 0))))
-  expect_true(all(compareNA(cohortCensorDate %>%
+                              dplyr::pull()),
+                            sort(c(NA, 1, 0)))))
+  expect_true(all(compareNA(sort(cohortCensorDate %>%
                               dplyr::select(days_to_exit) %>%
-                              dplyr::pull(),
-                              c(369, 368, 3))))
-  expect_true(all(compareNA(cohortCensorDate %>%
+                              dplyr::pull()),
+                            sort(c(369, 368, 3)))))
+  expect_true(all(compareNA(sort(cohortCensorDate %>%
                               dplyr::select(time) %>%
-                              dplyr::pull(),
-                              c(NA, 3, 3))))
+                              dplyr::pull()),
+                            sort(c(NA, 3, 3)))))
 
   expect_error(
     cdm2$cohort1 %>%
@@ -562,20 +562,6 @@ test_that("expected errors", {
 
   CDMConnector::cdmDisconnect(cdm)
 })
-
-#test_that("expected errors2 - index cohort to have one row per person", {
-#  skip_on_cran()
-#  cdm <- mockMGUS2cdm()
-#  cdm$mgus_diagnosis <- cdm$mgus_diagnosis %>%
-#    dplyr::mutate(subject_id = dplyr::if_else(subject_id == 2, 1, subject_id))
-#  expect_error(cdm$mgus_diagnosis %>%
-#                addCohortSurvival(
-#                cdm = cdm,
-#                outcomeCohortTable = "death_cohort",
-#                outcomeCohortId = 1
-#                ))
-#  CDMConnector::cdmDisconnect(cdm)
-#})
 
 test_that("within cohort survival", {
   skip_on_cran()

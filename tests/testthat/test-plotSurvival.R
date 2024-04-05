@@ -105,8 +105,21 @@ test_that("basic cumulative incidence plot", {
                            outcomeCohortId = 1
   )
 
-  plot <- plotCumulativeIncidence(surv, xscale = "years")
+  plot <- plotSurvival(surv, xscale = "years", cumulativeFailure = TRUE)
   expect_true(ggplot2::is.ggplot(plot))
+
+  survCR <- estimateCompetingRiskSurvival(cdm,
+                                          targetCohortTable = "mgus_diagnosis",
+                                          outcomeCohortTable = "progression",
+                                          competingOutcomeCohortTable = "death_cohort"
+  )
+  plot <- plotSurvival(survCR, xscale = "years", cumulativeFailure = TRUE,
+                       colour = "variable_level")
+  expect_true(ggplot2::is.ggplot(plot))
+
+  # cumulativeFailure must be true when working with competing risk result
+  expect_error(plotSurvival(survCR, xscale = "years", cumulativeFailure = FALSE,
+                       colour = "variable_level"))
 
   CDMConnector::cdmDisconnect(cdm)
 
@@ -124,8 +137,8 @@ test_that("plot facets for cumulative incidence plots", {
                            strata=list(c("sex", "age_group"))
   )
 
-  plot <-plotCumulativeIncidence(surv,
-                                 facet = "strata_level")
+  plot <-plotSurvival(surv,
+                      facet = "strata_level")
   expect_true(ggplot2::is.ggplot(plot))
 
   CDMConnector::cdmDisconnect(cdm)
@@ -144,9 +157,9 @@ test_that("plot colour for cumulative incidence plots", {
                            strata=list(c("sex", "age_group"))
   )
 
-  plot <- plotCumulativeIncidence(surv,
-                                  facet = "strata_level",
-                                  colour = "strata_level")
+  plot <- plotSurvival(surv,
+                       facet = "strata_level",
+                       colour = "strata_level")
 
   expect_true(ggplot2::is.ggplot(plot))
 

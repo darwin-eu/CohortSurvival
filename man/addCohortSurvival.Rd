@@ -10,6 +10,7 @@ addCohortSurvival(
   outcomeCohortTable,
   outcomeCohortId = 1,
   outcomeDateVariable = "cohort_start_date",
+  outcomeWashout = Inf,
   censorOnCohortExit = FALSE,
   censorOnDate = NULL,
   followUpDays = Inf
@@ -26,6 +27,8 @@ addCohortSurvival(
 (and so one ID) can be considered.}
 
 \item{outcomeDateVariable}{Variable containing date of outcome event}
+
+\item{outcomeWashout}{Washout time in days for the outcome}
 
 \item{censorOnCohortExit}{If TRUE, an individual's follow up will be
 censored at their cohort exit}

@@ -149,7 +149,7 @@ benchmarkCohortSurvival <- function(cdm,
       "cohort_start_date" = "observation_period_start_date",
       "cohort_end_date" = "observation_period_end_date"
     ) %>%
-    PatientProfiles::addDemographics(cdm) %>%
+    PatientProfiles::addDemographics() %>%
     dplyr::collect() %>%
     dplyr::as_tibble()
 
@@ -184,8 +184,8 @@ benchmarkCohortSurvival <- function(cdm,
       copy = TRUE
     )
 
-  start_dates <- outcome_cohort %>% dplyr::select(.data$observation_period_start_date) %>% dplyr::pull()
-  end_dates <- outcome_cohort %>% dplyr::select(.data$observation_period_end_date) %>% dplyr::pull()
+  start_dates <- outcome_cohort %>% dplyr::select("observation_period_start_date") %>% dplyr::pull()
+  end_dates <- outcome_cohort %>% dplyr::select("observation_period_end_date") %>% dplyr::pull()
 
   cohort_dates <- c()
   for(i in 1:length(start_dates)) {
@@ -232,8 +232,8 @@ benchmarkCohortSurvival <- function(cdm,
         copy = TRUE
       )
 
-    start_dates <- competing_outcome_cohort %>% dplyr::select(.data$observation_period_start_date) %>% dplyr::pull()
-    end_dates <- competing_outcome_cohort %>% dplyr::select(.data$observation_period_end_date) %>% dplyr::pull()
+    start_dates <- competing_outcome_cohort %>% dplyr::select("observation_period_start_date") %>% dplyr::pull()
+    end_dates <- competing_outcome_cohort %>% dplyr::select("observation_period_end_date") %>% dplyr::pull()
 
     cohort_dates <- c()
     for(i in 1:length(start_dates)) {
@@ -460,7 +460,7 @@ benchmarkCohortSurvival <- function(cdm,
           "cohort_start_date",
           "cohort_end_date"
         ) %>%
-        CDMConnector::computeQuery()
+        dplyr::compute()
 
       attr(participantsRef, "cohort_set") <- participantsRef %>%
         dplyr::select("cohort_definition_id") %>%

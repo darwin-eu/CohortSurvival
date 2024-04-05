@@ -12,15 +12,18 @@ estimateCompetingRiskSurvival(
   outcomeCohortTable,
   outcomeCohortId = NULL,
   outcomeDateVariable = "cohort_start_date",
+  outcomeWashout = Inf,
   competingOutcomeCohortTable,
   competingOutcomeCohortId = NULL,
   competingOutcomeDateVariable = "cohort_start_date",
+  competingOutcomeWashout = Inf,
   censorOnCohortExit = FALSE,
   censorOnDate = NULL,
   followUpDays = Inf,
   strata = NULL,
   eventGap = 30,
   estimateGap = 1,
+  minimumSurvivalDays = 1,
   minCellCount = 5,
   returnParticipants = FALSE
 )
@@ -39,12 +42,16 @@ estimateCompetingRiskSurvival(
 
 \item{outcomeDateVariable}{Variable containing date of outcome event}
 
+\item{outcomeWashout}{Washout time in days for the outcome}
+
 \item{competingOutcomeCohortTable}{The competing outcome cohort table of interest.}
 
 \item{competingOutcomeCohortId}{ID of event cohorts to include. Only one competing outcome
 (and so one ID) can be considered.}
 
 \item{competingOutcomeDateVariable}{Variable containing date of competing outcome event}
+
+\item{competingOutcomeWashout}{Washout time in days for the competing outcome}
 
 \item{censorOnCohortExit}{If TRUE, an individual's follow up will be
 censored at their cohort exit}
@@ -64,6 +71,9 @@ events, which are grouped into the specified intervals.}
 estimates. First day will be day zero with risk estimates provided
 for times up to the end of follow-up, with a gap in days equivalent
 to eventGap.}
+
+\item{minimumSurvivalDays}{Minimum number of days required for the main cohort
+to have survived}
 
 \item{minCellCount}{The minimum number of events to reported, below which
 results will be obscured. If 0, all results will be reported.}
@@ -89,9 +99,9 @@ surv <- estimateCompetingRiskSurvival(
   cdm = cdm,
   targetCohortTable = "mgus_diagnosis",
   targetCohortId = 1,
-  outcomeCohortTable = "death_cohort",
+  outcomeCohortTable = "progression",
   outcomeCohortId = 1,
-  competingOutcomeCohortTable = "progression",
+  competingOutcomeCohortTable = "death_cohort",
   competingOutcomeCohortId = 1,
   eventGap = 7
 )

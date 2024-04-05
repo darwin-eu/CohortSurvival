@@ -123,15 +123,10 @@ plotSurvival(MGUS_death,
 
 ### Summary statistics on survival
 
-For single event analyses, we can extract restricted mean survival and median survival
+We can summarise our results in a table.
 
 ```{r}
-survivalSummary(MGUS_death) %>% 
-  tidyr::pivot_wider(names_from = "estimate_name", values_from = "estimate_value") %>%
-  dplyr::mutate("Median survival (95% CI)" = paste0(median_survival, " (", median_survival_95CI_lower, " to ", median_survival_95CI_higher, ")")
-                ) %>% 
-  dplyr::select(strata_name, strata_level, "Median survival (95% CI)")
-
+tableSurvival(MGUS_death) 
 ```
 
 
@@ -146,8 +141,8 @@ MGUS_death_prog <- estimateCompetingRiskSurvival(cdm,
   competingOutcomeCohortTable = "death_cohort"
 )
 
-plotCumulativeIncidence(MGUS_death_prog, 
-                        colour = "variable_level")
+plotSurvival(MGUS_death_prog, cumulativeFailure = TRUE,
+             colour = "variable_level")
 ```
 
 
@@ -163,10 +158,11 @@ MGUS_death_prog <-  estimateCompetingRiskSurvival(cdm,
   strata = list(c("sex"))
 )
 
-plotCumulativeIncidence(MGUS_death_prog  %>%
-                          dplyr::filter(strata_name != "Overall"), 
-                        facet = "strata_level",
-                        colour = "variable_level")
+plotSurvival(MGUS_death_prog  %>%
+             dplyr::filter(strata_name != "Overall"), 
+             cumulativeFailure = TRUE,
+             facet = "strata_level",
+             colour = "variable_level")
 
 ```
 

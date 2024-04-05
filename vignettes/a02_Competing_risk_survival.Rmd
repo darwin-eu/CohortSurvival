@@ -56,24 +56,24 @@ MGUS_death_prog <- estimateCompetingRiskSurvival(cdm,
   targetCohortTable = "mgus_diagnosis",
   outcomeCohortTable = "progression",
   competingOutcomeCohortTable = "death_cohort"
-)
+) 
 
 MGUS_death_prog %>% 
+  asSurvivalResult() %>% 
   glimpse()
 ```
  
 As we can see above our results have been outputted in long format. We can plot these results like so.
 
 ```{r}
-plotCumulativeIncidence(MGUS_death_prog, 
-                        colour = "variable_level")
+plotSurvival(MGUS_death_prog, cumulativeFailure = TRUE,
+             colour = "variable_level")
 ```
 
 Our returned results also have attributes containing information that summarises survival. 
 
 ```{r}
-MGUS_death_prog %>% dplyr::filter(estimate_type == "Survival summary") %>%
-  tidyr::pivot_wider(names_from = "estimate_name", values_from = "estimate_value")
+tableSurvival(MGUS_death_prog, times = c(100,200,300,400)) 
 ```
 
 
@@ -91,21 +91,20 @@ MGUS_death_prog <-  estimateCompetingRiskSurvival(cdm,
 
 ```
 
-As we can see as well as results for each strata, we'll always also have overall results returned. We can filter the output table to plot only the cumulative failure probability for the different strata levels. 
+As we can see as well as results for each strata, we'll always also have overall results returned. We can filter the output table to plot only the results for the different strata levels. We can also ask for the cumulative failure probability to be plotted instead of the survival probability.
 
 ```{r, fig.height=6, fig.width=8}
-
-plotCumulativeIncidence(MGUS_death_prog  %>%
-                          dplyr::filter(strata_name != "Overall"), 
-                        facet = "strata_level",
-                        colour = "variable_level")
+plotSurvival(MGUS_death_prog %>% 
+               dplyr::filter(strata_name != "Overall"), 
+             facet = "strata_level",
+             colour = "variable_level",
+             cumulativeFailure = TRUE)
 ```
 
 And we also now have summary statistics for each of the strata as well as overall.
 
 ```{r}
-MGUS_death_prog %>% dplyr::filter(estimate_type == "Survival summary") %>%
-  tidyr::pivot_wider(names_from = "estimate_name", values_from = "estimate_value")
+tableSurvival(MGUS_death_prog, times = c(50,150,365))
 ```
 
 ## Summarising participants
@@ -118,7 +117,7 @@ MGUS_death_prog <- estimateCompetingRiskSurvival(cdm,
   outcomeCohortTable = "progression",
   competingOutcomeCohortTable = "death_cohort",
   returnParticipants = TRUE
-)
+) 
 survivalParticipants(MGUS_death_prog)
 ```
 

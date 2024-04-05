@@ -11,12 +11,14 @@ estimateSingleEventSurvival(
   outcomeCohortTable,
   outcomeCohortId = NULL,
   outcomeDateVariable = "cohort_start_date",
+  outcomeWashout = Inf,
   censorOnCohortExit = FALSE,
   censorOnDate = NULL,
   followUpDays = Inf,
   strata = NULL,
   eventGap = 30,
   estimateGap = 1,
+  minimumSurvivalDays = 1,
   minCellCount = 5,
   returnParticipants = FALSE
 )
@@ -34,6 +36,8 @@ estimateSingleEventSurvival(
 (and so one ID) can be considered.}
 
 \item{outcomeDateVariable}{Variable containing date of outcome event}
+
+\item{outcomeWashout}{Washout time in days for the outcome}
 
 \item{censorOnCohortExit}{If TRUE, an individual's follow up will be
 censored at their cohort exit}
@@ -53,6 +57,9 @@ events, which are grouped into the specified intervals.}
 estimates. First day will be day zero with risk estimates provided
 for times up to the end of follow-up, with a gap in days equivalent
 to eventGap.}
+
+\item{minimumSurvivalDays}{Minimum number of days required for the main cohort
+to have survived}
 
 \item{minCellCount}{The minimum number of events to reported, below which
 results will be obscured. If 0, all results will be reported.}

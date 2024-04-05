@@ -20,10 +20,12 @@
 #' @param x Variable to plot on x axis
 #' @param xscale X axis scale. Can be "days" or "years".
 #' @param ylim Limits for the Y axis
+#' @param cumulativeFailure whether to plot the cumulative failure probability
+#' instead of the survival probability
 #' @param ribbon If TRUE, the plot will join points using a ribbon
 #' @param facet Variables to use for facets
 #' @param colour Variables to use for colours
-#' @param colour_name Colour legend name
+#' @param colourName Colour legend name
 #'
 #' @return A plot of survival probabilities over time
 #' @export
@@ -34,26 +36,42 @@
 #' surv <- estimateSingleEventSurvival(cdm,
 #'                                     targetCohortTable = "mgus_diagnosis",
 #'                                     outcomeCohortTable = "death_cohort")
-#' plot <- plotSurvival(surv)
-#' plot
+#' plotSurvival(surv)
 #'}
 #'
 plotSurvival <- function(result,
                          x = "time",
                          xscale = "days",
                          ylim = c(0,NA),
+                         cumulativeFailure = FALSE,
                          ribbon = TRUE,
                          facet = NULL,
                          colour = NULL,
-                         colour_name = NULL){
+                         colourName = NULL){
+
 
   result <- result %>%
-    splitNameLevel(name = "additional_name", level = "additional_level") %>%
-    dplyr::mutate(time = as.numeric(.data$time))
+    asSurvivalResult()
 
- plot <- plotEstimates(result = result %>%
-                  dplyr::filter(.data$estimate_type ==
-                                  "Survival probability"),
+  # cumulativeFailure must be true for competing risk analysis
+  if(isFALSE(cumulativeFailure) &&
+     "cumulative_failure_probability" %in% unique(result$variable_name)){
+    cli::cli_abort("cumulativeFailure must be TRUE if result comes from a competing risk analysis")
+  }
+
+  if(cumulativeFailure) {
+    result <- result %>%
+      dplyr::mutate(
+        estimate_value = dplyr::if_else(.data$variable_name == "cumulative_failure_probability",
+                                        .data$estimate_value,
+                                        1 - .data$estimate_value)
+      )
+    plot_name <- "Cumulative failure probability"
+  } else {
+    plot_name <- "Survival probability"
+  }
+
+ plot <- plotEstimates(result,
                 x = x,
                 xscale = xscale,
                 y = "estimate",
@@ -64,8 +82,8 @@ plotSurvival <- function(result,
                 ribbon = ribbon,
                 facet = facet,
                 colour = colour,
-                colour_name = colour_name) +
-    ggplot2::ylab("Survival probability")
+                colourName = colourName) +
+    ggplot2::ylab(plot_name)
 
   if(xscale == "years"){
     plot <- plot+
@@ -80,74 +98,7 @@ plotSurvival <- function(result,
 
 }
 
-#' Plot cumulative incidence
-#'
-#' @param result Survival results
-#' @param x Variable to plot on x axis
-#' @param xscale X axis scale. Can be "days" or "years".
-#' @param ylim Limits for the Y axis
-#' @param ribbon If TRUE, the plot will join points using a ribbon
-#' @param facet Variables to use for facets
-#' @param colour Variables to use for colours
-#' @param colour_name Colour legend name
-#'
-#' @return A plot of cumulative incidence over time
-#' @export
-#'
-#' @examples
-#' \donttest{
-#' cdm <- mockMGUS2cdm()
-#' surv <- estimateSingleEventSurvival(cdm,
-#'                                     targetCohortTable = "mgus_diagnosis",
-#'                                     outcomeCohortTable = "death_cohort")
-#' plot <- plotCumulativeIncidence(surv)
-#' plot
-#'}
-plotCumulativeIncidence <- function(result,
-                                    x = "time",
-                                    xscale = "days",
-                                    ylim = c(0,NA),
-                                    ribbon = TRUE,
-                                    facet = NULL,
-                                    colour = NULL,
-                                    colour_name = NULL){
-
-  result <- result %>%
-    splitNameLevel(name = "additional_name", level = "additional_level") %>%
-    dplyr::mutate(time = as.numeric(.data$time))
-
-  plot <- plotEstimates(result = result %>%
-                  dplyr::filter(.data$estimate_type ==
-                                  "Cumulative failure probability"),
-                x = x,
-                xscale = xscale,
-                y = "estimate",
-                yLower = "estimate_95CI_lower",
-                yUpper = "estimate_95CI_upper",
-                ylim = ylim,
-                ytype = "count",
-                ribbon = ribbon,
-                facet = facet,
-                colour = colour,
-                colour_name = colour_name) +
-    ggplot2::ylab("Cumulative failure probability")
-
-  if(xscale == "years"){
-    plot <- plot+
-      ggplot2::xlab("Time in years")+
-      ggplot2::scale_x_continuous(breaks = function(x) unique(floor(pretty(seq(0, (max(x) + 1) * 1.1)))))
-  } else {
-    plot <- plot+
-      ggplot2::xlab("Time in days")
-  }
-
-  return(plot)
-
-
-}
-
 # helper functions
-
 plotEstimates <- function(result,
                           x,
                           xscale,
@@ -159,7 +110,7 @@ plotEstimates <- function(result,
                           ribbon,
                           facet,
                           colour,
-                          colour_name){
+                          colourName){
 
   errorMessage <- checkmate::makeAssertCollection()
   checkmate::assert_character(xscale, len = 1)
@@ -233,10 +184,7 @@ plotEstimates <- function(result,
 
   return(plot)
 
-
-
 }
-
 
 getPlotData <- function(estimates, facetVars, colourVars){
 

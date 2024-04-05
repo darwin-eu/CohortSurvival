@@ -38,7 +38,7 @@ x <- dplyr::tibble(
   "sex and age_group", "sex and age_group"),
   group_level = c("Male and <40", "Female and >40", "Male and >40", "Male and <40")
 )
-  x |> splitNameLevel(name = "group_name",
+  x \%>\% splitNameLevel(name = "group_name",
                  level = "group_level",
                  keep = FALSE)
 

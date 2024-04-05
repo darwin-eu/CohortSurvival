@@ -176,8 +176,7 @@ test_that("test death in observation criteria", {
   attr(cdm2, "write_schema") <- "main"
 
   cdm2 <- generateDeathCohortSet(cdm=cdm2,
-                                 name = "death_cohort",
-                                 deathInObservation = TRUE)
+                                 name = "death_cohort")
 
   expect_true(nrow(cdm2$death_cohort %>% dplyr::collect()) == 1)
 

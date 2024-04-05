@@ -7,7 +7,6 @@
 generateDeathCohortSet(
   cdm,
   name,
-  deathInObservation = FALSE,
   cohortTable = NULL,
   cohortId = NULL,
   overwrite = FALSE
@@ -17,9 +16,6 @@ generateDeathCohortSet(
 \item{cdm}{CDM reference}
 
 \item{name}{name for the created death cohort table}
-
-\item{deathInObservation}{If TRUE, restricts deaths included to only those
-observed during an ongoing observation period.}
 
 \item{cohortTable}{name of the cohort table to create a death cohort for}
 

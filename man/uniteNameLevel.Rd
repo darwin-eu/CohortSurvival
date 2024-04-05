@@ -40,7 +40,7 @@ x <- dplyr::tibble(
 
 x
 
-x |>
+x \%>\%
   CohortSurvival:::uniteNameLevel(
     cols = c("sex", "age_group"),
     name = "new_column_name",

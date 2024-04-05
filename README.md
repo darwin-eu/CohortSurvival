@@ -151,27 +151,24 @@ plotSurvival(MGUS_death,
 
 ### Summary statistics on survival
 
-For single event analyses, we can extract restricted mean survival and
-median survival
+We can summarise our results in a table.
 
 ``` r
-survivalSummary(MGUS_death) %>% 
-  tidyr::pivot_wider(names_from = "estimate_name", values_from = "estimate_value") %>%
-  dplyr::mutate("Median survival (95% CI)" = paste0(median_survival, " (", median_survival_95CI_lower, " to ", median_survival_95CI_higher, ")")
-                ) %>% 
-  dplyr::select(strata_name, strata_level, "Median survival (95% CI)")
-#> # A tibble: 9 × 3
-#>   strata_name       strata_level `Median survival (95% CI)`
-#>   <chr>             <chr>        <chr>                     
-#> 1 Overall           Overall      98 (92 to 103)            
-#> 2 age_group         <70          180 (158 to 206)          
-#> 3 age_group         >=70         71 (66 to 77)             
-#> 4 sex               F            108 (100 to 121)          
-#> 5 sex               M            88 (79 to 97)             
-#> 6 age_group and sex <70 and F    215 (179 to 260)          
-#> 7 age_group and sex <70 and M    158 (139 to 189)          
-#> 8 age_group and sex >=70 and F   82 (75 to 94)             
-#> 9 age_group and sex >=70 and M   61 (54 to 70)
+tableSurvival(MGUS_death) 
+#> # A tibble: 9 × 10
+#>   cdm_name cohort         variable_level analysis_type outcome   age_group sex  
+#>   <chr>    <chr>          <chr>          <chr>         <chr>     <chr>     <chr>
+#> 1 mock     mgus_diagnosis death_cohort   single_event  death_co… overall   over…
+#> 2 mock     mgus_diagnosis death_cohort   single_event  death_co… <70       over…
+#> 3 mock     mgus_diagnosis death_cohort   single_event  death_co… >=70      over…
+#> 4 mock     mgus_diagnosis death_cohort   single_event  death_co… overall   F    
+#> 5 mock     mgus_diagnosis death_cohort   single_event  death_co… overall   M    
+#> 6 mock     mgus_diagnosis death_cohort   single_event  death_co… <70       F    
+#> 7 mock     mgus_diagnosis death_cohort   single_event  death_co… <70       M    
+#> 8 mock     mgus_diagnosis death_cohort   single_event  death_co… >=70      F    
+#> 9 mock     mgus_diagnosis death_cohort   single_event  death_co… >=70      M    
+#> # ℹ 3 more variables: number_records <dbl>, events <dbl>,
+#> #   `Median survival (95% CI)` <chr>
 ```
 
 ## Estimating survival with competing risk
@@ -188,8 +185,8 @@ MGUS_death_prog <- estimateCompetingRiskSurvival(cdm,
   competingOutcomeCohortTable = "death_cohort"
 )
 
-plotCumulativeIncidence(MGUS_death_prog, 
-                        colour = "variable_level")
+plotSurvival(MGUS_death_prog, cumulativeFailure = TRUE,
+             colour = "variable_level")
 ```
 
 <img src="man/figures/README-unnamed-chunk-11-1.png" width="100%" />
@@ -209,10 +206,11 @@ MGUS_death_prog <-  estimateCompetingRiskSurvival(cdm,
   strata = list(c("sex"))
 )
 
-plotCumulativeIncidence(MGUS_death_prog  %>%
-                          dplyr::filter(strata_name != "Overall"), 
-                        facet = "strata_level",
-                        colour = "variable_level")
+plotSurvival(MGUS_death_prog  %>%
+             dplyr::filter(strata_name != "Overall"), 
+             cumulativeFailure = TRUE,
+             facet = "strata_level",
+             colour = "variable_level")
 ```
 
 <img src="man/figures/README-unnamed-chunk-12-1.png" width="100%" />

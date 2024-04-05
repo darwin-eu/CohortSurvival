@@ -56,7 +56,7 @@ survivalParticipants <- function(result) {
 #'
 #' x
 #'
-#' x |>
+#' x %>%
 #'   CohortSurvival:::uniteNameLevel(
 #'     cols = c("sex", "age_group"),
 #'     name = "new_column_name",
@@ -93,14 +93,14 @@ uniteNameLevel <- function(x,
     cli::cli_abort("Column names must not contain ' and ' : `{paste0(containAnd, collapse = '`, `')}`")
   }
   containAnd <- cols[
-    lapply(cols, function(col){any(grepl(" and ", x[[col]]))}) |> unlist()
+    lapply(cols, function(col){any(grepl(" and ", x[[col]]))}) %>% unlist()
   ]
   if (length(containAnd) > 0) {
     cli::cli_abort("Column values must not contain ' and '. Present in: `{paste0(containAnd, collapse = '`, `')}`.")
   }
 
-  x <- x |>
-    dplyr::mutate(!!name := paste0(cols, collapse = " and ")) |>
+  x <- x %>%
+    dplyr::mutate(!!name := paste0(cols, collapse = " and ")) %>%
     tidyr::unite(
       col = !!level, dplyr::all_of(cols), sep = " and ", remove = !keep
     )
@@ -113,10 +113,10 @@ uniteNameLevel <- function(x,
 
   # move cols
   if (id == 1) {
-    x <- x |> dplyr::relocate(dplyr::all_of(c(colskeep, name, level)))
+    x <- x %>% dplyr::relocate(dplyr::all_of(c(colskeep, name, level)))
   } else {
     id <- colnames(x)[id - 1]
-    x <- x |>
+    x <- x %>%
       dplyr::relocate(
         dplyr::all_of(c(colskeep, name, level)), .after = dplyr::all_of(id)
       )
@@ -148,7 +148,7 @@ uniteNameLevel <- function(x,
 #'   "sex and age_group", "sex and age_group"),
 #'   group_level = c("Male and <40", "Female and >40", "Male and >40", "Male and <40")
 #' )
-#'   x |> splitNameLevel(name = "group_name",
+#'   x %>% splitNameLevel(name = "group_name",
 #'                  level = "group_level",
 #'                  keep = FALSE)
 #'
@@ -166,8 +166,8 @@ splitNameLevel <- function(result,
   newCols <- getColumns(result, name, TRUE)
   id <- which(name == colnames(result))
 
-  nameValues <- result[[name]] |> stringr::str_split(" and ")
-  levelValues <- result[[level]] |> stringr::str_split(" and ")
+  nameValues <- result[[name]] %>% stringr::str_split(" and ")
+  levelValues <- result[[level]] %>% stringr::str_split(" and ")
   if (!all(lengths(nameValues) == lengths(levelValues))) {
     cli::cli_abort("Column names and levels number does not match")
   }
@@ -189,28 +189,28 @@ splitNameLevel <- function(result,
       } else {
         return(res)
       }
-    }) |>
+    }) %>%
       unlist()
     result[[col]] <- dat
   }
 
   if (!keep) {
-    result <- result |> dplyr::select(-dplyr::all_of(c(name, level)))
+    result <- result %>% dplyr::select(-dplyr::all_of(c(name, level)))
     colskeep <- character()
   } else {
     colskeep <- c(name, level)
   }
 
   if ("overall" %in% newCols & !overall) {
-    result <- result |> dplyr::select(-"overall")
+    result <- result %>% dplyr::select(-"overall")
   }
 
   # move cols
   if (id == 1) {
-    result <- result |> dplyr::relocate(dplyr::any_of(newCols))
+    result <- result %>% dplyr::relocate(dplyr::any_of(newCols))
   } else {
     id <- colnames(result)[id - 1]
-    result <- result |>
+    result <- result %>%
       dplyr::relocate(
         dplyr::any_of(c(colskeep, newCols)), .after = dplyr::all_of(id)
       )
@@ -227,11 +227,11 @@ getColumns <- function(result, col, overall) {
   checkmate::assertLogical(overall, any.missing = FALSE, len = 1)
 
   # extract columns
-  x <- result |>
-    dplyr::pull(dplyr::all_of(col)) |>
-    unique() |>
-    lapply(strsplit, split = " and ") |>
-    unlist() |>
+  x <- result %>%
+    dplyr::pull(dplyr::all_of(col)) %>%
+    unique() %>%
+    lapply(strsplit, split = " and ") %>%
+    unlist() %>%
     unique()
 
   # eliminate overall

@@ -42,13 +42,21 @@ cdm$death_cohort %>%
 ```
 
 ## Overall survival
-First, we can estimate survival for the cohort overall like so. 
+First, we can estimate survival for the cohort overall like so. Note that the output will be in a summarised result format.
 ```{r}
 MGUS_death <- estimateSingleEventSurvival(cdm,
   targetCohortTable = "mgus_diagnosis",
   outcomeCohortTable = "death_cohort"
 )
 MGUS_death %>% 
+  glimpse()
+class(MGUS_death)
+```
+
+We can though convert the result to be in a survival format using asSurvivalResult()
+```{r}
+MGUS_death %>% 
+  asSurvivalResult() %>%
   glimpse()
 ```
 
@@ -59,14 +67,7 @@ plotSurvival(MGUS_death)
 
 Our returned results also have attributes containing information that summarises survival. 
 ```{r}
-survivalSummary(MGUS_death) %>% 
-  tidyr::pivot_wider(names_from = "estimate_name", values_from = "estimate_value") %>%
-  dplyr::mutate(
-    "Median survival (95% CI)" = paste0(median_survival, 
-                                        " (", median_survival_95CI_lower, 
-                                        " to ", median_survival_95CI_higher, ")")
-  ) %>%
-  dplyr::select("Median survival (95% CI)")
+tableSurvival(MGUS_death, times = c(100,200,300,400)) 
 ```
 
 
@@ -79,7 +80,7 @@ MGUS_death <- estimateSingleEventSurvival(cdm,
   strata = list(c("age_group"),
                 c("sex"),
                 c("age_group", "sex"))
-)
+) 
 ```
 
 As we can see as well as results for each strata, we'll always also have overall results returned.
@@ -92,11 +93,8 @@ plotSurvival(MGUS_death,
 And we also now have summary statistics for each of the strata as well as overall.
 
 ```{r}
-survivalSummary(MGUS_death) %>%
-  tidyr::pivot_wider(names_from = "estimate_name", values_from = "estimate_value") %>%
-  dplyr::mutate("Median survival (95% CI)" = paste0(median_survival, " (", median_survival_95CI_lower, " to ", median_survival_95CI_higher, ")")
-                ) %>% 
-  dplyr::select(strata_name, strata_level,"Median survival (95% CI)")
+tableSurvival(MGUS_death, 
+                times = c(100,200,300,400))
 ```
 
 ## Summarising participants

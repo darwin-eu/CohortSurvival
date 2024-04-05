@@ -190,17 +190,17 @@ mockMGUS2cdm <- function() {
 }
 
 addAttrition <- function(cohort, set) {
-  cohort |>
-    dplyr::group_by(.data$cohort_definition_id) |>
+  cohort %>%
+    dplyr::group_by(.data$cohort_definition_id) %>%
     dplyr::summarise(
       number_records = dplyr::n(),
       number_subjects = dplyr::n_distinct(.data$subject_id)
-    ) |>
+    ) %>%
     dplyr::left_join(
-      set |> dplyr::select("cohort_definition_id"),
+      set %>% dplyr::select("cohort_definition_id"),
       by = "cohort_definition_id",
       copy = TRUE
-    ) |>
+    ) %>%
     dplyr::mutate(
       "number_records" = dplyr::if_else(
         is.na(.data$number_records), 0, .data$number_records
@@ -212,6 +212,6 @@ addAttrition <- function(cohort, set) {
       "reason" = "Initial qualifying events",
       "excluded_records" = 0,
       "excluded_subjects" = 0
-    ) |>
+    ) %>%
     dplyr::collect()
 }
