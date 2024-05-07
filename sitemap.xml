@@ -13,6 +13,9 @@
     <loc>https://darwin-eu.github.io/CohortSurvival/articles/a02_Competing_risk_survival.html</loc>
   </url>
   <url>
+    <loc>https://darwin-eu.github.io/CohortSurvival/articles/a03_Further_survival_analyses.html</loc>
+  </url>
+  <url>
     <loc>https://darwin-eu.github.io/CohortSurvival/articles/index.html</loc>
   </url>
   <url>
@@ -26,6 +29,9 @@
   </url>
   <url>
     <loc>https://darwin-eu.github.io/CohortSurvival/reference/addCohortSurvival.html</loc>
+  </url>
+  <url>
+    <loc>https://darwin-eu.github.io/CohortSurvival/reference/addCompetingRiskCohortSurvival.html</loc>
   </url>
   <url>
     <loc>https://darwin-eu.github.io/CohortSurvival/reference/asSurvivalResult.html</loc>
@@ -49,6 +55,9 @@
     <loc>https://darwin-eu.github.io/CohortSurvival/reference/mockMGUS2cdm.html</loc>
   </url>
   <url>
+    <loc>https://darwin-eu.github.io/CohortSurvival/reference/optionsTableSurvival.html</loc>
+  </url>
+  <url>
     <loc>https://darwin-eu.github.io/CohortSurvival/reference/pipe.html</loc>
   </url>
   <url>
@@ -58,9 +67,6 @@
     <loc>https://darwin-eu.github.io/CohortSurvival/reference/reexports.html</loc>
   </url>
   <url>
-    <loc>https://darwin-eu.github.io/CohortSurvival/reference/splitNameLevel.html</loc>
-  </url>
-  <url>
     <loc>https://darwin-eu.github.io/CohortSurvival/reference/survivalParticipants.html</loc>
   </url>
   <url>
@@ -68,8 +74,5 @@
   </url>
   <url>
     <loc>https://darwin-eu.github.io/CohortSurvival/reference/tidyeval.html</loc>
-  </url>
-  <url>
-    <loc>https://darwin-eu.github.io/CohortSurvival/reference/uniteNameLevel.html</loc>
   </url>
 </urlset>

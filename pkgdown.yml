@@ -1,10 +1,11 @@
 pandoc: 3.1.11
-pkgdown: 2.0.7
+pkgdown: 2.0.9
 pkgdown_sha: ~
 articles:
   a01_Single_event_of_interest: a01_Single_event_of_interest.html
   a02_Competing_risk_survival: a02_Competing_risk_survival.html
-last_built: 2024-04-05T11:18Z
+  a03_Further_survival_analyses: a03_Further_survival_analyses.html
+last_built: 2024-05-07T07:24Z
 urls:
   reference: https://darwin-eu.github.io/CohortSurvival/reference
   article: https://darwin-eu.github.io/CohortSurvival/articles
