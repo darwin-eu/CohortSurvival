@@ -48,8 +48,7 @@ test_that("basic example", {
   attr(cdm2, "write_schema") <- "main"
 
   cdm2 <- generateDeathCohortSet(cdm=cdm2,
-                                name = "death_cohort",
-                                overwrite = TRUE)
+                                name = "death_cohort")
 
  expect_true(all(c("cohort_definition_id", "subject_id",
     "cohort_start_date", "cohort_end_date") %in%
@@ -334,8 +333,7 @@ test_that("test subsetting death table by a cohort table", {
   cdm2 <-  generateDeathCohortSet(cdm=cdm2,
                                  name = "death_cohort",
                                  cohortTable = "cohort1",
-                                 cohortId = 1,
-                                 overwrite = TRUE)
+                                 cohortId = 1)
 
   expect_true(nrow(cdm2$death_cohort %>% dplyr::collect()) == 2)
 
@@ -503,8 +501,7 @@ test_that("test single permanent table created", {
   start_tables <- attr(cdm2, "names")
 
   cdm2 <- generateDeathCohortSet(cdm=cdm2,
-                                name = "my_death_cohort",
-                                overwrite = TRUE)
+                                name = "my_death_cohort")
 
   end_tables <- attr(cdm2, "names")
 

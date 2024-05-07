@@ -12,11 +12,10 @@ survival data using the OMOP common data model.
 
 ## Installation
 
-You can install the development version of CohortSurvival like so:
+You can install CohortSurvival like so:
 
 ``` r
-install.packages("remotes")
-remotes::install_github("darwin-eu/CohortSurvival")
+install.packages("CohortSurvival")
 ```
 
 ## Example usage
@@ -27,51 +26,30 @@ The CohortSurvival package is designed to work with data in the OMOP CDM
 format, so our first step is to create a reference to the data using the
 CDMConnector package.
 
+For this example we´ll use a cdm reference containing the MGUS2 dataset
+from the survival package (which we transformed into a set of OMOP CDM
+style cohort tables). The mgus2 dataset contains survival data of 1341
+sequential patients with monoclonal gammopathy of undetermined
+significance (MGUS). For more information see `?survival::mgus2`
+
 ``` r
 library(CDMConnector)
 library(CohortSurvival)
 library(dplyr)
 library(ggplot2)
-```
 
-Creating a connection to a Postgres database would for example look
-like:
-
-``` r
-con <- DBI::dbConnect(RPostgres::Postgres(),
-  dbname = Sys.getenv("CDM5_POSTGRESQL_DBNAME"),
-  host = Sys.getenv("CDM5_POSTGRESQL_HOST"),
-  user = Sys.getenv("CDM5_POSTGRESQL_USER"),
-  password = Sys.getenv("CDM5_POSTGRESQL_PASSWORD")
-)
-
-cdm <- CDMConnector::cdm_from_con(con,
-  cdm_schema = Sys.getenv("CDM5_POSTGRESQL_CDM_SCHEMA"),
-  write_schema = Sys.getenv("CDM5_POSTGRESQL_RESULT_SCHEMA")
-)
-```
-
-### Example: MGUS
-
-For this example we´ll use a cdm reference containing the MGUS2 dataset
-from the survival package (which we transformed into a set of OMOP CDM
-style cohort tables). The mgus2 dataset contains survival data of 1341
-sequential patients with monoclonal gammopathy of undetermined
-significance (MGUS). For more information see ´?survival::mgus2´
-
-``` r
 cdm <- CohortSurvival::mockMGUS2cdm()
 ```
 
-In this example cdm reference we have three cohort tables of
-interest: 1) MGUS diagnosis cohort
+In our cdm reference we have three cohort tables of interest: 1) MGUS
+diagnosis cohort
 
 ``` r
 cdm$mgus_diagnosis %>%
   glimpse()
 #> Rows: ??
 #> Columns: 10
-#> Database: DuckDB v0.9.2 [eburn@Windows 10 x64:R 4.2.1/:memory:]
+#> Database: DuckDB v0.10.3-dev163 [eburn@Windows 10 x64:R 4.2.1/:memory:]
 #> $ cohort_definition_id <int> 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1…
 #> $ subject_id           <dbl> 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15…
 #> $ cohort_start_date    <date> 1981-01-01, 1968-01-01, 1980-01-01, 1977-01-01, …
@@ -91,7 +69,7 @@ cdm$progression %>%
   glimpse()
 #> Rows: ??
 #> Columns: 4
-#> Database: DuckDB v0.9.2 [eburn@Windows 10 x64:R 4.2.1/:memory:]
+#> Database: DuckDB v0.10.3-dev163 [eburn@Windows 10 x64:R 4.2.1/:memory:]
 #> $ cohort_definition_id <int> 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1…
 #> $ subject_id           <dbl> 56, 81, 83, 111, 124, 127, 147, 163, 165, 167, 18…
 #> $ cohort_start_date    <date> 1978-01-30, 1985-01-15, 1974-08-17, 1993-01-14, …
@@ -105,7 +83,7 @@ cdm$death_cohort %>%
   glimpse()
 #> Rows: ??
 #> Columns: 4
-#> Database: DuckDB v0.9.2 [eburn@Windows 10 x64:R 4.2.1/:memory:]
+#> Database: DuckDB v0.10.3-dev163 [eburn@Windows 10 x64:R 4.2.1/:memory:]
 #> $ cohort_definition_id <int> 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1…
 #> $ subject_id           <dbl> 1, 2, 3, 4, 5, 6, 7, 8, 10, 11, 12, 13, 14, 15, 1…
 #> $ cohort_start_date    <date> 1981-01-31, 1968-01-26, 1980-02-16, 1977-04-03, …
@@ -114,29 +92,50 @@ cdm$death_cohort %>%
 
 ### MGUS diagnosis to death
 
-We can get survival estimates for death following diagnosis like so:
+We can get survival estimates for death following MGUS diagnosis like
+so:
 
 ``` r
 MGUS_death <- estimateSingleEventSurvival(cdm,
   targetCohortTable = "mgus_diagnosis",
-  targetCohortId = 1,
-  outcomeCohortTable = "death_cohort",
-  outcomeCohortId = 1
+  outcomeCohortTable = "death_cohort"
 )
+MGUS_death |> 
+  glimpse()
+#> Rows: 1,318
+#> Columns: 13
+#> $ result_id        <int> 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,…
+#> $ cdm_name         <chr> "mock", "mock", "mock", "mock", "mock", "mock", "mock…
+#> $ group_name       <chr> "cohort", "cohort", "cohort", "cohort", "cohort", "co…
+#> $ group_level      <chr> "mgus_diagnosis", "mgus_diagnosis", "mgus_diagnosis",…
+#> $ strata_name      <chr> "overall", "overall", "overall", "overall", "overall"…
+#> $ strata_level     <chr> "overall", "overall", "overall", "overall", "overall"…
+#> $ variable_name    <chr> "survival_probability", "survival_probability", "surv…
+#> $ variable_level   <chr> "death_cohort", "death_cohort", "death_cohort", "deat…
+#> $ estimate_name    <chr> "estimate", "estimate_95CI_lower", "estimate_95CI_upp…
+#> $ estimate_type    <chr> "numeric", "numeric", "numeric", "numeric", "numeric"…
+#> $ estimate_value   <chr> "1", "1", "1", "0.9697", "0.9607", "0.9787", "0.9494"…
+#> $ additional_name  <chr> "time &&& outcome", "time &&& outcome", "time &&& out…
+#> $ additional_level <chr> "0 &&& death_cohort", "0 &&& death_cohort", "0 &&& de…
+```
 
+Now we have our results, we can quickly create a plot summarising
+survival over time.
+
+``` r
 plotSurvival(MGUS_death)
 ```
 
 <img src="man/figures/README-unnamed-chunk-8-1.png" width="100%" />
 
-### Stratified results
+As well as estimating survival for our cohort as overall, we can also
+estimate survival by strata. These strata are based on variables that
+have been added to our target cohort.
 
 ``` r
 MGUS_death <- estimateSingleEventSurvival(cdm,
   targetCohortTable = "mgus_diagnosis",
-  targetCohortId = 1,
   outcomeCohortTable = "death_cohort",
-  outcomeCohortId = 1, 
   strata = list(c("age_group"),
                 c("sex"),
                 c("age_group", "sex"))
@@ -149,29 +148,7 @@ plotSurvival(MGUS_death,
 
 <img src="man/figures/README-unnamed-chunk-9-1.png" width="100%" />
 
-### Summary statistics on survival
-
-We can summarise our results in a table.
-
-``` r
-tableSurvival(MGUS_death) 
-#> # A tibble: 9 × 10
-#>   cdm_name cohort         variable_level analysis_type outcome   age_group sex  
-#>   <chr>    <chr>          <chr>          <chr>         <chr>     <chr>     <chr>
-#> 1 mock     mgus_diagnosis death_cohort   single_event  death_co… overall   over…
-#> 2 mock     mgus_diagnosis death_cohort   single_event  death_co… <70       over…
-#> 3 mock     mgus_diagnosis death_cohort   single_event  death_co… >=70      over…
-#> 4 mock     mgus_diagnosis death_cohort   single_event  death_co… overall   F    
-#> 5 mock     mgus_diagnosis death_cohort   single_event  death_co… overall   M    
-#> 6 mock     mgus_diagnosis death_cohort   single_event  death_co… <70       F    
-#> 7 mock     mgus_diagnosis death_cohort   single_event  death_co… <70       M    
-#> 8 mock     mgus_diagnosis death_cohort   single_event  death_co… >=70      F    
-#> 9 mock     mgus_diagnosis death_cohort   single_event  death_co… >=70      M    
-#> # ℹ 3 more variables: number_records <dbl>, events <dbl>,
-#> #   `Median survival (95% CI)` <chr>
-```
-
-## Estimating survival with competing risk
+## Estimating survival accounting for a competing risk
 
 The package also allows to estimate survival of both an outcome and
 competing risk outcome. We can then stratify, see information on events,
@@ -189,31 +166,27 @@ plotSurvival(MGUS_death_prog, cumulativeFailure = TRUE,
              colour = "variable_level")
 ```
 
-<img src="man/figures/README-unnamed-chunk-11-1.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-10-1.png" width="100%" />
 
-## Estimating survival with competing risk and strata
-
-Similarly, we can ask for a competing risk survival and stratification
-of the results by variables added previously to the cohort given. The
-in-built function allows us to plot the results of the strata levels by
-discarding the ones for the overall cohort.
+As with single event survival, we can stratify our competing risk
+analysis.
 
 ``` r
 MGUS_death_prog <-  estimateCompetingRiskSurvival(cdm,
   targetCohortTable = "mgus_diagnosis",
   outcomeCohortTable = "progression",
   competingOutcomeCohortTable = "death_cohort",
-  strata = list(c("sex"))
+  strata = list(c("age_group", "sex"))
 )
 
 plotSurvival(MGUS_death_prog  %>%
-             dplyr::filter(strata_name != "Overall"), 
+             dplyr::filter(strata_name != "overall"), 
              cumulativeFailure = TRUE,
              facet = "strata_level",
              colour = "variable_level")
 ```
 
-<img src="man/figures/README-unnamed-chunk-12-1.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-11-1.png" width="100%" />
 
 ### Disconnect from the cdm database connection
 

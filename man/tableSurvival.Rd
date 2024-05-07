@@ -4,15 +4,42 @@
 \alias{tableSurvival}
 \title{Table with survival summary}
 \usage{
-tableSurvival(x, times = NULL)
+tableSurvival(
+  x,
+  times = NULL,
+  timeScale = "days",
+  splitStrata = TRUE,
+  header = c("estimate"),
+  type = "gt",
+  groupColumn = NULL,
+  .options = list()
+)
 }
 \arguments{
 \item{x}{Result from estimateSingleEventSurvival or estimateCompetingRiskSurvival}
 
 \item{times}{Times at which to report survival in the summary table}
+
+\item{timeScale}{Time unit to report survival in: days, months or years}
+
+\item{splitStrata}{If TRUE strata will be split into columns, otherwise
+"strata_name" and "strata_level" columns will be kept.}
+
+\item{header}{A vector containing which elements should go into the header.
+Allowed are: cdm_name, group, strata, additional, variable, estimate,
+and settings.}
+
+\item{type}{Type of desired formatted table, possibilities: "gt",
+"flextable",  and "tibble".}
+
+\item{groupColumn}{Columns to use as group labels.}
+
+\item{.options}{Named list with additional formatting options.
+CohortSurvival::optionsTableSurvival() shows allowed arguments and their
+default values.}
 }
 \value{
-A tibble containing a summary of observed survival in days
+A tibble containing a summary of observed survival in the required units
 }
 \description{
 Table with survival summary

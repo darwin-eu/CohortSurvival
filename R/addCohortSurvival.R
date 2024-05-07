@@ -199,6 +199,150 @@ addCohortSurvival <- function(x,
   return(x)
 }
 
+#' Add competing risk survival information to a cohort table
+#' @param x cohort table to add survival information
+#' @param cdm CDM reference
+#' @param outcomeCohortTable The outcome cohort table of interest.
+#' @param outcomeCohortId ID of event cohorts to include. Only one outcome
+#' (and so one ID) can be considered.
+#' @param outcomeDateVariable Variable containing date of outcome event
+#' @param outcomeWashout Washout time in days for the outcome
+#' @param outcomeCensorOnCohortExit If TRUE, an individual's follow up will be
+#' censored at their cohort exit
+#' @param outcomeCensorOnDate if not NULL, an individual's follow up will be censored
+#' at the given date
+#' @param outcomeFollowUpDays Number of days to follow up individuals (lower bound 1,
+#' upper bound Inf)
+#' @param competingOutcomeCohortTable The outcome cohort table of interest.
+#' @param competingOutcomeCohortId ID of event cohorts to include. Only one outcome
+#' (and so one ID) can be considered.
+#' @param competingOutcomeDateVariable Variable containing date of competing outcome event
+#' @param competingOutcomeWashout Washout time in days for the competing outcome
+#' @param competingOutcomeCensorOnCohortExit If TRUE, an individual's follow up will be
+#' censored at their cohort exit
+#' @param competingOutcomeCensorOnDate if not NULL, an individual's follow up will be censored
+#' at the given date
+#' @param competingOutcomeFollowUpDays Number of days to follow up individuals (lower bound 1,
+#' upper bound Inf)
+#'
+#' @return Two additional columns will be added to x. The "time" column will
+#' contain number of days to censoring. The "status" column will indicate
+#' whether the patient had the outcome event (value: 1), competing event (value:2)
+#' or did not have the event/is censored (value: 0)
+#' @export
+#'
+#' @examples
+#' \donttest{
+#'
+#' cdm <- mockMGUS2cdm()
+#' crsurvivaldata <- cdm$mgus_diagnosis %>%
+#'   addCompetingRiskCohortSurvival(
+#'     cdm = cdm,
+#'     outcomeCohortTable = "progression",
+#'     outcomeCohortId = 1,
+#'     competingOutcomeCohortTable = "death_cohort",
+#'     competingOutcomeCohortId = 1
+#'   )
+#'   }
+#'
+addCompetingRiskCohortSurvival <- function(x,
+                                           cdm,
+                                           outcomeCohortTable,
+                                           outcomeCohortId = 1,
+                                           outcomeDateVariable = "cohort_start_date",
+                                           outcomeWashout = Inf,
+                                           outcomeCensorOnCohortExit = FALSE,
+                                           outcomeCensorOnDate = NULL,
+                                           outcomeFollowUpDays = Inf,
+                                           competingOutcomeCohortTable,
+                                           competingOutcomeCohortId = 1,
+                                           competingOutcomeDateVariable = "cohort_start_date",
+                                           competingOutcomeWashout = Inf,
+                                           competingOutcomeCensorOnCohortExit = FALSE,
+                                           competingOutcomeCensorOnDate = NULL,
+                                           competingOutcomeFollowUpDays = Inf) {
+
+  validateExtractSurvivalInputs(
+    cdm = cdm,
+    cohortTable = x,
+    outcomeCohortTable = outcomeCohortTable,
+    outcomeCohortId = outcomeCohortId,
+    outcomeWashout = outcomeWashout,
+    censorOnCohortExit = outcomeCensorOnCohortExit,
+    censorOnDate = outcomeCensorOnDate,
+    followUpDays = outcomeFollowUpDays
+  )
+
+  validateExtractSurvivalInputs(
+    cdm = cdm,
+    cohortTable = x,
+    outcomeCohortTable = competingOutcomeCohortTable,
+    outcomeCohortId = competingOutcomeCohortId,
+    outcomeWashout = competingOutcomeWashout,
+    censorOnCohortExit = competingOutcomeCensorOnCohortExit,
+    censorOnDate = competingOutcomeCensorOnDate,
+    followUpDays = competingOutcomeFollowUpDays
+  )
+
+  # drop columns if they already exist
+  x <- x %>%
+    dplyr::select(!dplyr::any_of(c("days_to_exit",
+                                   "time",
+                                   "status")))
+  x <- x %>%
+    addCohortSurvival(
+      cdm,
+      outcomeCohortTable,
+      outcomeCohortId,
+      outcomeDateVariable,
+      outcomeWashout,
+      outcomeCensorOnCohortExit,
+      outcomeCensorOnDate,
+      outcomeFollowUpDays
+    ) %>%
+    dplyr::rename(
+      "outcome_time" = "time",
+      "outcome_status" = "status"
+    ) %>%
+    addCohortSurvival(
+      cdm,
+      competingOutcomeCohortTable,
+      competingOutcomeCohortId,
+      competingOutcomeDateVariable,
+      competingOutcomeWashout,
+      competingOutcomeCensorOnCohortExit,
+      competingOutcomeCensorOnDate,
+      competingOutcomeFollowUpDays
+    ) %>%
+    dplyr::rename(
+      "competing_risk_time" = "time",
+      "competing_risk_status" = "status"
+    ) %>%
+    dplyr::collect()
+
+  x <- x %>%
+    addCompetingRiskVars(
+      time1 = "outcome_time",
+      status1 = "outcome_status",
+      time2 = "competing_risk_time",
+      status2 = "competing_risk_status",
+      nameOutTime = "outcome_or_competing_time",
+      nameOutStatus = "outcome_or_competing_status"
+    )  %>%
+    dplyr::select(
+      - "outcome_status",
+      - "outcome_time",
+      - "competing_risk_status",
+      - "competing_risk_time"
+    ) %>%
+    dplyr::rename(
+      "time" = "outcome_or_competing_time",
+      "status" = "outcome_or_competing_status"
+    )
+
+  return(x)
+}
+
 
 validateExtractSurvivalInputs <- function(cdm,
                                           cohortTable,

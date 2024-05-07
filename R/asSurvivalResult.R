@@ -43,13 +43,16 @@ asSurvivalResult <- function(result) {
     cli::cli_abort("result is not a valid `summarised_result` object.")
   }
   result <- result %>%
-#    suppress(minCellCount = minCellCount) %>%
+    visOmopResults::addSettings() %>%
+    #    suppress(minCellCount = minCellCount) %>%
     dplyr::select(-c("package_name", "package_version", "estimate_type")) %>%
     visOmopResults::splitAdditional() %>%
     visOmopResults::splitGroup() %>%
     dplyr::mutate(estimate_value = as.numeric(.data$estimate_value))
   estimates <- result %>%
-    dplyr::filter(.data$result_type == 'survival_estimate') %>%
+    dplyr::filter(.data$variable_name %in%
+                    c("survival_probability",
+                      "cumulative_failure_probability")) %>%
     dplyr::select(-dplyr::any_of('eventgap')) %>%
     dplyr::mutate(time = as.numeric(.data$time))
   if("competing_outcome" %in% colnames(estimates)) {
@@ -61,10 +64,10 @@ asSurvivalResult <- function(result) {
       dplyr::relocate("outcome", .after = "cohort")
   }
   summary <- result %>%
-    dplyr::filter(.data$result_type == 'survival_summary') %>%
+    dplyr::filter(.data$variable_name == 'survival_summary') %>%
     dplyr::select(-dplyr::any_of(c('variable_name', 'time', 'eventgap')))
   events <- result %>%
-    dplyr::filter(.data$result_type == 'survival_events') %>%
+    dplyr::filter(.data$variable_name == 'survival_events') %>%
     dplyr::select(-dplyr::any_of('variable_name')) %>%
     dplyr::distinct() %>%
     dplyr::mutate(time = as.numeric(.data$time))

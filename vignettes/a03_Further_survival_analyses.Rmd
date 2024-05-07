@@ -1,0 +1,97 @@
+---
+title: "Further survival analyses"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{a03_Further_survival_analyses}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE, warning = FALSE, message = FALSE,
+  comment = "#>"
+)
+```
+
+
+## Set up
+
+Let's first load the packages required.
+
+```{r}
+library(CDMConnector)
+library(CohortSurvival)
+library(dplyr)
+library(cmprsk)
+library(survival)
+```
+
+We'll create a cdm reference to use our example MGUS2 survival dataset. In practice you would use the CDMConnector package to connect to your data mapped to the OMOP CDM.
+
+```{r}
+cdm <- CohortSurvival::mockMGUS2cdm()
+```
+
+The CohortSurvival package does not have implemented functionality to do more complex survival analyses than Kaplar Meier
+curves, like Cox Proportional Hazards modelling. However, the format the data has to be in to be inputted to well-known 
+modelling functions from packages like `survival` or `cmprsk`can be retrieved from OMOP data with some in-built functions in
+this package. Let's see how to do it in both single event and competing risk survival settings.
+
+## Further analysis with single event survival
+
+To get the `time` and `status` information we need for the `coxph` function in the package `survival`, for instance, we only
+need to call `addCohortSurvival`. The stratification variables need to be columns previously added to the cohort by the user.
+
+```{r, fig.width=5}
+input_survival_single <- cdm$mgus_diagnosis %>%
+       addCohortSurvival(
+       cdm = cdm,
+       outcomeCohortTable = "death_cohort",
+       outcomeCohortId = 1
+       ) 
+
+input_survival_single %>% 
+  glimpse()
+```
+This information should be enough to call any advanced function, like:
+
+```{r}
+survival::coxph(survival::Surv(time, status) ~ age + sex, data = input_survival_single)
+survival::survdiff(survival::Surv(time, status) ~ sex, data = input_survival_single)
+```
+## Further analysis with competing risk survival
+
+For competing risk, there is a similar function that adds `time` and `status` information to the cohort of interest. We only need to specify which are the outcome and competing outcome of interest. We can also choose other options such as follow up time, censoring on a specific date, washout periods, or others. 
+
+```{r}
+input_survival_cr <- cdm$mgus_diagnosis %>%
+  addCompetingRiskCohortSurvival(
+    cdm = cdm,
+    outcomeCohortTable = "progression",
+    outcomeCohortId = 1,
+    competingOutcomeCohortTable = "death_cohort",
+    competingOutcomeCohortId = 1
+  ) %>% 
+  glimpse()
+```
+We can use the package `cmprsk` to fit a Fine and Gray model to the competing risk data. We first change our `sex` covariate to numeric.
+
+```{r, fig.height=6, fig.width=8}
+input_survival_cr <- input_survival_cr %>%
+  dplyr::mutate(sex = dplyr::if_else(sex == "M", 0, 1))
+
+covs <- data.frame(input_survival_cr$age, input_survival_cr$sex)
+names(covs) <- c("age", "sex")
+
+summary(cmprsk::crr(ftime = input_survival_cr$time,
+            fstatus = input_survival_cr$status,
+            cov1 = covs,
+            failcode = 1,
+            cencode = 0))
+```
+## Disconnect from the cdm database connection
+
+```{r}
+cdm_disconnect(cdm)
+```

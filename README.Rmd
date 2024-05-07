@@ -16,18 +16,16 @@ knitr::opts_chunk$set(
 
 # CohortSurvival <img src="man/figures/hexsticker.png" align="right" height="139"/>
 
-[![CRANstatus](https://www.r-pkg.org/badges/version/CohortSurvival)](https://CRAN.R-project.org/package=CohortSurvival)[![codecov.io](https://codecov.io/github/darwin-eu/CohortSurvival/coverage.svg?branch=main)](https://app.codecov.io/github/darwin-eu/CohortSurvival?branch=main)
-[![R-CMD-check](https://github.com/darwin-eu/CohortSurvival/workflows/R-CMD-check/badge.svg)](https://github.com/darwin-eu/CohortSurvival/actions) [![Lifecycle:Experimental](https://img.shields.io/badge/Lifecycle-Experimental-339999)](https://lifecycle.r-lib.org/articles/stages.html)
+[![CRANstatus](https://www.r-pkg.org/badges/version/CohortSurvival)](https://CRAN.R-project.org/package=CohortSurvival)[![codecov.io](https://codecov.io/github/darwin-eu/CohortSurvival/coverage.svg?branch=main)](https://app.codecov.io/github/darwin-eu/CohortSurvival?branch=main) [![R-CMD-check](https://github.com/darwin-eu/CohortSurvival/workflows/R-CMD-check/badge.svg)](https://github.com/darwin-eu/CohortSurvival/actions) [![Lifecycle:Experimental](https://img.shields.io/badge/Lifecycle-Experimental-339999)](https://lifecycle.r-lib.org/articles/stages.html)
 
 CohortSurvival contains functions for extracting and summarising survival data using the OMOP common data model.
 
 ## Installation
 
-You can install the development version of CohortSurvival like so:
+You can install CohortSurvival like so:
 
 ```{r, eval=FALSE}
-install.packages("remotes")
-remotes::install_github("darwin-eu/CohortSurvival")
+install.packages("CohortSurvival")
 ```
 
 ## Example usage
@@ -36,38 +34,18 @@ remotes::install_github("darwin-eu/CohortSurvival")
 
 The CohortSurvival package is designed to work with data in the OMOP CDM format, so our first step is to create a reference to the data using the CDMConnector package.
 
-```{r example}
+For this example we´ll use a cdm reference containing the MGUS2 dataset from the survival package (which we transformed into a set of OMOP CDM style cohort tables). The mgus2 dataset contains survival data of 1341 sequential patients with monoclonal gammopathy of undetermined significance (MGUS). For more information see `?survival::mgus2`
+
+```{r}
 library(CDMConnector)
 library(CohortSurvival)
 library(dplyr)
 library(ggplot2)
-```
 
-Creating a connection to a Postgres database would for example look like:
-
-```{r, eval=FALSE}
-con <- DBI::dbConnect(RPostgres::Postgres(),
-  dbname = Sys.getenv("CDM5_POSTGRESQL_DBNAME"),
-  host = Sys.getenv("CDM5_POSTGRESQL_HOST"),
-  user = Sys.getenv("CDM5_POSTGRESQL_USER"),
-  password = Sys.getenv("CDM5_POSTGRESQL_PASSWORD")
-)
-
-cdm <- CDMConnector::cdm_from_con(con,
-  cdm_schema = Sys.getenv("CDM5_POSTGRESQL_CDM_SCHEMA"),
-  write_schema = Sys.getenv("CDM5_POSTGRESQL_RESULT_SCHEMA")
-)
-```
-
-### Example: MGUS
-
-For this example we´ll use a cdm reference containing the MGUS2 dataset from the survival package (which we transformed into a set of OMOP CDM style cohort tables). The mgus2 dataset contains survival data of 1341 sequential patients with monoclonal gammopathy of undetermined significance (MGUS). For more information see ´?survival::mgus2´
-
-```{r}
 cdm <- CohortSurvival::mockMGUS2cdm()
 ```
 
-In this example cdm reference we have three cohort tables of interest: 1) MGUS diagnosis cohort
+In our cdm reference we have three cohort tables of interest: 1) MGUS diagnosis cohort
 
 ```{r}
 cdm$mgus_diagnosis %>%
@@ -90,27 +68,29 @@ cdm$death_cohort %>%
 
 ### MGUS diagnosis to death
 
-We can get survival estimates for death following diagnosis like so:
+We can get survival estimates for death following MGUS diagnosis like so:
 
 ```{r}
 MGUS_death <- estimateSingleEventSurvival(cdm,
   targetCohortTable = "mgus_diagnosis",
-  targetCohortId = 1,
-  outcomeCohortTable = "death_cohort",
-  outcomeCohortId = 1
+  outcomeCohortTable = "death_cohort"
 )
+MGUS_death |> 
+  glimpse()
+```
 
+Now we have our results, we can quickly create a plot summarising survival over time.
+
+```{r}
 plotSurvival(MGUS_death)
 ```
 
-### Stratified results
+As well as estimating survival for our cohort as overall, we can also estimate survival by strata. These strata are based on variables that have been added to our target cohort.
 
 ```{r}
 MGUS_death <- estimateSingleEventSurvival(cdm,
   targetCohortTable = "mgus_diagnosis",
-  targetCohortId = 1,
   outcomeCohortTable = "death_cohort",
-  outcomeCohortId = 1, 
   strata = list(c("age_group"),
                 c("sex"),
                 c("age_group", "sex"))
@@ -121,16 +101,7 @@ plotSurvival(MGUS_death,
              facet= "strata_name")
 ```
 
-### Summary statistics on survival
-
-We can summarise our results in a table.
-
-```{r}
-tableSurvival(MGUS_death) 
-```
-
-
-## Estimating survival with competing risk
+## Estimating survival accounting for a competing risk
 
 The package also allows to estimate survival of both an outcome and competing risk outcome. We can then stratify, see information on events, summarise the estimates and check the contributing participants in the same way we did for the single event survival analysis.
 
@@ -145,25 +116,21 @@ plotSurvival(MGUS_death_prog, cumulativeFailure = TRUE,
              colour = "variable_level")
 ```
 
-
-## Estimating survival with competing risk and strata
-
-Similarly, we can ask for a competing risk survival and stratification of the results by variables added previously to the cohort given. The in-built function allows us to plot the results of the strata levels by discarding the ones for the overall cohort.
+As with single event survival, we can stratify our competing risk analysis.
 
 ```{r}
 MGUS_death_prog <-  estimateCompetingRiskSurvival(cdm,
   targetCohortTable = "mgus_diagnosis",
   outcomeCohortTable = "progression",
   competingOutcomeCohortTable = "death_cohort",
-  strata = list(c("sex"))
+  strata = list(c("age_group", "sex"))
 )
 
 plotSurvival(MGUS_death_prog  %>%
-             dplyr::filter(strata_name != "Overall"), 
+             dplyr::filter(strata_name != "overall"), 
              cumulativeFailure = TRUE,
              facet = "strata_level",
              colour = "variable_level")
-
 ```
 
 ### Disconnect from the cdm database connection

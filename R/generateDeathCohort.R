@@ -21,7 +21,6 @@
 #' @param name name for the created death cohort table
 #' @param cohortTable name of the cohort table to create a death cohort for
 #' @param cohortId name of the cohort table to create a death cohort for
-#' @param overwrite	Should the cohort table be overwritten if it already exists?
 #'
 #' @return A cohort table with a death cohort in cdm
 #' @export
@@ -69,37 +68,31 @@
 #'  db <- DBI::dbConnect(duckdb::duckdb(), ":memory:")
 #' cdm2 = CDMConnector::copy_cdm_to(db,
 #'                                  cdm,
-#'                                  schema = "main",
-#'                                  overwrite = TRUE)
+#'                                  schema = "main")
 #'
 #' attr(cdm2, "cdm_schema") <- "main"
 #' attr(cdm2, "write_schema") <- "main"
 #'
 #' cdm2 <- generateDeathCohortSet(cdm=cdm2,
-#'                                name = "death_cohort",
-#'                                overwrite = TRUE)
+#'                                name = "death_cohort")
 #' }
 
 generateDeathCohortSet <- function(
     cdm,
     name,
     cohortTable = NULL,
-    cohortId = NULL,
-    overwrite = FALSE){
+    cohortId = NULL){
 
   # 0. validate inputs...
   checkCdm(cdm, tables = c("death", "observation_period"))
-  checkmate::assertNumeric(cohortId, any.missing = FALSE, null.ok = TRUE)
+  checkmate::assertNumeric(cohortId, any.missing = FALSE, null.ok = TRUE, len = 1)
   checkmate::assertCharacter(name, min.chars = 1, any.missing = FALSE, len = 1)
 
   x <-  cdm$death %>%
     PatientProfiles::addInObservation(indexDate = "death_date") %>%
     dplyr::filter(.data$in_observation==1) %>%
-    dplyr::select("person_id", "death_date")
-
-  x <- x %>%
-    dplyr::select("person_id", "death_date") %>%
-    dplyr::rename("subject_id" = "person_id")
+    dplyr::select("subject_id" = "person_id",
+                  "death_date")
 
   # 1. cohortTable and cohortId
   if (!is.null(cohortTable)){
@@ -139,7 +132,7 @@ generateDeathCohortSet <- function(
     dplyr::compute(
       name = name,
       temporary = FALSE,
-      overwrite = overwrite)
+      overwrite = TRUE)
 
   attr(cohortRef, "tbl_name") <- name
 

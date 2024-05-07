@@ -10,6 +10,7 @@ vignette: >
 ```{r, include = FALSE}
 knitr::opts_chunk$set(
   collapse = TRUE, warning = FALSE, message = FALSE,
+  out.width = "100%",
   comment = "#>"
 )
 ```
@@ -67,9 +68,8 @@ plotSurvival(MGUS_death)
 
 Our returned results also have attributes containing information that summarises survival. 
 ```{r}
-tableSurvival(MGUS_death, times = c(100,200,300,400)) 
+tableSurvival(MGUS_death) 
 ```
-
 
 ## With stratification
 To estimate survival for particular strata of interest we need these features to have been added to the target cohort table. Once we have them defined, and as seen above we already have a number of example characteristics added to our diagnosis cohort, we can add stratifications like so.
@@ -93,8 +93,7 @@ plotSurvival(MGUS_death,
 And we also now have summary statistics for each of the strata as well as overall.
 
 ```{r}
-tableSurvival(MGUS_death, 
-                times = c(100,200,300,400))
+tableSurvival(MGUS_death)
 ```
 
 ## Summarising participants

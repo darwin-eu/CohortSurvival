@@ -10,6 +10,7 @@ vignette: >
 ```{r, include = FALSE}
 knitr::opts_chunk$set(
   collapse = TRUE, warning = FALSE, message = FALSE,
+  out.width = "100%",
   comment = "#>"
 )
 ```
@@ -32,7 +33,7 @@ We'll create a cdm reference to use our example MGUS2 survival dataset. In pract
 cdm <- CohortSurvival::mockMGUS2cdm()
 ```
 
-We will proceed as we did with the single event survival, but this time we will also use a competing risk cohort of progression of the disease.
+We will proceed as we did with the single event survival, but this time we are considering an event of interest (progression of disease) with a competing risk (mortality).
 
 We would typically need to define study cohorts ourselves, but in the case of our example data we already have these cohorts available. You can see for our diagnosis cohort we also have a number of additional features recorded for individuals which we'll use for stratification.
 
@@ -65,15 +66,16 @@ MGUS_death_prog %>%
  
 As we can see above our results have been outputted in long format. We can plot these results like so.
 
-```{r}
+```{r, out.width = "75%"}
 plotSurvival(MGUS_death_prog, cumulativeFailure = TRUE,
-             colour = "variable_level")
+             colour = "variable_level") + 
+  theme(legend.position = "top")
 ```
 
 Our returned results also have attributes containing information that summarises survival. 
 
 ```{r}
-tableSurvival(MGUS_death_prog, times = c(100,200,300,400)) 
+tableSurvival(MGUS_death_prog) 
 ```
 
 
@@ -104,7 +106,7 @@ plotSurvival(MGUS_death_prog %>%
 And we also now have summary statistics for each of the strata as well as overall.
 
 ```{r}
-tableSurvival(MGUS_death_prog, times = c(50,150,365))
+tableSurvival(MGUS_death_prog)
 ```
 
 ## Summarising participants

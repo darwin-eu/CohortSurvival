@@ -62,16 +62,8 @@ checkCohortId <- function(cohort, cohortId) {
   )
   checkmate::reportAssertions(collection = errorMessage)
 
-  cohortIdPresent <- list()
-  for (i in seq_along(cohortId)) {
-    workingId <- cohortId[[i]]
-    cohortIdPresent[[i]] <- (cohort %>%
-      dplyr::filter(.data$cohort_definition_id == .env$workingId) %>%
-      dplyr::tally() %>%
-      dplyr::pull("n") > 0)
-  }
-  cohortIdPresent <- all(unlist(cohortIdPresent))
-  return(cohortIdPresent)
+  nrow(omopgenerics::settings(cohort) |>
+    dplyr::filter(.data$cohort_definition_id %in% .env$cohortId)) == length(cohortId)
 }
 
 checkStrata <- function(strata, x) {

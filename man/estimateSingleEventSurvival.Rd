@@ -18,6 +18,7 @@ estimateSingleEventSurvival(
   strata = NULL,
   eventGap = 30,
   estimateGap = 1,
+  restrictedMeanFollowUp = NULL,
   minimumSurvivalDays = 1,
   minCellCount = 5,
   returnParticipants = FALSE
@@ -57,6 +58,9 @@ events, which are grouped into the specified intervals.}
 estimates. First day will be day zero with risk estimates provided
 for times up to the end of follow-up, with a gap in days equivalent
 to eventGap.}
+
+\item{restrictedMeanFollowUp}{number of days of follow-up to take into account
+when calculating restricted mean for all cohorts}
 
 \item{minimumSurvivalDays}{Minimum number of days required for the main cohort
 to have survived}

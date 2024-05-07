@@ -4,13 +4,7 @@
 \alias{generateDeathCohortSet}
 \title{To create a death cohort}
 \usage{
-generateDeathCohortSet(
-  cdm,
-  name,
-  cohortTable = NULL,
-  cohortId = NULL,
-  overwrite = FALSE
-)
+generateDeathCohortSet(cdm, name, cohortTable = NULL, cohortId = NULL)
 }
 \arguments{
 \item{cdm}{CDM reference}
@@ -20,8 +14,6 @@ generateDeathCohortSet(
 \item{cohortTable}{name of the cohort table to create a death cohort for}
 
 \item{cohortId}{name of the cohort table to create a death cohort for}
-
-\item{overwrite}{Should the cohort table be overwritten if it already exists?}
 }
 \value{
 A cohort table with a death cohort in cdm
@@ -72,14 +64,12 @@ cdm <- omopgenerics::cdmFromTables(
  db <- DBI::dbConnect(duckdb::duckdb(), ":memory:")
 cdm2 = CDMConnector::copy_cdm_to(db,
                                  cdm,
-                                 schema = "main",
-                                 overwrite = TRUE)
+                                 schema = "main")
 
 attr(cdm2, "cdm_schema") <- "main"
 attr(cdm2, "write_schema") <- "main"
 
 cdm2 <- generateDeathCohortSet(cdm=cdm2,
-                               name = "death_cohort",
-                               overwrite = TRUE)
+                               name = "death_cohort")
 }
 }
