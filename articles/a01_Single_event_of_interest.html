@@ -26,7 +26,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">CohortSurvival</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.1</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -98,7 +98,7 @@ stratification.</p>
 <span>  <span class="fu"><a href="https://pillar.r-lib.org/reference/glimpse.html" class="external-link">glimpse</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Rows: ??</span></span>
 <span><span class="co">#&gt; Columns: 10</span></span>
-<span><span class="co">#&gt; Database: DuckDB v0.10.2 [unknown@Linux 6.5.0-1018-azure:R 4.4.0/:memory:]</span></span>
+<span><span class="co">#&gt; Database: DuckDB v0.10.2 [unknown@Linux 6.5.0-1021-azure:R 4.4.0/:memory:]</span></span>
 <span><span class="co">#&gt; $ cohort_definition_id <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1…</span></span>
 <span><span class="co">#&gt; $ subject_id           <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15…</span></span>
 <span><span class="co">#&gt; $ cohort_start_date    <span style="color: #949494; font-style: italic;">&lt;date&gt;</span> 1981-01-01, 1968-01-01, 1980-01-01, 1977-01-01, …</span></span>
@@ -108,13 +108,14 @@ stratification.</p>
 <span><span class="co">#&gt; $ hgb                  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> 13.1, 11.5, 10.5, 15.2, 10.7, 12.9, 10.5, 12.3, 1…</span></span>
 <span><span class="co">#&gt; $ creat                <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> 1.30, 1.20, 1.50, 1.20, 0.80, 1.00, 0.90, 1.20, 0…</span></span>
 <span><span class="co">#&gt; $ mspike               <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> 0.5, 2.0, 2.6, 1.2, 1.0, 0.5, 1.3, 1.6, 2.4, 2.3,…</span></span>
-<span><span class="co">#&gt; $ age_group            <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "&gt;=70", "&gt;=70", "&gt;=70", "&lt;70", "&gt;=70", "&gt;=70", "&gt;…</span></span>
-<span></span>
+<span><span class="co">#&gt; $ age_group            <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "&gt;=70", "&gt;=70", "&gt;=70", "&lt;70", "&gt;=70", "&gt;=70", "&gt;…</span></span></code></pre></div>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span></span>
 <span><span class="va">cdm</span><span class="op">$</span><span class="va">death_cohort</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> </span>
 <span>  <span class="fu"><a href="https://pillar.r-lib.org/reference/glimpse.html" class="external-link">glimpse</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Rows: ??</span></span>
 <span><span class="co">#&gt; Columns: 4</span></span>
-<span><span class="co">#&gt; Database: DuckDB v0.10.2 [unknown@Linux 6.5.0-1018-azure:R 4.4.0/:memory:]</span></span>
+<span><span class="co">#&gt; Database: DuckDB v0.10.2 [unknown@Linux 6.5.0-1021-azure:R 4.4.0/:memory:]</span></span>
 <span><span class="co">#&gt; $ cohort_definition_id <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1…</span></span>
 <span><span class="co">#&gt; $ subject_id           <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> 1, 2, 3, 4, 5, 6, 7, 8, 10, 11, 12, 13, 14, 15, 1…</span></span>
 <span><span class="co">#&gt; $ cohort_start_date    <span style="color: #949494; font-style: italic;">&lt;date&gt;</span> 1981-01-31, 1968-01-26, 1980-02-16, 1977-04-03, …</span></span>
@@ -125,7 +126,7 @@ stratification.</p>
 </h2>
 <p>First, we can estimate survival for the cohort overall like so. Note
 that the output will be in a summarised result format.</p>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">MGUS_death</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/estimateSingleEventSurvival.html">estimateSingleEventSurvival</a></span><span class="op">(</span><span class="va">cdm</span>,</span>
 <span>  targetCohortTable <span class="op">=</span> <span class="st">"mgus_diagnosis"</span>,</span>
 <span>  outcomeCohortTable <span class="op">=</span> <span class="st">"death_cohort"</span></span>
@@ -146,13 +147,14 @@ that the output will be in a summarised result format.</p>
 <span><span class="co">#&gt; $ estimate_type    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "numeric", "numeric", "numeric", "numeric", "numeric"…</span></span>
 <span><span class="co">#&gt; $ estimate_value   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "1", "1", "1", "0.9697", "0.9607", "0.9787", "0.9494"…</span></span>
 <span><span class="co">#&gt; $ additional_name  <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "time &amp;&amp;&amp; outcome", "time &amp;&amp;&amp; outcome", "time &amp;&amp;&amp; out…</span></span>
-<span><span class="co">#&gt; $ additional_level <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "0 &amp;&amp;&amp; death_cohort", "0 &amp;&amp;&amp; death_cohort", "0 &amp;&amp;&amp; de…</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/class.html" class="external-link">class</a></span><span class="op">(</span><span class="va">MGUS_death</span><span class="op">)</span></span>
+<span><span class="co">#&gt; $ additional_level <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "0 &amp;&amp;&amp; death_cohort", "0 &amp;&amp;&amp; death_cohort", "0 &amp;&amp;&amp; de…</span></span></code></pre></div>
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/class.html" class="external-link">class</a></span><span class="op">(</span><span class="va">MGUS_death</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] "summarised_result" "omop_result"       "tbl_df"           </span></span>
 <span><span class="co">#&gt; [4] "tbl"               "data.frame"</span></span></code></pre></div>
 <p>We can though convert the result to be in a survival format using
 asSurvivalResult()</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">MGUS_death</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> </span>
 <span>  <span class="fu"><a href="../reference/asSurvivalResult.html">asSurvivalResult</a></span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="https://pillar.r-lib.org/reference/glimpse.html" class="external-link">glimpse</a></span><span class="op">(</span><span class="op">)</span></span>
@@ -173,30 +175,30 @@ asSurvivalResult()</p>
 <span><span class="co">#&gt; $ analysis_type  <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "single_event", "single_event", "single_event", "single…</span></span></code></pre></div>
 <p>As we can see above our results have been outputted in long format.
 We can plot these results like so.</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/plotSurvival.html">plotSurvival</a></span><span class="op">(</span><span class="va">MGUS_death</span><span class="op">)</span></span></code></pre></div>
 <p><img src="a01_Single_event_of_interest_files/figure-html/unnamed-chunk-7-1.png" width="100%"></p>
 <p>Our returned results also have attributes containing information that
 summarises survival.</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/tableSurvival.html">tableSurvival</a></span><span class="op">(</span><span class="va">MGUS_death</span><span class="op">)</span> </span></code></pre></div>
-<div id="kssmwbhicv" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
-<style>#kssmwbhicv table {
+<div id="cbqlvpytyo" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
+<style>#cbqlvpytyo table {
   font-family: system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-#kssmwbhicv thead, #kssmwbhicv tbody, #kssmwbhicv tfoot, #kssmwbhicv tr, #kssmwbhicv td, #kssmwbhicv th {
+#cbqlvpytyo thead, #cbqlvpytyo tbody, #cbqlvpytyo tfoot, #cbqlvpytyo tr, #cbqlvpytyo td, #cbqlvpytyo th {
   border-style: none;
 }
 
-#kssmwbhicv p {
+#cbqlvpytyo p {
   margin: 0;
   padding: 0;
 }
 
-#kssmwbhicv .gt_table {
+#cbqlvpytyo .gt_table {
   display: table;
   border-collapse: collapse;
   line-height: normal;
@@ -222,12 +224,12 @@ summarises survival.</p>
   border-left-color: #D3D3D3;
 }
 
-#kssmwbhicv .gt_caption {
+#cbqlvpytyo .gt_caption {
   padding-top: 4px;
   padding-bottom: 4px;
 }
 
-#kssmwbhicv .gt_title {
+#cbqlvpytyo .gt_title {
   color: #333333;
   font-size: 125%;
   font-weight: initial;
@@ -239,7 +241,7 @@ summarises survival.</p>
   border-bottom-width: 0;
 }
 
-#kssmwbhicv .gt_subtitle {
+#cbqlvpytyo .gt_subtitle {
   color: #333333;
   font-size: 85%;
   font-weight: initial;
@@ -251,7 +253,7 @@ summarises survival.</p>
   border-top-width: 0;
 }
 
-#kssmwbhicv .gt_heading {
+#cbqlvpytyo .gt_heading {
   background-color: #FFFFFF;
   text-align: center;
   border-bottom-color: #FFFFFF;
@@ -263,13 +265,13 @@ summarises survival.</p>
   border-right-color: #D3D3D3;
 }
 
-#kssmwbhicv .gt_bottom_border {
+#cbqlvpytyo .gt_bottom_border {
   border-bottom-style: solid;
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
 }
 
-#kssmwbhicv .gt_col_headings {
+#cbqlvpytyo .gt_col_headings {
   border-top-style: solid;
   border-top-width: 2px;
   border-top-color: #D3D3D3;
@@ -284,7 +286,7 @@ summarises survival.</p>
   border-right-color: #D3D3D3;
 }
 
-#kssmwbhicv .gt_col_heading {
+#cbqlvpytyo .gt_col_heading {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -304,7 +306,7 @@ summarises survival.</p>
   overflow-x: hidden;
 }
 
-#kssmwbhicv .gt_column_spanner_outer {
+#cbqlvpytyo .gt_column_spanner_outer {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -316,15 +318,15 @@ summarises survival.</p>
   padding-right: 4px;
 }
 
-#kssmwbhicv .gt_column_spanner_outer:first-child {
+#cbqlvpytyo .gt_column_spanner_outer:first-child {
   padding-left: 0;
 }
 
-#kssmwbhicv .gt_column_spanner_outer:last-child {
+#cbqlvpytyo .gt_column_spanner_outer:last-child {
   padding-right: 0;
 }
 
-#kssmwbhicv .gt_column_spanner {
+#cbqlvpytyo .gt_column_spanner {
   border-bottom-style: solid;
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
@@ -336,11 +338,11 @@ summarises survival.</p>
   width: 100%;
 }
 
-#kssmwbhicv .gt_spanner_row {
+#cbqlvpytyo .gt_spanner_row {
   border-bottom-style: hidden;
 }
 
-#kssmwbhicv .gt_group_heading {
+#cbqlvpytyo .gt_group_heading {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -366,7 +368,7 @@ summarises survival.</p>
   text-align: left;
 }
 
-#kssmwbhicv .gt_empty_group_heading {
+#cbqlvpytyo .gt_empty_group_heading {
   padding: 0.5px;
   color: #333333;
   background-color: #FFFFFF;
@@ -381,15 +383,15 @@ summarises survival.</p>
   vertical-align: middle;
 }
 
-#kssmwbhicv .gt_from_md > :first-child {
+#cbqlvpytyo .gt_from_md > :first-child {
   margin-top: 0;
 }
 
-#kssmwbhicv .gt_from_md > :last-child {
+#cbqlvpytyo .gt_from_md > :last-child {
   margin-bottom: 0;
 }
 
-#kssmwbhicv .gt_row {
+#cbqlvpytyo .gt_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -408,7 +410,7 @@ summarises survival.</p>
   overflow-x: hidden;
 }
 
-#kssmwbhicv .gt_stub {
+#cbqlvpytyo .gt_stub {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -421,7 +423,7 @@ summarises survival.</p>
   padding-right: 5px;
 }
 
-#kssmwbhicv .gt_stub_row_group {
+#cbqlvpytyo .gt_stub_row_group {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -435,15 +437,15 @@ summarises survival.</p>
   vertical-align: top;
 }
 
-#kssmwbhicv .gt_row_group_first td {
+#cbqlvpytyo .gt_row_group_first td {
   border-top-width: 2px;
 }
 
-#kssmwbhicv .gt_row_group_first th {
+#cbqlvpytyo .gt_row_group_first th {
   border-top-width: 2px;
 }
 
-#kssmwbhicv .gt_summary_row {
+#cbqlvpytyo .gt_summary_row {
   color: #333333;
   background-color: #FFFFFF;
   text-transform: inherit;
@@ -453,16 +455,16 @@ summarises survival.</p>
   padding-right: 5px;
 }
 
-#kssmwbhicv .gt_first_summary_row {
+#cbqlvpytyo .gt_first_summary_row {
   border-top-style: solid;
   border-top-color: #D3D3D3;
 }
 
-#kssmwbhicv .gt_first_summary_row.thick {
+#cbqlvpytyo .gt_first_summary_row.thick {
   border-top-width: 2px;
 }
 
-#kssmwbhicv .gt_last_summary_row {
+#cbqlvpytyo .gt_last_summary_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -472,7 +474,7 @@ summarises survival.</p>
   border-bottom-color: #D3D3D3;
 }
 
-#kssmwbhicv .gt_grand_summary_row {
+#cbqlvpytyo .gt_grand_summary_row {
   color: #333333;
   background-color: #FFFFFF;
   text-transform: inherit;
@@ -482,7 +484,7 @@ summarises survival.</p>
   padding-right: 5px;
 }
 
-#kssmwbhicv .gt_first_grand_summary_row {
+#cbqlvpytyo .gt_first_grand_summary_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -492,7 +494,7 @@ summarises survival.</p>
   border-top-color: #D3D3D3;
 }
 
-#kssmwbhicv .gt_last_grand_summary_row_top {
+#cbqlvpytyo .gt_last_grand_summary_row_top {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -502,11 +504,11 @@ summarises survival.</p>
   border-bottom-color: #D3D3D3;
 }
 
-#kssmwbhicv .gt_striped {
+#cbqlvpytyo .gt_striped {
   background-color: rgba(128, 128, 128, 0.05);
 }
 
-#kssmwbhicv .gt_table_body {
+#cbqlvpytyo .gt_table_body {
   border-top-style: solid;
   border-top-width: 2px;
   border-top-color: #D3D3D3;
@@ -515,7 +517,7 @@ summarises survival.</p>
   border-bottom-color: #D3D3D3;
 }
 
-#kssmwbhicv .gt_footnotes {
+#cbqlvpytyo .gt_footnotes {
   color: #333333;
   background-color: #FFFFFF;
   border-bottom-style: none;
@@ -529,7 +531,7 @@ summarises survival.</p>
   border-right-color: #D3D3D3;
 }
 
-#kssmwbhicv .gt_footnote {
+#cbqlvpytyo .gt_footnote {
   margin: 0px;
   font-size: 90%;
   padding-top: 4px;
@@ -538,7 +540,7 @@ summarises survival.</p>
   padding-right: 5px;
 }
 
-#kssmwbhicv .gt_sourcenotes {
+#cbqlvpytyo .gt_sourcenotes {
   color: #333333;
   background-color: #FFFFFF;
   border-bottom-style: none;
@@ -552,7 +554,7 @@ summarises survival.</p>
   border-right-color: #D3D3D3;
 }
 
-#kssmwbhicv .gt_sourcenote {
+#cbqlvpytyo .gt_sourcenote {
   font-size: 90%;
   padding-top: 4px;
   padding-bottom: 4px;
@@ -560,63 +562,63 @@ summarises survival.</p>
   padding-right: 5px;
 }
 
-#kssmwbhicv .gt_left {
+#cbqlvpytyo .gt_left {
   text-align: left;
 }
 
-#kssmwbhicv .gt_center {
+#cbqlvpytyo .gt_center {
   text-align: center;
 }
 
-#kssmwbhicv .gt_right {
+#cbqlvpytyo .gt_right {
   text-align: right;
   font-variant-numeric: tabular-nums;
 }
 
-#kssmwbhicv .gt_font_normal {
+#cbqlvpytyo .gt_font_normal {
   font-weight: normal;
 }
 
-#kssmwbhicv .gt_font_bold {
+#cbqlvpytyo .gt_font_bold {
   font-weight: bold;
 }
 
-#kssmwbhicv .gt_font_italic {
+#cbqlvpytyo .gt_font_italic {
   font-style: italic;
 }
 
-#kssmwbhicv .gt_super {
+#cbqlvpytyo .gt_super {
   font-size: 65%;
 }
 
-#kssmwbhicv .gt_footnote_marks {
+#cbqlvpytyo .gt_footnote_marks {
   font-size: 75%;
   vertical-align: 0.4em;
   position: initial;
 }
 
-#kssmwbhicv .gt_asterisk {
+#cbqlvpytyo .gt_asterisk {
   font-size: 100%;
   vertical-align: 0;
 }
 
-#kssmwbhicv .gt_indent_1 {
+#cbqlvpytyo .gt_indent_1 {
   text-indent: 5px;
 }
 
-#kssmwbhicv .gt_indent_2 {
+#cbqlvpytyo .gt_indent_2 {
   text-indent: 10px;
 }
 
-#kssmwbhicv .gt_indent_3 {
+#cbqlvpytyo .gt_indent_3 {
   text-indent: 15px;
 }
 
-#kssmwbhicv .gt_indent_4 {
+#cbqlvpytyo .gt_indent_4 {
   text-indent: 20px;
 }
 
-#kssmwbhicv .gt_indent_5 {
+#cbqlvpytyo .gt_indent_5 {
   text-indent: 25px;
 }
 </style>
@@ -650,7 +652,7 @@ features to have been added to the target cohort table. Once we have
 them defined, and as seen above we already have a number of example
 characteristics added to our diagnosis cohort, we can add
 stratifications like so.</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">MGUS_death</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/estimateSingleEventSurvival.html">estimateSingleEventSurvival</a></span><span class="op">(</span><span class="va">cdm</span>,</span>
 <span>  targetCohortTable <span class="op">=</span> <span class="st">"mgus_diagnosis"</span>,</span>
 <span>  outcomeCohortTable <span class="op">=</span> <span class="st">"death_cohort"</span>,</span>
@@ -660,32 +662,32 @@ stratifications like so.</p>
 <span><span class="op">)</span> </span></code></pre></div>
 <p>As we can see as well as results for each strata, we’ll always also
 have overall results returned.</p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/plotSurvival.html">plotSurvival</a></span><span class="op">(</span><span class="va">MGUS_death</span>,</span>
 <span>             facet <span class="op">=</span> <span class="st">"strata_name"</span>,</span>
 <span>             colour <span class="op">=</span> <span class="st">"strata_level"</span><span class="op">)</span></span></code></pre></div>
 <p><img src="a01_Single_event_of_interest_files/figure-html/unnamed-chunk-10-1.png" width="100%"></p>
 <p>And we also now have summary statistics for each of the strata as
 well as overall.</p>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/tableSurvival.html">tableSurvival</a></span><span class="op">(</span><span class="va">MGUS_death</span><span class="op">)</span></span></code></pre></div>
-<div id="gxvsvzqmur" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
-<style>#gxvsvzqmur table {
+<div id="lozffpvdbw" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
+<style>#lozffpvdbw table {
   font-family: system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-#gxvsvzqmur thead, #gxvsvzqmur tbody, #gxvsvzqmur tfoot, #gxvsvzqmur tr, #gxvsvzqmur td, #gxvsvzqmur th {
+#lozffpvdbw thead, #lozffpvdbw tbody, #lozffpvdbw tfoot, #lozffpvdbw tr, #lozffpvdbw td, #lozffpvdbw th {
   border-style: none;
 }
 
-#gxvsvzqmur p {
+#lozffpvdbw p {
   margin: 0;
   padding: 0;
 }
 
-#gxvsvzqmur .gt_table {
+#lozffpvdbw .gt_table {
   display: table;
   border-collapse: collapse;
   line-height: normal;
@@ -711,12 +713,12 @@ well as overall.</p>
   border-left-color: #D3D3D3;
 }
 
-#gxvsvzqmur .gt_caption {
+#lozffpvdbw .gt_caption {
   padding-top: 4px;
   padding-bottom: 4px;
 }
 
-#gxvsvzqmur .gt_title {
+#lozffpvdbw .gt_title {
   color: #333333;
   font-size: 125%;
   font-weight: initial;
@@ -728,7 +730,7 @@ well as overall.</p>
   border-bottom-width: 0;
 }
 
-#gxvsvzqmur .gt_subtitle {
+#lozffpvdbw .gt_subtitle {
   color: #333333;
   font-size: 85%;
   font-weight: initial;
@@ -740,7 +742,7 @@ well as overall.</p>
   border-top-width: 0;
 }
 
-#gxvsvzqmur .gt_heading {
+#lozffpvdbw .gt_heading {
   background-color: #FFFFFF;
   text-align: center;
   border-bottom-color: #FFFFFF;
@@ -752,13 +754,13 @@ well as overall.</p>
   border-right-color: #D3D3D3;
 }
 
-#gxvsvzqmur .gt_bottom_border {
+#lozffpvdbw .gt_bottom_border {
   border-bottom-style: solid;
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
 }
 
-#gxvsvzqmur .gt_col_headings {
+#lozffpvdbw .gt_col_headings {
   border-top-style: solid;
   border-top-width: 2px;
   border-top-color: #D3D3D3;
@@ -773,7 +775,7 @@ well as overall.</p>
   border-right-color: #D3D3D3;
 }
 
-#gxvsvzqmur .gt_col_heading {
+#lozffpvdbw .gt_col_heading {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -793,7 +795,7 @@ well as overall.</p>
   overflow-x: hidden;
 }
 
-#gxvsvzqmur .gt_column_spanner_outer {
+#lozffpvdbw .gt_column_spanner_outer {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -805,15 +807,15 @@ well as overall.</p>
   padding-right: 4px;
 }
 
-#gxvsvzqmur .gt_column_spanner_outer:first-child {
+#lozffpvdbw .gt_column_spanner_outer:first-child {
   padding-left: 0;
 }
 
-#gxvsvzqmur .gt_column_spanner_outer:last-child {
+#lozffpvdbw .gt_column_spanner_outer:last-child {
   padding-right: 0;
 }
 
-#gxvsvzqmur .gt_column_spanner {
+#lozffpvdbw .gt_column_spanner {
   border-bottom-style: solid;
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
@@ -825,11 +827,11 @@ well as overall.</p>
   width: 100%;
 }
 
-#gxvsvzqmur .gt_spanner_row {
+#lozffpvdbw .gt_spanner_row {
   border-bottom-style: hidden;
 }
 
-#gxvsvzqmur .gt_group_heading {
+#lozffpvdbw .gt_group_heading {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -855,7 +857,7 @@ well as overall.</p>
   text-align: left;
 }
 
-#gxvsvzqmur .gt_empty_group_heading {
+#lozffpvdbw .gt_empty_group_heading {
   padding: 0.5px;
   color: #333333;
   background-color: #FFFFFF;
@@ -870,15 +872,15 @@ well as overall.</p>
   vertical-align: middle;
 }
 
-#gxvsvzqmur .gt_from_md > :first-child {
+#lozffpvdbw .gt_from_md > :first-child {
   margin-top: 0;
 }
 
-#gxvsvzqmur .gt_from_md > :last-child {
+#lozffpvdbw .gt_from_md > :last-child {
   margin-bottom: 0;
 }
 
-#gxvsvzqmur .gt_row {
+#lozffpvdbw .gt_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -897,7 +899,7 @@ well as overall.</p>
   overflow-x: hidden;
 }
 
-#gxvsvzqmur .gt_stub {
+#lozffpvdbw .gt_stub {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -910,7 +912,7 @@ well as overall.</p>
   padding-right: 5px;
 }
 
-#gxvsvzqmur .gt_stub_row_group {
+#lozffpvdbw .gt_stub_row_group {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -924,15 +926,15 @@ well as overall.</p>
   vertical-align: top;
 }
 
-#gxvsvzqmur .gt_row_group_first td {
+#lozffpvdbw .gt_row_group_first td {
   border-top-width: 2px;
 }
 
-#gxvsvzqmur .gt_row_group_first th {
+#lozffpvdbw .gt_row_group_first th {
   border-top-width: 2px;
 }
 
-#gxvsvzqmur .gt_summary_row {
+#lozffpvdbw .gt_summary_row {
   color: #333333;
   background-color: #FFFFFF;
   text-transform: inherit;
@@ -942,16 +944,16 @@ well as overall.</p>
   padding-right: 5px;
 }
 
-#gxvsvzqmur .gt_first_summary_row {
+#lozffpvdbw .gt_first_summary_row {
   border-top-style: solid;
   border-top-color: #D3D3D3;
 }
 
-#gxvsvzqmur .gt_first_summary_row.thick {
+#lozffpvdbw .gt_first_summary_row.thick {
   border-top-width: 2px;
 }
 
-#gxvsvzqmur .gt_last_summary_row {
+#lozffpvdbw .gt_last_summary_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -961,7 +963,7 @@ well as overall.</p>
   border-bottom-color: #D3D3D3;
 }
 
-#gxvsvzqmur .gt_grand_summary_row {
+#lozffpvdbw .gt_grand_summary_row {
   color: #333333;
   background-color: #FFFFFF;
   text-transform: inherit;
@@ -971,7 +973,7 @@ well as overall.</p>
   padding-right: 5px;
 }
 
-#gxvsvzqmur .gt_first_grand_summary_row {
+#lozffpvdbw .gt_first_grand_summary_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -981,7 +983,7 @@ well as overall.</p>
   border-top-color: #D3D3D3;
 }
 
-#gxvsvzqmur .gt_last_grand_summary_row_top {
+#lozffpvdbw .gt_last_grand_summary_row_top {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -991,11 +993,11 @@ well as overall.</p>
   border-bottom-color: #D3D3D3;
 }
 
-#gxvsvzqmur .gt_striped {
+#lozffpvdbw .gt_striped {
   background-color: rgba(128, 128, 128, 0.05);
 }
 
-#gxvsvzqmur .gt_table_body {
+#lozffpvdbw .gt_table_body {
   border-top-style: solid;
   border-top-width: 2px;
   border-top-color: #D3D3D3;
@@ -1004,7 +1006,7 @@ well as overall.</p>
   border-bottom-color: #D3D3D3;
 }
 
-#gxvsvzqmur .gt_footnotes {
+#lozffpvdbw .gt_footnotes {
   color: #333333;
   background-color: #FFFFFF;
   border-bottom-style: none;
@@ -1018,7 +1020,7 @@ well as overall.</p>
   border-right-color: #D3D3D3;
 }
 
-#gxvsvzqmur .gt_footnote {
+#lozffpvdbw .gt_footnote {
   margin: 0px;
   font-size: 90%;
   padding-top: 4px;
@@ -1027,7 +1029,7 @@ well as overall.</p>
   padding-right: 5px;
 }
 
-#gxvsvzqmur .gt_sourcenotes {
+#lozffpvdbw .gt_sourcenotes {
   color: #333333;
   background-color: #FFFFFF;
   border-bottom-style: none;
@@ -1041,7 +1043,7 @@ well as overall.</p>
   border-right-color: #D3D3D3;
 }
 
-#gxvsvzqmur .gt_sourcenote {
+#lozffpvdbw .gt_sourcenote {
   font-size: 90%;
   padding-top: 4px;
   padding-bottom: 4px;
@@ -1049,63 +1051,63 @@ well as overall.</p>
   padding-right: 5px;
 }
 
-#gxvsvzqmur .gt_left {
+#lozffpvdbw .gt_left {
   text-align: left;
 }
 
-#gxvsvzqmur .gt_center {
+#lozffpvdbw .gt_center {
   text-align: center;
 }
 
-#gxvsvzqmur .gt_right {
+#lozffpvdbw .gt_right {
   text-align: right;
   font-variant-numeric: tabular-nums;
 }
 
-#gxvsvzqmur .gt_font_normal {
+#lozffpvdbw .gt_font_normal {
   font-weight: normal;
 }
 
-#gxvsvzqmur .gt_font_bold {
+#lozffpvdbw .gt_font_bold {
   font-weight: bold;
 }
 
-#gxvsvzqmur .gt_font_italic {
+#lozffpvdbw .gt_font_italic {
   font-style: italic;
 }
 
-#gxvsvzqmur .gt_super {
+#lozffpvdbw .gt_super {
   font-size: 65%;
 }
 
-#gxvsvzqmur .gt_footnote_marks {
+#lozffpvdbw .gt_footnote_marks {
   font-size: 75%;
   vertical-align: 0.4em;
   position: initial;
 }
 
-#gxvsvzqmur .gt_asterisk {
+#lozffpvdbw .gt_asterisk {
   font-size: 100%;
   vertical-align: 0;
 }
 
-#gxvsvzqmur .gt_indent_1 {
+#lozffpvdbw .gt_indent_1 {
   text-indent: 5px;
 }
 
-#gxvsvzqmur .gt_indent_2 {
+#lozffpvdbw .gt_indent_2 {
   text-indent: 10px;
 }
 
-#gxvsvzqmur .gt_indent_3 {
+#lozffpvdbw .gt_indent_3 {
   text-indent: 15px;
 }
 
-#gxvsvzqmur .gt_indent_4 {
+#lozffpvdbw .gt_indent_4 {
   text-indent: 20px;
 }
 
-#gxvsvzqmur .gt_indent_5 {
+#lozffpvdbw .gt_indent_5 {
   text-indent: 25px;
 }
 </style>
@@ -1230,7 +1232,7 @@ well as overall.</p>
 </h2>
 <p>If we set returnParticipants as TRUE then we will also be able to
 access the individuals that contributed to the analysis.</p>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">MGUS_death</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/estimateSingleEventSurvival.html">estimateSingleEventSurvival</a></span><span class="op">(</span><span class="va">cdm</span>,</span>
 <span>  targetCohortTable <span class="op">=</span> <span class="st">"mgus_diagnosis"</span>,</span>
 <span>  outcomeCohortTable <span class="op">=</span> <span class="st">"death_cohort"</span>,</span>
@@ -1249,14 +1251,14 @@ access the individuals that contributed to the analysis.</p>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span>                    1         11 1972-01-01        1972-01-01                1</span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span>                    1         12 1983-01-01        1983-01-01                1</span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span>                    1         13 1968-01-01        1968-01-01                1</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span>                    1         16 1985-01-01        1985-01-01                1</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span>                    1         15 1979-01-01        1979-01-01                1</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 1,374 more rows</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 1 more variable: outcome_id &lt;int&gt;</span></span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="disconnect-from-the-cdm-database-connection">Disconnect from the cdm database connection<a class="anchor" aria-label="anchor" href="#disconnect-from-the-cdm-database-connection"></a>
 </h2>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://darwin-eu.github.io/CDMConnector/reference/cdmDisconnect.html" class="external-link">cdm_disconnect</a></span><span class="op">(</span><span class="va">cdm</span><span class="op">)</span></span></code></pre></div>
 </div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
