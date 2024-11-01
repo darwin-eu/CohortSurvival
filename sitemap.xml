@@ -1,75 +1,27 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url>
-    <loc>https://darwin-eu.github.io/CohortSurvival/404.html</loc>
-  </url>
-  <url>
-    <loc>https://darwin-eu.github.io/CohortSurvival/LICENSE.html</loc>
-  </url>
-  <url>
-    <loc>https://darwin-eu.github.io/CohortSurvival/articles/a01_Single_event_of_interest.html</loc>
-  </url>
-  <url>
-    <loc>https://darwin-eu.github.io/CohortSurvival/articles/a02_Competing_risk_survival.html</loc>
-  </url>
-  <url>
-    <loc>https://darwin-eu.github.io/CohortSurvival/articles/a03_Further_survival_analyses.html</loc>
-  </url>
-  <url>
-    <loc>https://darwin-eu.github.io/CohortSurvival/articles/index.html</loc>
-  </url>
-  <url>
-    <loc>https://darwin-eu.github.io/CohortSurvival/authors.html</loc>
-  </url>
-  <url>
-    <loc>https://darwin-eu.github.io/CohortSurvival/index.html</loc>
-  </url>
-  <url>
-    <loc>https://darwin-eu.github.io/CohortSurvival/reference/CohortSurvival-package.html</loc>
-  </url>
-  <url>
-    <loc>https://darwin-eu.github.io/CohortSurvival/reference/addCohortSurvival.html</loc>
-  </url>
-  <url>
-    <loc>https://darwin-eu.github.io/CohortSurvival/reference/addCompetingRiskCohortSurvival.html</loc>
-  </url>
-  <url>
-    <loc>https://darwin-eu.github.io/CohortSurvival/reference/asSurvivalResult.html</loc>
-  </url>
-  <url>
-    <loc>https://darwin-eu.github.io/CohortSurvival/reference/benchmarkCohortSurvival.html</loc>
-  </url>
-  <url>
-    <loc>https://darwin-eu.github.io/CohortSurvival/reference/estimateCompetingRiskSurvival.html</loc>
-  </url>
-  <url>
-    <loc>https://darwin-eu.github.io/CohortSurvival/reference/estimateSingleEventSurvival.html</loc>
-  </url>
-  <url>
-    <loc>https://darwin-eu.github.io/CohortSurvival/reference/generateDeathCohortSet.html</loc>
-  </url>
-  <url>
-    <loc>https://darwin-eu.github.io/CohortSurvival/reference/index.html</loc>
-  </url>
-  <url>
-    <loc>https://darwin-eu.github.io/CohortSurvival/reference/mockMGUS2cdm.html</loc>
-  </url>
-  <url>
-    <loc>https://darwin-eu.github.io/CohortSurvival/reference/optionsTableSurvival.html</loc>
-  </url>
-  <url>
-    <loc>https://darwin-eu.github.io/CohortSurvival/reference/pipe.html</loc>
-  </url>
-  <url>
-    <loc>https://darwin-eu.github.io/CohortSurvival/reference/plotSurvival.html</loc>
-  </url>
-  <url>
-    <loc>https://darwin-eu.github.io/CohortSurvival/reference/survivalParticipants.html</loc>
-  </url>
-  <url>
-    <loc>https://darwin-eu.github.io/CohortSurvival/reference/tableSurvival.html</loc>
-  </url>
-  <url>
-    <loc>https://darwin-eu.github.io/CohortSurvival/reference/tidyeval.html</loc>
-  </url>
+<urlset xmlns = 'http://www.sitemaps.org/schemas/sitemap/0.9'>
+<url><loc>https://darwin-eu.github.io/CohortSurvival/404.html</loc></url>
+<url><loc>https://darwin-eu.github.io/CohortSurvival/LICENSE.html</loc></url>
+<url><loc>https://darwin-eu.github.io/CohortSurvival/articles/a01_Single_event_of_interest.html</loc></url>
+<url><loc>https://darwin-eu.github.io/CohortSurvival/articles/a02_Competing_risk_survival.html</loc></url>
+<url><loc>https://darwin-eu.github.io/CohortSurvival/articles/a03_Further_survival_analyses.html</loc></url>
+<url><loc>https://darwin-eu.github.io/CohortSurvival/articles/index.html</loc></url>
+<url><loc>https://darwin-eu.github.io/CohortSurvival/authors.html</loc></url>
+<url><loc>https://darwin-eu.github.io/CohortSurvival/index.html</loc></url>
+<url><loc>https://darwin-eu.github.io/CohortSurvival/reference/CohortSurvival-package.html</loc></url>
+<url><loc>https://darwin-eu.github.io/CohortSurvival/reference/addCohortSurvival.html</loc></url>
+<url><loc>https://darwin-eu.github.io/CohortSurvival/reference/addCompetingRiskCohortSurvival.html</loc></url>
+<url><loc>https://darwin-eu.github.io/CohortSurvival/reference/asSurvivalResult.html</loc></url>
+<url><loc>https://darwin-eu.github.io/CohortSurvival/reference/benchmarkCohortSurvival.html</loc></url>
+<url><loc>https://darwin-eu.github.io/CohortSurvival/reference/estimateCompetingRiskSurvival.html</loc></url>
+<url><loc>https://darwin-eu.github.io/CohortSurvival/reference/estimateSingleEventSurvival.html</loc></url>
+<url><loc>https://darwin-eu.github.io/CohortSurvival/reference/generateDeathCohortSet.html</loc></url>
+<url><loc>https://darwin-eu.github.io/CohortSurvival/reference/index.html</loc></url>
+<url><loc>https://darwin-eu.github.io/CohortSurvival/reference/mockMGUS2cdm.html</loc></url>
+<url><loc>https://darwin-eu.github.io/CohortSurvival/reference/optionsTableSurvival.html</loc></url>
+<url><loc>https://darwin-eu.github.io/CohortSurvival/reference/pipe.html</loc></url>
+<url><loc>https://darwin-eu.github.io/CohortSurvival/reference/plotSurvival.html</loc></url>
+<url><loc>https://darwin-eu.github.io/CohortSurvival/reference/survivalParticipants.html</loc></url>
+<url><loc>https://darwin-eu.github.io/CohortSurvival/reference/tableSurvival.html</loc></url>
+<url><loc>https://darwin-eu.github.io/CohortSurvival/reference/tidyeval.html</loc></url>
 </urlset>
+

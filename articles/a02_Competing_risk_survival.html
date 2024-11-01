@@ -5,56 +5,44 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<meta name="description" content="CohortSurvival">
 <title>Competing risk survival • CohortSurvival</title>
 <script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
-<script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><!-- Font Awesome icons --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css" integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk=" crossorigin="anonymous">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/v4-shims.min.css" integrity="sha256-wZjR52fzng1pJHwx4aV2AO3yyTOXrcDW7jBpJtTwVxw=" crossorigin="anonymous">
-<!-- bootstrap-toc --><script src="https://cdn.jsdelivr.net/gh/afeld/bootstrap-toc@v1.0.1/dist/bootstrap-toc.min.js" integrity="sha256-4veVQbu7//Lk5TSmc7YV48MxtMy98e26cf5MrgZYnwo=" crossorigin="anonymous"></script><!-- headroom.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/headroom.min.js" integrity="sha256-AsUX4SJE1+yuDu5+mAVzJbuYNPHj/WroHuZ8Ir/CkE0=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script><!-- clipboard.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.11/clipboard.min.js" integrity="sha512-7O5pXpc0oCRrxk8RUfDYFgn0nO1t+jLuIOQdOMRp4APB7uZ4vSjspzp5y6YDtDs4VzUSTbWzBFZ/LKJhnyFOKw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script><!-- search --><script src="https://cdnjs.cloudflare.com/ajax/libs/fuse.js/6.4.6/fuse.js" integrity="sha512-zv6Ywkjyktsohkbp9bb45V6tEMoWhzFzXis+LrMehmJZZSys19Yxf1dopHx7WzIKxr5tK2dVcYmaCk2uqdjF4A==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/autocomplete.js/0.38.0/autocomplete.jquery.min.js" integrity="sha512-GU9ayf+66Xx2TmpxqJpliWbT5PiGYxpaG8rfnBEk1LL8l1KGkRShhngwdXK1UgqhAzWpZHSiYPc09/NwDQIGyg==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/mark.min.js" integrity="sha512-5CYOlHXGh6QpOFA/TeTylKLWfB3ftPsde7AnmhuitiTX4K5SqCLBeKro6sPS8ilsz1Q4NRx3v8Ko2IBiszzdww==" crossorigin="anonymous"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Competing risk survival">
-<meta property="og:description" content="CohortSurvival">
-<!-- mathjax --><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js" integrity="sha256-nvJJv9wWKEm88qvoQl9ekL2J+k/RWIsaSScxxlsrv8k=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/config/TeX-AMS-MML_HTMLorMML.js" integrity="sha256-84DKXVJXs0/F8OTMzX4UR909+jtl4G7SPypPavF+GfA=" crossorigin="anonymous"></script><!--[if lt IE 9]>
-<script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
-<script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
-<![endif]-->
+<script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.4.2/css/all.min.css" rel="stylesheet">
+<link href="../deps/font-awesome-6.4.2/css/v4-shims.min.css" rel="stylesheet">
+<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Competing risk survival">
 </head>
 <body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
-    
 
-    <nav class="navbar fixed-top navbar-dark navbar-expand-lg bg-primary" data-bs-theme="dark"><div class="container">
-    
+
+    <nav class="navbar navbar-expand-lg fixed-top bg-primary" data-bs-theme="dark" aria-label="Site navigation"><div class="container">
+
     <a class="navbar-brand me-2" href="../index.html">CohortSurvival</a>
 
     <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.1</small>
 
-    
+
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
     </button>
 
     <div id="navbar" class="collapse navbar-collapse ms-3">
       <ul class="navbar-nav me-auto">
-<li class="nav-item">
-  <a class="nav-link" href="../reference/index.html">Reference</a>
-</li>
+<li class="nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
 <li class="active nav-item dropdown">
-  <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false" aria-haspopup="true" id="dropdown-articles">Articles</a>
-  <div class="dropdown-menu" aria-labelledby="dropdown-articles">
-    <a class="dropdown-item" href="../articles/a01_Single_event_of_interest.html">Single outcome event of interest</a>
-    <a class="dropdown-item" href="../articles/a02_Competing_risk_survival.html">Competing risk survival</a>
-    <a class="dropdown-item" href="../articles/a03_Further_survival_analyses.html">Further survival analyses</a>
-  </div>
+  <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
+<li><a class="dropdown-item" href="../articles/a01_Single_event_of_interest.html">Single outcome event of interest</a></li>
+    <li><a class="dropdown-item" href="../articles/a02_Competing_risk_survival.html">Competing risk survival</a></li>
+    <li><a class="dropdown-item" href="../articles/a03_Further_survival_analyses.html">Further survival analyses</a></li>
+  </ul>
 </li>
       </ul>
-<form class="form-inline my-2 my-lg-0" role="search">
-        <input type="search" class="form-control me-sm-2" aria-label="Toggle navigation" name="search-input" data-search-index="../search.json" id="search-input" placeholder="Search for" autocomplete="off">
-</form>
-
-      <ul class="navbar-nav"></ul>
+<ul class="navbar-nav"></ul>
 </div>
 
-    
+
   </div>
 </nav><div class="container template-article">
 
@@ -63,10 +51,11 @@
 
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
-      <img src="" class="logo" alt=""><h1>Competing risk survival</h1>
+
+      <h1>Competing risk survival</h1>
             
       
-      
+
       <div class="d-none name"><code>a02_Competing_risk_survival.Rmd</code></div>
     </div>
 
@@ -99,7 +88,7 @@ stratification.</p>
 <span>  <span class="fu"><a href="https://pillar.r-lib.org/reference/glimpse.html" class="external-link">glimpse</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Rows: ??</span></span>
 <span><span class="co">#&gt; Columns: 10</span></span>
-<span><span class="co">#&gt; Database: DuckDB v0.10.2 [unknown@Linux 6.5.0-1021-azure:R 4.4.0/:memory:]</span></span>
+<span><span class="co">#&gt; Database: DuckDB v1.1.2 [unknown@Linux 6.5.0-1025-azure:R 4.4.2/:memory:]</span></span>
 <span><span class="co">#&gt; $ cohort_definition_id <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1…</span></span>
 <span><span class="co">#&gt; $ subject_id           <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15…</span></span>
 <span><span class="co">#&gt; $ cohort_start_date    <span style="color: #949494; font-style: italic;">&lt;date&gt;</span> 1981-01-01, 1968-01-01, 1980-01-01, 1977-01-01, …</span></span>
@@ -109,25 +98,23 @@ stratification.</p>
 <span><span class="co">#&gt; $ hgb                  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> 13.1, 11.5, 10.5, 15.2, 10.7, 12.9, 10.5, 12.3, 1…</span></span>
 <span><span class="co">#&gt; $ creat                <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> 1.30, 1.20, 1.50, 1.20, 0.80, 1.00, 0.90, 1.20, 0…</span></span>
 <span><span class="co">#&gt; $ mspike               <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> 0.5, 2.0, 2.6, 1.2, 1.0, 0.5, 1.3, 1.6, 2.4, 2.3,…</span></span>
-<span><span class="co">#&gt; $ age_group            <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "&gt;=70", "&gt;=70", "&gt;=70", "&lt;70", "&gt;=70", "&gt;=70", "&gt;…</span></span></code></pre></div>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span></span>
+<span><span class="co">#&gt; $ age_group            <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "&gt;=70", "&gt;=70", "&gt;=70", "&lt;70", "&gt;=70", "&gt;=70", "&gt;…</span></span>
+<span></span>
 <span><span class="va">cdm</span><span class="op">$</span><span class="va">death_cohort</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> </span>
 <span>  <span class="fu"><a href="https://pillar.r-lib.org/reference/glimpse.html" class="external-link">glimpse</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Rows: ??</span></span>
 <span><span class="co">#&gt; Columns: 4</span></span>
-<span><span class="co">#&gt; Database: DuckDB v0.10.2 [unknown@Linux 6.5.0-1021-azure:R 4.4.0/:memory:]</span></span>
+<span><span class="co">#&gt; Database: DuckDB v1.1.2 [unknown@Linux 6.5.0-1025-azure:R 4.4.2/:memory:]</span></span>
 <span><span class="co">#&gt; $ cohort_definition_id <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1…</span></span>
 <span><span class="co">#&gt; $ subject_id           <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> 1, 2, 3, 4, 5, 6, 7, 8, 10, 11, 12, 13, 14, 15, 1…</span></span>
 <span><span class="co">#&gt; $ cohort_start_date    <span style="color: #949494; font-style: italic;">&lt;date&gt;</span> 1981-01-31, 1968-01-26, 1980-02-16, 1977-04-03, …</span></span>
-<span><span class="co">#&gt; $ cohort_end_date      <span style="color: #949494; font-style: italic;">&lt;date&gt;</span> 1981-01-31, 1968-01-26, 1980-02-16, 1977-04-03, …</span></span></code></pre></div>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span></span>
+<span><span class="co">#&gt; $ cohort_end_date      <span style="color: #949494; font-style: italic;">&lt;date&gt;</span> 1981-01-31, 1968-01-26, 1980-02-16, 1977-04-03, …</span></span>
+<span></span>
 <span><span class="va">cdm</span><span class="op">$</span><span class="va">progression</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="https://pillar.r-lib.org/reference/glimpse.html" class="external-link">glimpse</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Rows: ??</span></span>
 <span><span class="co">#&gt; Columns: 4</span></span>
-<span><span class="co">#&gt; Database: DuckDB v0.10.2 [unknown@Linux 6.5.0-1021-azure:R 4.4.0/:memory:]</span></span>
+<span><span class="co">#&gt; Database: DuckDB v1.1.2 [unknown@Linux 6.5.0-1025-azure:R 4.4.2/:memory:]</span></span>
 <span><span class="co">#&gt; $ cohort_definition_id <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1…</span></span>
 <span><span class="co">#&gt; $ subject_id           <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> 56, 81, 83, 111, 124, 127, 147, 163, 165, 167, 18…</span></span>
 <span><span class="co">#&gt; $ cohort_start_date    <span style="color: #949494; font-style: italic;">&lt;date&gt;</span> 1978-01-30, 1985-01-15, 1974-08-17, 1993-01-14, …</span></span>
@@ -140,7 +127,7 @@ stratification.</p>
 competing risk outcome. We can then stratify, see information on events,
 summarise the estimates and check the contributing participants in the
 same way we did for the single event survival analysis.</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">MGUS_death_prog</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/estimateCompetingRiskSurvival.html">estimateCompetingRiskSurvival</a></span><span class="op">(</span><span class="va">cdm</span>,</span>
 <span>  targetCohortTable <span class="op">=</span> <span class="st">"mgus_diagnosis"</span>,</span>
 <span>  outcomeCohortTable <span class="op">=</span> <span class="st">"progression"</span>,</span>
@@ -168,32 +155,32 @@ same way we did for the single event survival analysis.</p>
 <span><span class="co">#&gt; $ analysis_type     <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "competing_risk", "competing_risk", "competing_risk"…</span></span></code></pre></div>
 <p>As we can see above our results have been outputted in long format.
 We can plot these results like so.</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/plotSurvival.html">plotSurvival</a></span><span class="op">(</span><span class="va">MGUS_death_prog</span>, cumulativeFailure <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>             colour <span class="op">=</span> <span class="st">"variable_level"</span><span class="op">)</span> <span class="op">+</span> </span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html" class="external-link">theme</a></span><span class="op">(</span>legend.position <span class="op">=</span> <span class="st">"top"</span><span class="op">)</span></span></code></pre></div>
 <p><img src="a02_Competing_risk_survival_files/figure-html/unnamed-chunk-6-1.png" width="75%"></p>
 <p>Our returned results also have attributes containing information that
 summarises survival.</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/tableSurvival.html">tableSurvival</a></span><span class="op">(</span><span class="va">MGUS_death_prog</span><span class="op">)</span> </span></code></pre></div>
-<div id="mclgauxekn" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
-<style>#mclgauxekn table {
+<div id="pasvermvjb" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
+<style>#pasvermvjb table {
   font-family: system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-#mclgauxekn thead, #mclgauxekn tbody, #mclgauxekn tfoot, #mclgauxekn tr, #mclgauxekn td, #mclgauxekn th {
+#pasvermvjb thead, #pasvermvjb tbody, #pasvermvjb tfoot, #pasvermvjb tr, #pasvermvjb td, #pasvermvjb th {
   border-style: none;
 }
 
-#mclgauxekn p {
+#pasvermvjb p {
   margin: 0;
   padding: 0;
 }
 
-#mclgauxekn .gt_table {
+#pasvermvjb .gt_table {
   display: table;
   border-collapse: collapse;
   line-height: normal;
@@ -219,12 +206,12 @@ summarises survival.</p>
   border-left-color: #D3D3D3;
 }
 
-#mclgauxekn .gt_caption {
+#pasvermvjb .gt_caption {
   padding-top: 4px;
   padding-bottom: 4px;
 }
 
-#mclgauxekn .gt_title {
+#pasvermvjb .gt_title {
   color: #333333;
   font-size: 125%;
   font-weight: initial;
@@ -236,7 +223,7 @@ summarises survival.</p>
   border-bottom-width: 0;
 }
 
-#mclgauxekn .gt_subtitle {
+#pasvermvjb .gt_subtitle {
   color: #333333;
   font-size: 85%;
   font-weight: initial;
@@ -248,7 +235,7 @@ summarises survival.</p>
   border-top-width: 0;
 }
 
-#mclgauxekn .gt_heading {
+#pasvermvjb .gt_heading {
   background-color: #FFFFFF;
   text-align: center;
   border-bottom-color: #FFFFFF;
@@ -260,13 +247,13 @@ summarises survival.</p>
   border-right-color: #D3D3D3;
 }
 
-#mclgauxekn .gt_bottom_border {
+#pasvermvjb .gt_bottom_border {
   border-bottom-style: solid;
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
 }
 
-#mclgauxekn .gt_col_headings {
+#pasvermvjb .gt_col_headings {
   border-top-style: solid;
   border-top-width: 2px;
   border-top-color: #D3D3D3;
@@ -281,7 +268,7 @@ summarises survival.</p>
   border-right-color: #D3D3D3;
 }
 
-#mclgauxekn .gt_col_heading {
+#pasvermvjb .gt_col_heading {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -301,7 +288,7 @@ summarises survival.</p>
   overflow-x: hidden;
 }
 
-#mclgauxekn .gt_column_spanner_outer {
+#pasvermvjb .gt_column_spanner_outer {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -313,15 +300,15 @@ summarises survival.</p>
   padding-right: 4px;
 }
 
-#mclgauxekn .gt_column_spanner_outer:first-child {
+#pasvermvjb .gt_column_spanner_outer:first-child {
   padding-left: 0;
 }
 
-#mclgauxekn .gt_column_spanner_outer:last-child {
+#pasvermvjb .gt_column_spanner_outer:last-child {
   padding-right: 0;
 }
 
-#mclgauxekn .gt_column_spanner {
+#pasvermvjb .gt_column_spanner {
   border-bottom-style: solid;
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
@@ -333,11 +320,11 @@ summarises survival.</p>
   width: 100%;
 }
 
-#mclgauxekn .gt_spanner_row {
+#pasvermvjb .gt_spanner_row {
   border-bottom-style: hidden;
 }
 
-#mclgauxekn .gt_group_heading {
+#pasvermvjb .gt_group_heading {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -363,7 +350,7 @@ summarises survival.</p>
   text-align: left;
 }
 
-#mclgauxekn .gt_empty_group_heading {
+#pasvermvjb .gt_empty_group_heading {
   padding: 0.5px;
   color: #333333;
   background-color: #FFFFFF;
@@ -378,15 +365,15 @@ summarises survival.</p>
   vertical-align: middle;
 }
 
-#mclgauxekn .gt_from_md > :first-child {
+#pasvermvjb .gt_from_md > :first-child {
   margin-top: 0;
 }
 
-#mclgauxekn .gt_from_md > :last-child {
+#pasvermvjb .gt_from_md > :last-child {
   margin-bottom: 0;
 }
 
-#mclgauxekn .gt_row {
+#pasvermvjb .gt_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -405,7 +392,7 @@ summarises survival.</p>
   overflow-x: hidden;
 }
 
-#mclgauxekn .gt_stub {
+#pasvermvjb .gt_stub {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -418,7 +405,7 @@ summarises survival.</p>
   padding-right: 5px;
 }
 
-#mclgauxekn .gt_stub_row_group {
+#pasvermvjb .gt_stub_row_group {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -432,15 +419,15 @@ summarises survival.</p>
   vertical-align: top;
 }
 
-#mclgauxekn .gt_row_group_first td {
+#pasvermvjb .gt_row_group_first td {
   border-top-width: 2px;
 }
 
-#mclgauxekn .gt_row_group_first th {
+#pasvermvjb .gt_row_group_first th {
   border-top-width: 2px;
 }
 
-#mclgauxekn .gt_summary_row {
+#pasvermvjb .gt_summary_row {
   color: #333333;
   background-color: #FFFFFF;
   text-transform: inherit;
@@ -450,16 +437,16 @@ summarises survival.</p>
   padding-right: 5px;
 }
 
-#mclgauxekn .gt_first_summary_row {
+#pasvermvjb .gt_first_summary_row {
   border-top-style: solid;
   border-top-color: #D3D3D3;
 }
 
-#mclgauxekn .gt_first_summary_row.thick {
+#pasvermvjb .gt_first_summary_row.thick {
   border-top-width: 2px;
 }
 
-#mclgauxekn .gt_last_summary_row {
+#pasvermvjb .gt_last_summary_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -469,7 +456,7 @@ summarises survival.</p>
   border-bottom-color: #D3D3D3;
 }
 
-#mclgauxekn .gt_grand_summary_row {
+#pasvermvjb .gt_grand_summary_row {
   color: #333333;
   background-color: #FFFFFF;
   text-transform: inherit;
@@ -479,7 +466,7 @@ summarises survival.</p>
   padding-right: 5px;
 }
 
-#mclgauxekn .gt_first_grand_summary_row {
+#pasvermvjb .gt_first_grand_summary_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -489,7 +476,7 @@ summarises survival.</p>
   border-top-color: #D3D3D3;
 }
 
-#mclgauxekn .gt_last_grand_summary_row_top {
+#pasvermvjb .gt_last_grand_summary_row_top {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -499,11 +486,11 @@ summarises survival.</p>
   border-bottom-color: #D3D3D3;
 }
 
-#mclgauxekn .gt_striped {
+#pasvermvjb .gt_striped {
   background-color: rgba(128, 128, 128, 0.05);
 }
 
-#mclgauxekn .gt_table_body {
+#pasvermvjb .gt_table_body {
   border-top-style: solid;
   border-top-width: 2px;
   border-top-color: #D3D3D3;
@@ -512,7 +499,7 @@ summarises survival.</p>
   border-bottom-color: #D3D3D3;
 }
 
-#mclgauxekn .gt_footnotes {
+#pasvermvjb .gt_footnotes {
   color: #333333;
   background-color: #FFFFFF;
   border-bottom-style: none;
@@ -526,7 +513,7 @@ summarises survival.</p>
   border-right-color: #D3D3D3;
 }
 
-#mclgauxekn .gt_footnote {
+#pasvermvjb .gt_footnote {
   margin: 0px;
   font-size: 90%;
   padding-top: 4px;
@@ -535,7 +522,7 @@ summarises survival.</p>
   padding-right: 5px;
 }
 
-#mclgauxekn .gt_sourcenotes {
+#pasvermvjb .gt_sourcenotes {
   color: #333333;
   background-color: #FFFFFF;
   border-bottom-style: none;
@@ -549,7 +536,7 @@ summarises survival.</p>
   border-right-color: #D3D3D3;
 }
 
-#mclgauxekn .gt_sourcenote {
+#pasvermvjb .gt_sourcenote {
   font-size: 90%;
   padding-top: 4px;
   padding-bottom: 4px;
@@ -557,94 +544,117 @@ summarises survival.</p>
   padding-right: 5px;
 }
 
-#mclgauxekn .gt_left {
+#pasvermvjb .gt_left {
   text-align: left;
 }
 
-#mclgauxekn .gt_center {
+#pasvermvjb .gt_center {
   text-align: center;
 }
 
-#mclgauxekn .gt_right {
+#pasvermvjb .gt_right {
   text-align: right;
   font-variant-numeric: tabular-nums;
 }
 
-#mclgauxekn .gt_font_normal {
+#pasvermvjb .gt_font_normal {
   font-weight: normal;
 }
 
-#mclgauxekn .gt_font_bold {
+#pasvermvjb .gt_font_bold {
   font-weight: bold;
 }
 
-#mclgauxekn .gt_font_italic {
+#pasvermvjb .gt_font_italic {
   font-style: italic;
 }
 
-#mclgauxekn .gt_super {
+#pasvermvjb .gt_super {
   font-size: 65%;
 }
 
-#mclgauxekn .gt_footnote_marks {
+#pasvermvjb .gt_footnote_marks {
   font-size: 75%;
   vertical-align: 0.4em;
   position: initial;
 }
 
-#mclgauxekn .gt_asterisk {
+#pasvermvjb .gt_asterisk {
   font-size: 100%;
   vertical-align: 0;
 }
 
-#mclgauxekn .gt_indent_1 {
+#pasvermvjb .gt_indent_1 {
   text-indent: 5px;
 }
 
-#mclgauxekn .gt_indent_2 {
+#pasvermvjb .gt_indent_2 {
   text-indent: 10px;
 }
 
-#mclgauxekn .gt_indent_3 {
+#pasvermvjb .gt_indent_3 {
   text-indent: 15px;
 }
 
-#mclgauxekn .gt_indent_4 {
+#pasvermvjb .gt_indent_4 {
   text-indent: 20px;
 }
 
-#mclgauxekn .gt_indent_5 {
+#pasvermvjb .gt_indent_5 {
   text-indent: 25px;
+}
+
+#pasvermvjb .katex-display {
+  display: inline-flex !important;
+  margin-bottom: 0.75em !important;
+}
+
+#pasvermvjb div.Reactable > div.rt-table > div.rt-thead > div.rt-tr.rt-tr-group-header > div.rt-th-group:after {
+  height: 0px !important;
 }
 </style>
 <table class="table gt_table" data-quarto-disable-processing="false" data-quarto-bootstrap="false">
-<thead><tr class="gt_col_headings">
-<th class="gt_col_heading gt_columns_bottom_border gt_left" rowspan="1" colspan="1" style="text-align: center; font-weight: bold;" scope="col" id="CDM name">CDM name</th>
-      <th class="gt_col_heading gt_columns_bottom_border gt_left" rowspan="1" colspan="1" style="text-align: center; font-weight: bold;" scope="col" id="Cohort">Cohort</th>
-      <th class="gt_col_heading gt_columns_bottom_border gt_left" rowspan="1" colspan="1" style="text-align: center; font-weight: bold;" scope="col" id="Outcome type">Outcome type</th>
-      <th class="gt_col_heading gt_columns_bottom_border gt_left" rowspan="1" colspan="1" style="text-align: center; font-weight: bold;" scope="col" id="Outcome name">Outcome name</th>
-      <th class="gt_col_heading gt_columns_bottom_border gt_right" rowspan="1" colspan="1" style="background-color: #E1E1E1; text-align: center; font-weight: bold;" scope="col" id="Number records">Number records</th>
-      <th class="gt_col_heading gt_columns_bottom_border gt_right" rowspan="1" colspan="1" style="background-color: #E1E1E1; text-align: center; font-weight: bold;" scope="col" id="Number events">Number events</th>
-      <th class="gt_col_heading gt_columns_bottom_border gt_right" rowspan="1" colspan="1" style="background-color: #E1E1E1; text-align: center; font-weight: bold;" scope="col" id="Restricted mean survival">Restricted mean survival</th>
-    </tr></thead>
+<thead>
+<tr class="gt_col_headings gt_spanner_row">
+<th class="gt_col_heading gt_columns_bottom_border gt_left" rowspan="2" colspan="1" style="text-align: center; font-weight: bold;" scope="col" id="CDM-name">CDM name</th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_left" rowspan="2" colspan="1" style="text-align: center; font-weight: bold;" scope="col" id="Cohort">Cohort</th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_left" rowspan="2" colspan="1" style="text-align: center; font-weight: bold;" scope="col" id="Outcome-type">Outcome type</th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_left" rowspan="2" colspan="1" style="text-align: center; font-weight: bold;" scope="col" id="Outcome-name">Outcome name</th>
+      <th class="gt_center gt_columns_top_border gt_column_spanner_outer" rowspan="1" colspan="3" style="background-color: #D9D9D9; text-align: center; font-weight: bold;" scope="colgroup" id="spanner-[header_name]Estimate name
+[header_level]Number records">
+        <div class="gt_column_spanner">Estimate name</div>
+      </th>
+    </tr>
+<tr class="gt_col_headings">
+<th class="gt_col_heading gt_columns_bottom_border gt_right" rowspan="1" colspan="1" style="background-color: #E1E1E1; text-align: center; font-weight: bold;" scope="col" id="[header_name]Estimate-name-[header_level]Number-records">Number records</th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_right" rowspan="1" colspan="1" style="background-color: #E1E1E1; text-align: center; font-weight: bold;" scope="col" id="[header_name]Estimate-name-[header_level]Number-events">Number events</th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_right" rowspan="1" colspan="1" style="background-color: #E1E1E1; text-align: center; font-weight: bold;" scope="col" id="[header_name]Estimate-name-[header_level]Restricted-mean-survival">Restricted mean survival</th>
+    </tr>
+</thead>
 <tbody class="gt_table_body">
 <tr>
 <td headers="CDM name" class="gt_row gt_left" style="text-align: left;">mock</td>
-<td headers="Cohort" class="gt_row gt_left" style="text-align: left; border-left-width: 1px; border-left-style: solid; border-left-color: #D3D3D3; border-right-width: 1px; border-right-style: solid; border-right-color: #D3D3D3; border-top-width: 1px; border-top-style: solid; border-top-color: #D3D3D3; border-bottom-width: 1px; border-bottom-style: solid; border-bottom-color: #D3D3D3;">Mgus diagnosis</td>
-<td headers="Outcome type" class="gt_row gt_left" style="text-align: left; border-left-width: 1px; border-left-style: solid; border-left-color: #D3D3D3; border-right-width: 1px; border-right-style: solid; border-right-color: #D3D3D3; border-top-width: 1px; border-top-style: solid; border-top-color: #D3D3D3; border-bottom-width: 1px; border-bottom-style: solid; border-bottom-color: #D3D3D3;">Outcome</td>
-<td headers="Outcome name" class="gt_row gt_left" style="text-align: left; border-left-width: 1px; border-left-style: solid; border-left-color: #D3D3D3; border-right-width: 1px; border-right-style: solid; border-right-color: #D3D3D3; border-top-width: 1px; border-top-style: solid; border-top-color: #D3D3D3; border-bottom-width: 1px; border-bottom-style: solid; border-bottom-color: #D3D3D3;">Progression</td>
-<td headers="[header_level]Number records" class="gt_row gt_right" style="text-align: right; border-left-width: 1px; border-left-style: solid; border-left-color: #D3D3D3; border-right-width: 1px; border-right-style: solid; border-right-color: #D3D3D3; border-top-width: 1px; border-top-style: solid; border-top-color: #D3D3D3; border-bottom-width: 1px; border-bottom-style: solid; border-bottom-color: #D3D3D3;">1,384</td>
-<td headers="[header_level]Number events" class="gt_row gt_right" style="text-align: right; border-left-width: 1px; border-left-style: solid; border-left-color: #D3D3D3; border-right-width: 1px; border-right-style: solid; border-right-color: #D3D3D3; border-top-width: 1px; border-top-style: solid; border-top-color: #D3D3D3; border-bottom-width: 1px; border-bottom-style: solid; border-bottom-color: #D3D3D3;">106</td>
-<td headers="[header_level]Restricted mean survival" class="gt_row gt_right" style="text-align: right;">35.00</td>
+<td headers="Cohort" class="gt_row gt_left" style="text-align: left; border-left-width: 1px; border-left-style: solid; border-left-color: #D3D3D3; border-right-width: 1px; border-right-style: solid; border-right-color: #D3D3D3; border-top-width: 1px; border-top-style: solid; border-top-color: #D3D3D3; border-bottom-width: 1px; border-bottom-style: solid; border-bottom-color: #D3D3D3;">mgus_diagnosis</td>
+<td headers="Outcome type" class="gt_row gt_left" style="text-align: left; border-left-width: 1px; border-left-style: solid; border-left-color: #D3D3D3; border-right-width: 1px; border-right-style: solid; border-right-color: #D3D3D3; border-top-width: 1px; border-top-style: solid; border-top-color: #D3D3D3; border-bottom-width: 1px; border-bottom-style: solid; border-bottom-color: #D3D3D3;">outcome</td>
+<td headers="Outcome name" class="gt_row gt_left" style="text-align: left; border-left-width: 1px; border-left-style: solid; border-left-color: #D3D3D3; border-right-width: 1px; border-right-style: solid; border-right-color: #D3D3D3; border-top-width: 1px; border-top-style: solid; border-top-color: #D3D3D3; border-bottom-width: 1px; border-bottom-style: solid; border-bottom-color: #D3D3D3;">progression</td>
+<td headers="[header_name]Estimate name
+[header_level]Number records" class="gt_row gt_right" style="text-align: right; border-left-width: 1px; border-left-style: solid; border-left-color: #D3D3D3; border-right-width: 1px; border-right-style: solid; border-right-color: #D3D3D3; border-top-width: 1px; border-top-style: solid; border-top-color: #D3D3D3; border-bottom-width: 1px; border-bottom-style: solid; border-bottom-color: #D3D3D3;">1,384</td>
+<td headers="[header_name]Estimate name
+[header_level]Number events" class="gt_row gt_right" style="text-align: right; border-left-width: 1px; border-left-style: solid; border-left-color: #D3D3D3; border-right-width: 1px; border-right-style: solid; border-right-color: #D3D3D3; border-top-width: 1px; border-top-style: solid; border-top-color: #D3D3D3; border-bottom-width: 1px; border-bottom-style: solid; border-bottom-color: #D3D3D3;">106</td>
+<td headers="[header_name]Estimate name
+[header_level]Restricted mean survival" class="gt_row gt_right" style="text-align: right;">35.00</td>
 </tr>
 <tr>
 <td headers="CDM name" class="gt_row gt_left" style="text-align: left; border-top-width: 1px; border-top-style: hidden; border-top-color: #000000;"></td>
 <td headers="Cohort" class="gt_row gt_left" style="text-align: left; border-left-width: 1px; border-left-style: solid; border-left-color: #D3D3D3; border-right-width: 1px; border-right-style: solid; border-right-color: #D3D3D3; border-top-width: 1px; border-top-style: hidden; border-top-color: #000000; border-bottom-width: 1px; border-bottom-style: solid; border-bottom-color: #D3D3D3;"></td>
-<td headers="Outcome type" class="gt_row gt_left" style="text-align: left; border-left-width: 1px; border-left-style: solid; border-left-color: #D3D3D3; border-right-width: 1px; border-right-style: solid; border-right-color: #D3D3D3; border-top-width: 1px; border-top-style: solid; border-top-color: #D3D3D3; border-bottom-width: 1px; border-bottom-style: solid; border-bottom-color: #D3D3D3;">Competing outcome</td>
-<td headers="Outcome name" class="gt_row gt_left" style="text-align: left; border-left-width: 1px; border-left-style: solid; border-left-color: #D3D3D3; border-right-width: 1px; border-right-style: solid; border-right-color: #D3D3D3; border-top-width: 1px; border-top-style: solid; border-top-color: #D3D3D3; border-bottom-width: 1px; border-bottom-style: solid; border-bottom-color: #D3D3D3;">Death cohort</td>
-<td headers="[header_level]Number records" class="gt_row gt_right" style="text-align: right; border-left-width: 1px; border-left-style: solid; border-left-color: #D3D3D3; border-right-width: 1px; border-right-style: solid; border-right-color: #D3D3D3; border-top-width: 1px; border-top-style: solid; border-top-color: #D3D3D3; border-bottom-width: 1px; border-bottom-style: solid; border-bottom-color: #D3D3D3;">1,384</td>
-<td headers="[header_level]Number events" class="gt_row gt_right" style="text-align: right; border-left-width: 1px; border-left-style: solid; border-left-color: #D3D3D3; border-right-width: 1px; border-right-style: solid; border-right-color: #D3D3D3; border-top-width: 1px; border-top-style: solid; border-top-color: #D3D3D3; border-bottom-width: 1px; border-bottom-style: solid; border-bottom-color: #D3D3D3;">869</td>
-<td headers="[header_level]Restricted mean survival" class="gt_row gt_right" style="text-align: right;">260.00</td>
+<td headers="Outcome type" class="gt_row gt_left" style="text-align: left; border-left-width: 1px; border-left-style: solid; border-left-color: #D3D3D3; border-right-width: 1px; border-right-style: solid; border-right-color: #D3D3D3; border-top-width: 1px; border-top-style: solid; border-top-color: #D3D3D3; border-bottom-width: 1px; border-bottom-style: solid; border-bottom-color: #D3D3D3;">competing_outcome</td>
+<td headers="Outcome name" class="gt_row gt_left" style="text-align: left; border-left-width: 1px; border-left-style: solid; border-left-color: #D3D3D3; border-right-width: 1px; border-right-style: solid; border-right-color: #D3D3D3; border-top-width: 1px; border-top-style: solid; border-top-color: #D3D3D3; border-bottom-width: 1px; border-bottom-style: solid; border-bottom-color: #D3D3D3;">death_cohort</td>
+<td headers="[header_name]Estimate name
+[header_level]Number records" class="gt_row gt_right" style="text-align: right; border-left-width: 1px; border-left-style: solid; border-left-color: #D3D3D3; border-right-width: 1px; border-right-style: solid; border-right-color: #D3D3D3; border-top-width: 1px; border-top-style: solid; border-top-color: #D3D3D3; border-bottom-width: 1px; border-bottom-style: solid; border-bottom-color: #D3D3D3;">1,384</td>
+<td headers="[header_name]Estimate name
+[header_level]Number events" class="gt_row gt_right" style="text-align: right; border-left-width: 1px; border-left-style: solid; border-left-color: #D3D3D3; border-right-width: 1px; border-right-style: solid; border-right-color: #D3D3D3; border-top-width: 1px; border-top-style: solid; border-top-color: #D3D3D3; border-bottom-width: 1px; border-bottom-style: solid; border-bottom-color: #D3D3D3;">869</td>
+<td headers="[header_name]Estimate name
+[header_level]Restricted mean survival" class="gt_row gt_right" style="text-align: right;">260.00</td>
 </tr>
 </tbody>
 </table>
@@ -658,7 +668,7 @@ features to have been added to the target cohort table. Once we have
 them defined, and as seen above we already have a number of example
 characteristics added to our diagnosis cohort, we can add
 stratifications like so.</p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">MGUS_death_prog</span> <span class="op">&lt;-</span>  <span class="fu"><a href="../reference/estimateCompetingRiskSurvival.html">estimateCompetingRiskSurvival</a></span><span class="op">(</span><span class="va">cdm</span>,</span>
 <span>  targetCohortTable <span class="op">=</span> <span class="st">"mgus_diagnosis"</span>,</span>
 <span>  outcomeCohortTable <span class="op">=</span> <span class="st">"progression"</span>,</span>
@@ -670,7 +680,7 @@ have overall results returned. We can filter the output table to plot
 only the results for the different strata levels. We can also ask for
 the cumulative failure probability to be plotted instead of the survival
 probability.</p>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/plotSurvival.html">plotSurvival</a></span><span class="op">(</span><span class="va">MGUS_death_prog</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> </span>
 <span>               <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">strata_name</span> <span class="op">!=</span> <span class="st">"Overall"</span><span class="op">)</span>, </span>
 <span>             facet <span class="op">=</span> <span class="st">"strata_level"</span>,</span>
@@ -679,25 +689,25 @@ probability.</p>
 <p><img src="a02_Competing_risk_survival_files/figure-html/unnamed-chunk-9-1.png" width="100%"></p>
 <p>And we also now have summary statistics for each of the strata as
 well as overall.</p>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/tableSurvival.html">tableSurvival</a></span><span class="op">(</span><span class="va">MGUS_death_prog</span><span class="op">)</span></span></code></pre></div>
-<div id="enzxehrrik" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
-<style>#enzxehrrik table {
+<div id="kpmjgfdyfg" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
+<style>#kpmjgfdyfg table {
   font-family: system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-#enzxehrrik thead, #enzxehrrik tbody, #enzxehrrik tfoot, #enzxehrrik tr, #enzxehrrik td, #enzxehrrik th {
+#kpmjgfdyfg thead, #kpmjgfdyfg tbody, #kpmjgfdyfg tfoot, #kpmjgfdyfg tr, #kpmjgfdyfg td, #kpmjgfdyfg th {
   border-style: none;
 }
 
-#enzxehrrik p {
+#kpmjgfdyfg p {
   margin: 0;
   padding: 0;
 }
 
-#enzxehrrik .gt_table {
+#kpmjgfdyfg .gt_table {
   display: table;
   border-collapse: collapse;
   line-height: normal;
@@ -723,12 +733,12 @@ well as overall.</p>
   border-left-color: #D3D3D3;
 }
 
-#enzxehrrik .gt_caption {
+#kpmjgfdyfg .gt_caption {
   padding-top: 4px;
   padding-bottom: 4px;
 }
 
-#enzxehrrik .gt_title {
+#kpmjgfdyfg .gt_title {
   color: #333333;
   font-size: 125%;
   font-weight: initial;
@@ -740,7 +750,7 @@ well as overall.</p>
   border-bottom-width: 0;
 }
 
-#enzxehrrik .gt_subtitle {
+#kpmjgfdyfg .gt_subtitle {
   color: #333333;
   font-size: 85%;
   font-weight: initial;
@@ -752,7 +762,7 @@ well as overall.</p>
   border-top-width: 0;
 }
 
-#enzxehrrik .gt_heading {
+#kpmjgfdyfg .gt_heading {
   background-color: #FFFFFF;
   text-align: center;
   border-bottom-color: #FFFFFF;
@@ -764,13 +774,13 @@ well as overall.</p>
   border-right-color: #D3D3D3;
 }
 
-#enzxehrrik .gt_bottom_border {
+#kpmjgfdyfg .gt_bottom_border {
   border-bottom-style: solid;
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
 }
 
-#enzxehrrik .gt_col_headings {
+#kpmjgfdyfg .gt_col_headings {
   border-top-style: solid;
   border-top-width: 2px;
   border-top-color: #D3D3D3;
@@ -785,7 +795,7 @@ well as overall.</p>
   border-right-color: #D3D3D3;
 }
 
-#enzxehrrik .gt_col_heading {
+#kpmjgfdyfg .gt_col_heading {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -805,7 +815,7 @@ well as overall.</p>
   overflow-x: hidden;
 }
 
-#enzxehrrik .gt_column_spanner_outer {
+#kpmjgfdyfg .gt_column_spanner_outer {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -817,15 +827,15 @@ well as overall.</p>
   padding-right: 4px;
 }
 
-#enzxehrrik .gt_column_spanner_outer:first-child {
+#kpmjgfdyfg .gt_column_spanner_outer:first-child {
   padding-left: 0;
 }
 
-#enzxehrrik .gt_column_spanner_outer:last-child {
+#kpmjgfdyfg .gt_column_spanner_outer:last-child {
   padding-right: 0;
 }
 
-#enzxehrrik .gt_column_spanner {
+#kpmjgfdyfg .gt_column_spanner {
   border-bottom-style: solid;
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
@@ -837,11 +847,11 @@ well as overall.</p>
   width: 100%;
 }
 
-#enzxehrrik .gt_spanner_row {
+#kpmjgfdyfg .gt_spanner_row {
   border-bottom-style: hidden;
 }
 
-#enzxehrrik .gt_group_heading {
+#kpmjgfdyfg .gt_group_heading {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -867,7 +877,7 @@ well as overall.</p>
   text-align: left;
 }
 
-#enzxehrrik .gt_empty_group_heading {
+#kpmjgfdyfg .gt_empty_group_heading {
   padding: 0.5px;
   color: #333333;
   background-color: #FFFFFF;
@@ -882,15 +892,15 @@ well as overall.</p>
   vertical-align: middle;
 }
 
-#enzxehrrik .gt_from_md > :first-child {
+#kpmjgfdyfg .gt_from_md > :first-child {
   margin-top: 0;
 }
 
-#enzxehrrik .gt_from_md > :last-child {
+#kpmjgfdyfg .gt_from_md > :last-child {
   margin-bottom: 0;
 }
 
-#enzxehrrik .gt_row {
+#kpmjgfdyfg .gt_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -909,7 +919,7 @@ well as overall.</p>
   overflow-x: hidden;
 }
 
-#enzxehrrik .gt_stub {
+#kpmjgfdyfg .gt_stub {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -922,7 +932,7 @@ well as overall.</p>
   padding-right: 5px;
 }
 
-#enzxehrrik .gt_stub_row_group {
+#kpmjgfdyfg .gt_stub_row_group {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -936,15 +946,15 @@ well as overall.</p>
   vertical-align: top;
 }
 
-#enzxehrrik .gt_row_group_first td {
+#kpmjgfdyfg .gt_row_group_first td {
   border-top-width: 2px;
 }
 
-#enzxehrrik .gt_row_group_first th {
+#kpmjgfdyfg .gt_row_group_first th {
   border-top-width: 2px;
 }
 
-#enzxehrrik .gt_summary_row {
+#kpmjgfdyfg .gt_summary_row {
   color: #333333;
   background-color: #FFFFFF;
   text-transform: inherit;
@@ -954,16 +964,16 @@ well as overall.</p>
   padding-right: 5px;
 }
 
-#enzxehrrik .gt_first_summary_row {
+#kpmjgfdyfg .gt_first_summary_row {
   border-top-style: solid;
   border-top-color: #D3D3D3;
 }
 
-#enzxehrrik .gt_first_summary_row.thick {
+#kpmjgfdyfg .gt_first_summary_row.thick {
   border-top-width: 2px;
 }
 
-#enzxehrrik .gt_last_summary_row {
+#kpmjgfdyfg .gt_last_summary_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -973,7 +983,7 @@ well as overall.</p>
   border-bottom-color: #D3D3D3;
 }
 
-#enzxehrrik .gt_grand_summary_row {
+#kpmjgfdyfg .gt_grand_summary_row {
   color: #333333;
   background-color: #FFFFFF;
   text-transform: inherit;
@@ -983,7 +993,7 @@ well as overall.</p>
   padding-right: 5px;
 }
 
-#enzxehrrik .gt_first_grand_summary_row {
+#kpmjgfdyfg .gt_first_grand_summary_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -993,7 +1003,7 @@ well as overall.</p>
   border-top-color: #D3D3D3;
 }
 
-#enzxehrrik .gt_last_grand_summary_row_top {
+#kpmjgfdyfg .gt_last_grand_summary_row_top {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -1003,11 +1013,11 @@ well as overall.</p>
   border-bottom-color: #D3D3D3;
 }
 
-#enzxehrrik .gt_striped {
+#kpmjgfdyfg .gt_striped {
   background-color: rgba(128, 128, 128, 0.05);
 }
 
-#enzxehrrik .gt_table_body {
+#kpmjgfdyfg .gt_table_body {
   border-top-style: solid;
   border-top-width: 2px;
   border-top-color: #D3D3D3;
@@ -1016,7 +1026,7 @@ well as overall.</p>
   border-bottom-color: #D3D3D3;
 }
 
-#enzxehrrik .gt_footnotes {
+#kpmjgfdyfg .gt_footnotes {
   color: #333333;
   background-color: #FFFFFF;
   border-bottom-style: none;
@@ -1030,7 +1040,7 @@ well as overall.</p>
   border-right-color: #D3D3D3;
 }
 
-#enzxehrrik .gt_footnote {
+#kpmjgfdyfg .gt_footnote {
   margin: 0px;
   font-size: 90%;
   padding-top: 4px;
@@ -1039,7 +1049,7 @@ well as overall.</p>
   padding-right: 5px;
 }
 
-#enzxehrrik .gt_sourcenotes {
+#kpmjgfdyfg .gt_sourcenotes {
   color: #333333;
   background-color: #FFFFFF;
   border-bottom-style: none;
@@ -1053,7 +1063,7 @@ well as overall.</p>
   border-right-color: #D3D3D3;
 }
 
-#enzxehrrik .gt_sourcenote {
+#kpmjgfdyfg .gt_sourcenote {
   font-size: 90%;
   padding-top: 4px;
   padding-bottom: 4px;
@@ -1061,137 +1071,172 @@ well as overall.</p>
   padding-right: 5px;
 }
 
-#enzxehrrik .gt_left {
+#kpmjgfdyfg .gt_left {
   text-align: left;
 }
 
-#enzxehrrik .gt_center {
+#kpmjgfdyfg .gt_center {
   text-align: center;
 }
 
-#enzxehrrik .gt_right {
+#kpmjgfdyfg .gt_right {
   text-align: right;
   font-variant-numeric: tabular-nums;
 }
 
-#enzxehrrik .gt_font_normal {
+#kpmjgfdyfg .gt_font_normal {
   font-weight: normal;
 }
 
-#enzxehrrik .gt_font_bold {
+#kpmjgfdyfg .gt_font_bold {
   font-weight: bold;
 }
 
-#enzxehrrik .gt_font_italic {
+#kpmjgfdyfg .gt_font_italic {
   font-style: italic;
 }
 
-#enzxehrrik .gt_super {
+#kpmjgfdyfg .gt_super {
   font-size: 65%;
 }
 
-#enzxehrrik .gt_footnote_marks {
+#kpmjgfdyfg .gt_footnote_marks {
   font-size: 75%;
   vertical-align: 0.4em;
   position: initial;
 }
 
-#enzxehrrik .gt_asterisk {
+#kpmjgfdyfg .gt_asterisk {
   font-size: 100%;
   vertical-align: 0;
 }
 
-#enzxehrrik .gt_indent_1 {
+#kpmjgfdyfg .gt_indent_1 {
   text-indent: 5px;
 }
 
-#enzxehrrik .gt_indent_2 {
+#kpmjgfdyfg .gt_indent_2 {
   text-indent: 10px;
 }
 
-#enzxehrrik .gt_indent_3 {
+#kpmjgfdyfg .gt_indent_3 {
   text-indent: 15px;
 }
 
-#enzxehrrik .gt_indent_4 {
+#kpmjgfdyfg .gt_indent_4 {
   text-indent: 20px;
 }
 
-#enzxehrrik .gt_indent_5 {
+#kpmjgfdyfg .gt_indent_5 {
   text-indent: 25px;
+}
+
+#kpmjgfdyfg .katex-display {
+  display: inline-flex !important;
+  margin-bottom: 0.75em !important;
+}
+
+#kpmjgfdyfg div.Reactable > div.rt-table > div.rt-thead > div.rt-tr.rt-tr-group-header > div.rt-th-group:after {
+  height: 0px !important;
 }
 </style>
 <table class="table gt_table" data-quarto-disable-processing="false" data-quarto-bootstrap="false">
-<thead><tr class="gt_col_headings">
-<th class="gt_col_heading gt_columns_bottom_border gt_left" rowspan="1" colspan="1" style="text-align: center; font-weight: bold;" scope="col" id="CDM name">CDM name</th>
-      <th class="gt_col_heading gt_columns_bottom_border gt_left" rowspan="1" colspan="1" style="text-align: center; font-weight: bold;" scope="col" id="Cohort">Cohort</th>
-      <th class="gt_col_heading gt_columns_bottom_border gt_left" rowspan="1" colspan="1" style="text-align: center; font-weight: bold;" scope="col" id="Sex">Sex</th>
-      <th class="gt_col_heading gt_columns_bottom_border gt_left" rowspan="1" colspan="1" style="text-align: center; font-weight: bold;" scope="col" id="Outcome type">Outcome type</th>
-      <th class="gt_col_heading gt_columns_bottom_border gt_left" rowspan="1" colspan="1" style="text-align: center; font-weight: bold;" scope="col" id="Outcome name">Outcome name</th>
-      <th class="gt_col_heading gt_columns_bottom_border gt_right" rowspan="1" colspan="1" style="background-color: #E1E1E1; text-align: center; font-weight: bold;" scope="col" id="Number records">Number records</th>
-      <th class="gt_col_heading gt_columns_bottom_border gt_right" rowspan="1" colspan="1" style="background-color: #E1E1E1; text-align: center; font-weight: bold;" scope="col" id="Number events">Number events</th>
-      <th class="gt_col_heading gt_columns_bottom_border gt_right" rowspan="1" colspan="1" style="background-color: #E1E1E1; text-align: center; font-weight: bold;" scope="col" id="Restricted mean survival">Restricted mean survival</th>
-    </tr></thead>
+<thead>
+<tr class="gt_col_headings gt_spanner_row">
+<th class="gt_col_heading gt_columns_bottom_border gt_left" rowspan="2" colspan="1" style="text-align: center; font-weight: bold;" scope="col" id="CDM-name">CDM name</th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_left" rowspan="2" colspan="1" style="text-align: center; font-weight: bold;" scope="col" id="Cohort">Cohort</th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_left" rowspan="2" colspan="1" style="text-align: center; font-weight: bold;" scope="col" id="Sex">Sex</th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_left" rowspan="2" colspan="1" style="text-align: center; font-weight: bold;" scope="col" id="Outcome-type">Outcome type</th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_left" rowspan="2" colspan="1" style="text-align: center; font-weight: bold;" scope="col" id="Outcome-name">Outcome name</th>
+      <th class="gt_center gt_columns_top_border gt_column_spanner_outer" rowspan="1" colspan="3" style="background-color: #D9D9D9; text-align: center; font-weight: bold;" scope="colgroup" id="spanner-[header_name]Estimate name
+[header_level]Number records">
+        <div class="gt_column_spanner">Estimate name</div>
+      </th>
+    </tr>
+<tr class="gt_col_headings">
+<th class="gt_col_heading gt_columns_bottom_border gt_right" rowspan="1" colspan="1" style="background-color: #E1E1E1; text-align: center; font-weight: bold;" scope="col" id="[header_name]Estimate-name-[header_level]Number-records">Number records</th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_right" rowspan="1" colspan="1" style="background-color: #E1E1E1; text-align: center; font-weight: bold;" scope="col" id="[header_name]Estimate-name-[header_level]Number-events">Number events</th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_right" rowspan="1" colspan="1" style="background-color: #E1E1E1; text-align: center; font-weight: bold;" scope="col" id="[header_name]Estimate-name-[header_level]Restricted-mean-survival">Restricted mean survival</th>
+    </tr>
+</thead>
 <tbody class="gt_table_body">
 <tr>
 <td headers="CDM name" class="gt_row gt_left" style="text-align: left;">mock</td>
-<td headers="Cohort" class="gt_row gt_left" style="text-align: left; border-left-width: 1px; border-left-style: solid; border-left-color: #D3D3D3; border-right-width: 1px; border-right-style: solid; border-right-color: #D3D3D3; border-top-width: 1px; border-top-style: solid; border-top-color: #D3D3D3; border-bottom-width: 1px; border-bottom-style: solid; border-bottom-color: #D3D3D3;">Mgus diagnosis</td>
-<td headers="Sex" class="gt_row gt_left" style="text-align: left; border-left-width: 1px; border-left-style: solid; border-left-color: #D3D3D3; border-right-width: 1px; border-right-style: solid; border-right-color: #D3D3D3; border-top-width: 1px; border-top-style: solid; border-top-color: #D3D3D3; border-bottom-width: 1px; border-bottom-style: solid; border-bottom-color: #D3D3D3;">Overall</td>
-<td headers="Outcome type" class="gt_row gt_left" style="text-align: left; border-left-width: 1px; border-left-style: solid; border-left-color: #D3D3D3; border-right-width: 1px; border-right-style: solid; border-right-color: #D3D3D3; border-top-width: 1px; border-top-style: solid; border-top-color: #D3D3D3; border-bottom-width: 1px; border-bottom-style: solid; border-bottom-color: #D3D3D3;">Outcome</td>
-<td headers="Outcome name" class="gt_row gt_left" style="text-align: left; border-left-width: 1px; border-left-style: solid; border-left-color: #D3D3D3; border-right-width: 1px; border-right-style: solid; border-right-color: #D3D3D3; border-top-width: 1px; border-top-style: solid; border-top-color: #D3D3D3; border-bottom-width: 1px; border-bottom-style: solid; border-bottom-color: #D3D3D3;">Progression</td>
-<td headers="[header_level]Number records" class="gt_row gt_right" style="text-align: right; border-left-width: 1px; border-left-style: solid; border-left-color: #D3D3D3; border-right-width: 1px; border-right-style: solid; border-right-color: #D3D3D3; border-top-width: 1px; border-top-style: solid; border-top-color: #D3D3D3; border-bottom-width: 1px; border-bottom-style: solid; border-bottom-color: #D3D3D3;">1,384</td>
-<td headers="[header_level]Number events" class="gt_row gt_right" style="text-align: right; border-left-width: 1px; border-left-style: solid; border-left-color: #D3D3D3; border-right-width: 1px; border-right-style: solid; border-right-color: #D3D3D3; border-top-width: 1px; border-top-style: solid; border-top-color: #D3D3D3; border-bottom-width: 1px; border-bottom-style: solid; border-bottom-color: #D3D3D3;">106</td>
-<td headers="[header_level]Restricted mean survival" class="gt_row gt_right" style="text-align: right;">35.00</td>
+<td headers="Cohort" class="gt_row gt_left" style="text-align: left; border-left-width: 1px; border-left-style: solid; border-left-color: #D3D3D3; border-right-width: 1px; border-right-style: solid; border-right-color: #D3D3D3; border-top-width: 1px; border-top-style: solid; border-top-color: #D3D3D3; border-bottom-width: 1px; border-bottom-style: solid; border-bottom-color: #D3D3D3;">mgus_diagnosis</td>
+<td headers="Sex" class="gt_row gt_left" style="text-align: left; border-left-width: 1px; border-left-style: solid; border-left-color: #D3D3D3; border-right-width: 1px; border-right-style: solid; border-right-color: #D3D3D3; border-top-width: 1px; border-top-style: solid; border-top-color: #D3D3D3; border-bottom-width: 1px; border-bottom-style: solid; border-bottom-color: #D3D3D3;">overall</td>
+<td headers="Outcome type" class="gt_row gt_left" style="text-align: left; border-left-width: 1px; border-left-style: solid; border-left-color: #D3D3D3; border-right-width: 1px; border-right-style: solid; border-right-color: #D3D3D3; border-top-width: 1px; border-top-style: solid; border-top-color: #D3D3D3; border-bottom-width: 1px; border-bottom-style: solid; border-bottom-color: #D3D3D3;">outcome</td>
+<td headers="Outcome name" class="gt_row gt_left" style="text-align: left; border-left-width: 1px; border-left-style: solid; border-left-color: #D3D3D3; border-right-width: 1px; border-right-style: solid; border-right-color: #D3D3D3; border-top-width: 1px; border-top-style: solid; border-top-color: #D3D3D3; border-bottom-width: 1px; border-bottom-style: solid; border-bottom-color: #D3D3D3;">progression</td>
+<td headers="[header_name]Estimate name
+[header_level]Number records" class="gt_row gt_right" style="text-align: right; border-left-width: 1px; border-left-style: solid; border-left-color: #D3D3D3; border-right-width: 1px; border-right-style: solid; border-right-color: #D3D3D3; border-top-width: 1px; border-top-style: solid; border-top-color: #D3D3D3; border-bottom-width: 1px; border-bottom-style: solid; border-bottom-color: #D3D3D3;">1,384</td>
+<td headers="[header_name]Estimate name
+[header_level]Number events" class="gt_row gt_right" style="text-align: right; border-left-width: 1px; border-left-style: solid; border-left-color: #D3D3D3; border-right-width: 1px; border-right-style: solid; border-right-color: #D3D3D3; border-top-width: 1px; border-top-style: solid; border-top-color: #D3D3D3; border-bottom-width: 1px; border-bottom-style: solid; border-bottom-color: #D3D3D3;">106</td>
+<td headers="[header_name]Estimate name
+[header_level]Restricted mean survival" class="gt_row gt_right" style="text-align: right;">35.00</td>
 </tr>
 <tr>
 <td headers="CDM name" class="gt_row gt_left" style="text-align: left; border-top-width: 1px; border-top-style: hidden; border-top-color: #000000;"></td>
 <td headers="Cohort" class="gt_row gt_left" style="text-align: left; border-left-width: 1px; border-left-style: solid; border-left-color: #D3D3D3; border-right-width: 1px; border-right-style: solid; border-right-color: #D3D3D3; border-top-width: 1px; border-top-style: hidden; border-top-color: #000000; border-bottom-width: 1px; border-bottom-style: solid; border-bottom-color: #D3D3D3;"></td>
 <td headers="Sex" class="gt_row gt_left" style="text-align: left; border-left-width: 1px; border-left-style: solid; border-left-color: #D3D3D3; border-right-width: 1px; border-right-style: solid; border-right-color: #D3D3D3; border-top-width: 1px; border-top-style: hidden; border-top-color: #000000; border-bottom-width: 1px; border-bottom-style: solid; border-bottom-color: #D3D3D3;"></td>
-<td headers="Outcome type" class="gt_row gt_left" style="text-align: left; border-left-width: 1px; border-left-style: solid; border-left-color: #D3D3D3; border-right-width: 1px; border-right-style: solid; border-right-color: #D3D3D3; border-top-width: 1px; border-top-style: solid; border-top-color: #D3D3D3; border-bottom-width: 1px; border-bottom-style: solid; border-bottom-color: #D3D3D3;">Competing outcome</td>
-<td headers="Outcome name" class="gt_row gt_left" style="text-align: left; border-left-width: 1px; border-left-style: solid; border-left-color: #D3D3D3; border-right-width: 1px; border-right-style: solid; border-right-color: #D3D3D3; border-top-width: 1px; border-top-style: solid; border-top-color: #D3D3D3; border-bottom-width: 1px; border-bottom-style: solid; border-bottom-color: #D3D3D3;">Death cohort</td>
-<td headers="[header_level]Number records" class="gt_row gt_right" style="text-align: right; border-left-width: 1px; border-left-style: solid; border-left-color: #D3D3D3; border-right-width: 1px; border-right-style: solid; border-right-color: #D3D3D3; border-top-width: 1px; border-top-style: solid; border-top-color: #D3D3D3; border-bottom-width: 1px; border-bottom-style: solid; border-bottom-color: #D3D3D3;">1,384</td>
-<td headers="[header_level]Number events" class="gt_row gt_right" style="text-align: right; border-left-width: 1px; border-left-style: solid; border-left-color: #D3D3D3; border-right-width: 1px; border-right-style: solid; border-right-color: #D3D3D3; border-top-width: 1px; border-top-style: solid; border-top-color: #D3D3D3; border-bottom-width: 1px; border-bottom-style: solid; border-bottom-color: #D3D3D3;">869</td>
-<td headers="[header_level]Restricted mean survival" class="gt_row gt_right" style="text-align: right;">260.00</td>
+<td headers="Outcome type" class="gt_row gt_left" style="text-align: left; border-left-width: 1px; border-left-style: solid; border-left-color: #D3D3D3; border-right-width: 1px; border-right-style: solid; border-right-color: #D3D3D3; border-top-width: 1px; border-top-style: solid; border-top-color: #D3D3D3; border-bottom-width: 1px; border-bottom-style: solid; border-bottom-color: #D3D3D3;">competing_outcome</td>
+<td headers="Outcome name" class="gt_row gt_left" style="text-align: left; border-left-width: 1px; border-left-style: solid; border-left-color: #D3D3D3; border-right-width: 1px; border-right-style: solid; border-right-color: #D3D3D3; border-top-width: 1px; border-top-style: solid; border-top-color: #D3D3D3; border-bottom-width: 1px; border-bottom-style: solid; border-bottom-color: #D3D3D3;">death_cohort</td>
+<td headers="[header_name]Estimate name
+[header_level]Number records" class="gt_row gt_right" style="text-align: right; border-left-width: 1px; border-left-style: solid; border-left-color: #D3D3D3; border-right-width: 1px; border-right-style: solid; border-right-color: #D3D3D3; border-top-width: 1px; border-top-style: solid; border-top-color: #D3D3D3; border-bottom-width: 1px; border-bottom-style: solid; border-bottom-color: #D3D3D3;">1,384</td>
+<td headers="[header_name]Estimate name
+[header_level]Number events" class="gt_row gt_right" style="text-align: right; border-left-width: 1px; border-left-style: solid; border-left-color: #D3D3D3; border-right-width: 1px; border-right-style: solid; border-right-color: #D3D3D3; border-top-width: 1px; border-top-style: solid; border-top-color: #D3D3D3; border-bottom-width: 1px; border-bottom-style: solid; border-bottom-color: #D3D3D3;">869</td>
+<td headers="[header_name]Estimate name
+[header_level]Restricted mean survival" class="gt_row gt_right" style="text-align: right;">260.00</td>
 </tr>
 <tr>
 <td headers="CDM name" class="gt_row gt_left" style="text-align: left; border-top-width: 1px; border-top-style: hidden; border-top-color: #000000;"></td>
 <td headers="Cohort" class="gt_row gt_left" style="text-align: left; border-left-width: 1px; border-left-style: solid; border-left-color: #D3D3D3; border-right-width: 1px; border-right-style: solid; border-right-color: #D3D3D3; border-top-width: 1px; border-top-style: hidden; border-top-color: #000000; border-bottom-width: 1px; border-bottom-style: solid; border-bottom-color: #D3D3D3;"></td>
 <td headers="Sex" class="gt_row gt_left" style="text-align: left; border-left-width: 1px; border-left-style: solid; border-left-color: #D3D3D3; border-right-width: 1px; border-right-style: solid; border-right-color: #D3D3D3; border-top-width: 1px; border-top-style: solid; border-top-color: #D3D3D3; border-bottom-width: 1px; border-bottom-style: solid; border-bottom-color: #D3D3D3;">F</td>
-<td headers="Outcome type" class="gt_row gt_left" style="text-align: left; border-left-width: 1px; border-left-style: solid; border-left-color: #D3D3D3; border-right-width: 1px; border-right-style: solid; border-right-color: #D3D3D3; border-top-width: 1px; border-top-style: solid; border-top-color: #D3D3D3; border-bottom-width: 1px; border-bottom-style: solid; border-bottom-color: #D3D3D3;">Outcome</td>
-<td headers="Outcome name" class="gt_row gt_left" style="text-align: left; border-left-width: 1px; border-left-style: solid; border-left-color: #D3D3D3; border-right-width: 1px; border-right-style: solid; border-right-color: #D3D3D3; border-top-width: 1px; border-top-style: solid; border-top-color: #D3D3D3; border-bottom-width: 1px; border-bottom-style: solid; border-bottom-color: #D3D3D3;">Progression</td>
-<td headers="[header_level]Number records" class="gt_row gt_right" style="text-align: right; border-left-width: 1px; border-left-style: solid; border-left-color: #D3D3D3; border-right-width: 1px; border-right-style: solid; border-right-color: #D3D3D3; border-top-width: 1px; border-top-style: solid; border-top-color: #D3D3D3; border-bottom-width: 1px; border-bottom-style: solid; border-bottom-color: #D3D3D3;">631</td>
-<td headers="[header_level]Number events" class="gt_row gt_right" style="text-align: right; border-left-width: 1px; border-left-style: solid; border-left-color: #D3D3D3; border-right-width: 1px; border-right-style: solid; border-right-color: #D3D3D3; border-top-width: 1px; border-top-style: solid; border-top-color: #D3D3D3; border-bottom-width: 1px; border-bottom-style: solid; border-bottom-color: #D3D3D3;">55</td>
-<td headers="[header_level]Restricted mean survival" class="gt_row gt_right" style="text-align: right;">40.00</td>
+<td headers="Outcome type" class="gt_row gt_left" style="text-align: left; border-left-width: 1px; border-left-style: solid; border-left-color: #D3D3D3; border-right-width: 1px; border-right-style: solid; border-right-color: #D3D3D3; border-top-width: 1px; border-top-style: solid; border-top-color: #D3D3D3; border-bottom-width: 1px; border-bottom-style: solid; border-bottom-color: #D3D3D3;">outcome</td>
+<td headers="Outcome name" class="gt_row gt_left" style="text-align: left; border-left-width: 1px; border-left-style: solid; border-left-color: #D3D3D3; border-right-width: 1px; border-right-style: solid; border-right-color: #D3D3D3; border-top-width: 1px; border-top-style: solid; border-top-color: #D3D3D3; border-bottom-width: 1px; border-bottom-style: solid; border-bottom-color: #D3D3D3;">progression</td>
+<td headers="[header_name]Estimate name
+[header_level]Number records" class="gt_row gt_right" style="text-align: right; border-left-width: 1px; border-left-style: solid; border-left-color: #D3D3D3; border-right-width: 1px; border-right-style: solid; border-right-color: #D3D3D3; border-top-width: 1px; border-top-style: solid; border-top-color: #D3D3D3; border-bottom-width: 1px; border-bottom-style: solid; border-bottom-color: #D3D3D3;">631</td>
+<td headers="[header_name]Estimate name
+[header_level]Number events" class="gt_row gt_right" style="text-align: right; border-left-width: 1px; border-left-style: solid; border-left-color: #D3D3D3; border-right-width: 1px; border-right-style: solid; border-right-color: #D3D3D3; border-top-width: 1px; border-top-style: solid; border-top-color: #D3D3D3; border-bottom-width: 1px; border-bottom-style: solid; border-bottom-color: #D3D3D3;">55</td>
+<td headers="[header_name]Estimate name
+[header_level]Restricted mean survival" class="gt_row gt_right" style="text-align: right;">40.00</td>
 </tr>
 <tr>
 <td headers="CDM name" class="gt_row gt_left" style="text-align: left; border-top-width: 1px; border-top-style: hidden; border-top-color: #000000;"></td>
 <td headers="Cohort" class="gt_row gt_left" style="text-align: left; border-left-width: 1px; border-left-style: solid; border-left-color: #D3D3D3; border-right-width: 1px; border-right-style: solid; border-right-color: #D3D3D3; border-top-width: 1px; border-top-style: hidden; border-top-color: #000000; border-bottom-width: 1px; border-bottom-style: solid; border-bottom-color: #D3D3D3;"></td>
 <td headers="Sex" class="gt_row gt_left" style="text-align: left; border-left-width: 1px; border-left-style: solid; border-left-color: #D3D3D3; border-right-width: 1px; border-right-style: solid; border-right-color: #D3D3D3; border-top-width: 1px; border-top-style: solid; border-top-color: #D3D3D3; border-bottom-width: 1px; border-bottom-style: solid; border-bottom-color: #D3D3D3;">M</td>
-<td headers="Outcome type" class="gt_row gt_left" style="text-align: left; border-left-width: 1px; border-left-style: solid; border-left-color: #D3D3D3; border-right-width: 1px; border-right-style: solid; border-right-color: #D3D3D3; border-top-width: 1px; border-top-style: solid; border-top-color: #D3D3D3; border-bottom-width: 1px; border-bottom-style: solid; border-bottom-color: #D3D3D3;">Outcome</td>
-<td headers="Outcome name" class="gt_row gt_left" style="text-align: left; border-left-width: 1px; border-left-style: solid; border-left-color: #D3D3D3; border-right-width: 1px; border-right-style: solid; border-right-color: #D3D3D3; border-top-width: 1px; border-top-style: solid; border-top-color: #D3D3D3; border-bottom-width: 1px; border-bottom-style: solid; border-bottom-color: #D3D3D3;">Progression</td>
-<td headers="[header_level]Number records" class="gt_row gt_right" style="text-align: right; border-left-width: 1px; border-left-style: solid; border-left-color: #D3D3D3; border-right-width: 1px; border-right-style: solid; border-right-color: #D3D3D3; border-top-width: 1px; border-top-style: solid; border-top-color: #D3D3D3; border-bottom-width: 1px; border-bottom-style: solid; border-bottom-color: #D3D3D3;">753</td>
-<td headers="[header_level]Number events" class="gt_row gt_right" style="text-align: right; border-left-width: 1px; border-left-style: solid; border-left-color: #D3D3D3; border-right-width: 1px; border-right-style: solid; border-right-color: #D3D3D3; border-top-width: 1px; border-top-style: solid; border-top-color: #D3D3D3; border-bottom-width: 1px; border-bottom-style: solid; border-bottom-color: #D3D3D3;">51</td>
-<td headers="[header_level]Restricted mean survival" class="gt_row gt_right" style="text-align: right;">29.00</td>
+<td headers="Outcome type" class="gt_row gt_left" style="text-align: left; border-left-width: 1px; border-left-style: solid; border-left-color: #D3D3D3; border-right-width: 1px; border-right-style: solid; border-right-color: #D3D3D3; border-top-width: 1px; border-top-style: solid; border-top-color: #D3D3D3; border-bottom-width: 1px; border-bottom-style: solid; border-bottom-color: #D3D3D3;">outcome</td>
+<td headers="Outcome name" class="gt_row gt_left" style="text-align: left; border-left-width: 1px; border-left-style: solid; border-left-color: #D3D3D3; border-right-width: 1px; border-right-style: solid; border-right-color: #D3D3D3; border-top-width: 1px; border-top-style: solid; border-top-color: #D3D3D3; border-bottom-width: 1px; border-bottom-style: solid; border-bottom-color: #D3D3D3;">progression</td>
+<td headers="[header_name]Estimate name
+[header_level]Number records" class="gt_row gt_right" style="text-align: right; border-left-width: 1px; border-left-style: solid; border-left-color: #D3D3D3; border-right-width: 1px; border-right-style: solid; border-right-color: #D3D3D3; border-top-width: 1px; border-top-style: solid; border-top-color: #D3D3D3; border-bottom-width: 1px; border-bottom-style: solid; border-bottom-color: #D3D3D3;">753</td>
+<td headers="[header_name]Estimate name
+[header_level]Number events" class="gt_row gt_right" style="text-align: right; border-left-width: 1px; border-left-style: solid; border-left-color: #D3D3D3; border-right-width: 1px; border-right-style: solid; border-right-color: #D3D3D3; border-top-width: 1px; border-top-style: solid; border-top-color: #D3D3D3; border-bottom-width: 1px; border-bottom-style: solid; border-bottom-color: #D3D3D3;">51</td>
+<td headers="[header_name]Estimate name
+[header_level]Restricted mean survival" class="gt_row gt_right" style="text-align: right;">29.00</td>
 </tr>
 <tr>
 <td headers="CDM name" class="gt_row gt_left" style="text-align: left; border-top-width: 1px; border-top-style: hidden; border-top-color: #000000;"></td>
 <td headers="Cohort" class="gt_row gt_left" style="text-align: left; border-left-width: 1px; border-left-style: solid; border-left-color: #D3D3D3; border-right-width: 1px; border-right-style: solid; border-right-color: #D3D3D3; border-top-width: 1px; border-top-style: hidden; border-top-color: #000000; border-bottom-width: 1px; border-bottom-style: solid; border-bottom-color: #D3D3D3;"></td>
 <td headers="Sex" class="gt_row gt_left" style="text-align: left; border-left-width: 1px; border-left-style: solid; border-left-color: #D3D3D3; border-right-width: 1px; border-right-style: solid; border-right-color: #D3D3D3; border-top-width: 1px; border-top-style: solid; border-top-color: #D3D3D3; border-bottom-width: 1px; border-bottom-style: solid; border-bottom-color: #D3D3D3;">F</td>
-<td headers="Outcome type" class="gt_row gt_left" style="text-align: left; border-left-width: 1px; border-left-style: solid; border-left-color: #D3D3D3; border-right-width: 1px; border-right-style: solid; border-right-color: #D3D3D3; border-top-width: 1px; border-top-style: solid; border-top-color: #D3D3D3; border-bottom-width: 1px; border-bottom-style: solid; border-bottom-color: #D3D3D3;">Competing outcome</td>
-<td headers="Outcome name" class="gt_row gt_left" style="text-align: left; border-left-width: 1px; border-left-style: solid; border-left-color: #D3D3D3; border-right-width: 1px; border-right-style: solid; border-right-color: #D3D3D3; border-top-width: 1px; border-top-style: solid; border-top-color: #D3D3D3; border-bottom-width: 1px; border-bottom-style: solid; border-bottom-color: #D3D3D3;">Death cohort</td>
-<td headers="[header_level]Number records" class="gt_row gt_right" style="text-align: right; border-left-width: 1px; border-left-style: solid; border-left-color: #D3D3D3; border-right-width: 1px; border-right-style: solid; border-right-color: #D3D3D3; border-top-width: 1px; border-top-style: solid; border-top-color: #D3D3D3; border-bottom-width: 1px; border-bottom-style: solid; border-bottom-color: #D3D3D3;">631</td>
-<td headers="[header_level]Number events" class="gt_row gt_right" style="text-align: right; border-left-width: 1px; border-left-style: solid; border-left-color: #D3D3D3; border-right-width: 1px; border-right-style: solid; border-right-color: #D3D3D3; border-top-width: 1px; border-top-style: solid; border-top-color: #D3D3D3; border-bottom-width: 1px; border-bottom-style: solid; border-bottom-color: #D3D3D3;">374</td>
-<td headers="[header_level]Restricted mean survival" class="gt_row gt_right" style="text-align: right;">245.00</td>
+<td headers="Outcome type" class="gt_row gt_left" style="text-align: left; border-left-width: 1px; border-left-style: solid; border-left-color: #D3D3D3; border-right-width: 1px; border-right-style: solid; border-right-color: #D3D3D3; border-top-width: 1px; border-top-style: solid; border-top-color: #D3D3D3; border-bottom-width: 1px; border-bottom-style: solid; border-bottom-color: #D3D3D3;">competing_outcome</td>
+<td headers="Outcome name" class="gt_row gt_left" style="text-align: left; border-left-width: 1px; border-left-style: solid; border-left-color: #D3D3D3; border-right-width: 1px; border-right-style: solid; border-right-color: #D3D3D3; border-top-width: 1px; border-top-style: solid; border-top-color: #D3D3D3; border-bottom-width: 1px; border-bottom-style: solid; border-bottom-color: #D3D3D3;">death_cohort</td>
+<td headers="[header_name]Estimate name
+[header_level]Number records" class="gt_row gt_right" style="text-align: right; border-left-width: 1px; border-left-style: solid; border-left-color: #D3D3D3; border-right-width: 1px; border-right-style: solid; border-right-color: #D3D3D3; border-top-width: 1px; border-top-style: solid; border-top-color: #D3D3D3; border-bottom-width: 1px; border-bottom-style: solid; border-bottom-color: #D3D3D3;">631</td>
+<td headers="[header_name]Estimate name
+[header_level]Number events" class="gt_row gt_right" style="text-align: right; border-left-width: 1px; border-left-style: solid; border-left-color: #D3D3D3; border-right-width: 1px; border-right-style: solid; border-right-color: #D3D3D3; border-top-width: 1px; border-top-style: solid; border-top-color: #D3D3D3; border-bottom-width: 1px; border-bottom-style: solid; border-bottom-color: #D3D3D3;">374</td>
+<td headers="[header_name]Estimate name
+[header_level]Restricted mean survival" class="gt_row gt_right" style="text-align: right;">245.00</td>
 </tr>
 <tr>
 <td headers="CDM name" class="gt_row gt_left" style="text-align: left; border-top-width: 1px; border-top-style: hidden; border-top-color: #000000;"></td>
 <td headers="Cohort" class="gt_row gt_left" style="text-align: left; border-left-width: 1px; border-left-style: solid; border-left-color: #D3D3D3; border-right-width: 1px; border-right-style: solid; border-right-color: #D3D3D3; border-top-width: 1px; border-top-style: hidden; border-top-color: #000000; border-bottom-width: 1px; border-bottom-style: solid; border-bottom-color: #D3D3D3;"></td>
 <td headers="Sex" class="gt_row gt_left" style="text-align: left; border-left-width: 1px; border-left-style: solid; border-left-color: #D3D3D3; border-right-width: 1px; border-right-style: solid; border-right-color: #D3D3D3; border-top-width: 1px; border-top-style: solid; border-top-color: #D3D3D3; border-bottom-width: 1px; border-bottom-style: solid; border-bottom-color: #D3D3D3;">M</td>
-<td headers="Outcome type" class="gt_row gt_left" style="text-align: left; border-left-width: 1px; border-left-style: solid; border-left-color: #D3D3D3; border-right-width: 1px; border-right-style: solid; border-right-color: #D3D3D3; border-top-width: 1px; border-top-style: solid; border-top-color: #D3D3D3; border-bottom-width: 1px; border-bottom-style: solid; border-bottom-color: #D3D3D3;">Competing outcome</td>
-<td headers="Outcome name" class="gt_row gt_left" style="text-align: left; border-left-width: 1px; border-left-style: solid; border-left-color: #D3D3D3; border-right-width: 1px; border-right-style: solid; border-right-color: #D3D3D3; border-top-width: 1px; border-top-style: solid; border-top-color: #D3D3D3; border-bottom-width: 1px; border-bottom-style: solid; border-bottom-color: #D3D3D3;">Death cohort</td>
-<td headers="[header_level]Number records" class="gt_row gt_right" style="text-align: right; border-left-width: 1px; border-left-style: solid; border-left-color: #D3D3D3; border-right-width: 1px; border-right-style: solid; border-right-color: #D3D3D3; border-top-width: 1px; border-top-style: solid; border-top-color: #D3D3D3; border-bottom-width: 1px; border-bottom-style: solid; border-bottom-color: #D3D3D3;">753</td>
-<td headers="[header_level]Number events" class="gt_row gt_right" style="text-align: right; border-left-width: 1px; border-left-style: solid; border-left-color: #D3D3D3; border-right-width: 1px; border-right-style: solid; border-right-color: #D3D3D3; border-top-width: 1px; border-top-style: solid; border-top-color: #D3D3D3; border-bottom-width: 1px; border-bottom-style: solid; border-bottom-color: #D3D3D3;">495</td>
-<td headers="[header_level]Restricted mean survival" class="gt_row gt_right" style="text-align: right;">272.00</td>
+<td headers="Outcome type" class="gt_row gt_left" style="text-align: left; border-left-width: 1px; border-left-style: solid; border-left-color: #D3D3D3; border-right-width: 1px; border-right-style: solid; border-right-color: #D3D3D3; border-top-width: 1px; border-top-style: solid; border-top-color: #D3D3D3; border-bottom-width: 1px; border-bottom-style: solid; border-bottom-color: #D3D3D3;">competing_outcome</td>
+<td headers="Outcome name" class="gt_row gt_left" style="text-align: left; border-left-width: 1px; border-left-style: solid; border-left-color: #D3D3D3; border-right-width: 1px; border-right-style: solid; border-right-color: #D3D3D3; border-top-width: 1px; border-top-style: solid; border-top-color: #D3D3D3; border-bottom-width: 1px; border-bottom-style: solid; border-bottom-color: #D3D3D3;">death_cohort</td>
+<td headers="[header_name]Estimate name
+[header_level]Number records" class="gt_row gt_right" style="text-align: right; border-left-width: 1px; border-left-style: solid; border-left-color: #D3D3D3; border-right-width: 1px; border-right-style: solid; border-right-color: #D3D3D3; border-top-width: 1px; border-top-style: solid; border-top-color: #D3D3D3; border-bottom-width: 1px; border-bottom-style: solid; border-bottom-color: #D3D3D3;">753</td>
+<td headers="[header_name]Estimate name
+[header_level]Number events" class="gt_row gt_right" style="text-align: right; border-left-width: 1px; border-left-style: solid; border-left-color: #D3D3D3; border-right-width: 1px; border-right-style: solid; border-right-color: #D3D3D3; border-top-width: 1px; border-top-style: solid; border-top-color: #D3D3D3; border-bottom-width: 1px; border-bottom-style: solid; border-bottom-color: #D3D3D3;">495</td>
+<td headers="[header_name]Estimate name
+[header_level]Restricted mean survival" class="gt_row gt_right" style="text-align: right;">272.00</td>
 </tr>
 </tbody>
 </table>
@@ -1202,7 +1247,7 @@ well as overall.</p>
 </h2>
 <p>If we set returnParticipants as TRUE then we will also be able to
 access the individuals that contributed to the analysis.</p>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">MGUS_death_prog</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/estimateCompetingRiskSurvival.html">estimateCompetingRiskSurvival</a></span><span class="op">(</span><span class="va">cdm</span>,</span>
 <span>  targetCohortTable <span class="op">=</span> <span class="st">"mgus_diagnosis"</span>,</span>
 <span>  outcomeCohortTable <span class="op">=</span> <span class="st">"progression"</span>,</span>
@@ -1213,26 +1258,26 @@ access the individuals that contributed to the analysis.</p>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 1,384 × 7</span></span></span>
 <span><span class="co">#&gt;    cohort_definition_id subject_id cohort_start_date cohort_end_date exposure_id</span></span>
 <span><span class="co">#&gt;                   <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;date&gt;</span>            <span style="color: #949494; font-style: italic;">&lt;date&gt;</span>                <span style="color: #949494; font-style: italic;">&lt;int&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span>                    1         56 1978-01-01        1978-01-01                1</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span>                    1        124 1974-01-01        1974-01-01                1</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span>                    1        127 1978-01-01        1978-01-01                1</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span>                    1        147 1975-01-01        1975-01-01                1</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span>                    1        163 1966-01-01        1966-01-01                1</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span>                    1        167 1968-01-01        1968-01-01                1</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span>                    1        180 1981-01-01        1981-01-01                1</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span>                    1        186 1989-01-01        1989-01-01                1</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span>                    1        195 1981-01-01        1981-01-01                1</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span>                    1        206 1986-01-01        1986-01-01                1</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span>                    1         81 1985-01-01        1985-01-01                1</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span>                    1        111 1993-01-01        1993-01-01                1</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span>                    1        124 1974-01-01        1974-01-01                1</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span>                    1        127 1978-01-01        1978-01-01                1</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span>                    1        147 1975-01-01        1975-01-01                1</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span>                    1        163 1966-01-01        1966-01-01                1</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span>                    1        165 1974-01-01        1974-01-01                1</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span>                    1        167 1968-01-01        1968-01-01                1</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span>                    1        180 1981-01-01        1981-01-01                1</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span>                    1        186 1989-01-01        1989-01-01                1</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 1,374 more rows</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 2 more variables: outcome_id &lt;int&gt;, competing_outcome_id &lt;int&gt;</span></span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="disconnect-from-the-cdm-database-connection">Disconnect from the cdm database connection<a class="anchor" aria-label="anchor" href="#disconnect-from-the-cdm-database-connection"></a>
 </h2>
-<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://darwin-eu.github.io/CDMConnector/reference/cdmDisconnect.html" class="external-link">cdm_disconnect</a></span><span class="op">(</span><span class="va">cdm</span><span class="op">)</span></span></code></pre></div>
 </div>
-  </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
+  </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>
 </div>
 
@@ -1243,15 +1288,15 @@ access the individuals that contributed to the analysis.</p>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.9.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.1.</p>
 </div>
 
     </footer>
 </div>
 
-  
 
-  
+
+
 
   </body>
 </html>
