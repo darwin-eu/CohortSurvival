@@ -19,7 +19,7 @@ generateDeathCohortSet(cdm, name, cohortTable = NULL, cohortId = NULL)
 A cohort table with a death cohort in cdm
 }
 \description{
-To create a death cohort
+\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}}
 }
 \examples{
 \donttest{

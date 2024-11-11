@@ -16,6 +16,8 @@
 
 #' To create a death cohort
 #'
+#' `r lifecycle::badge("deprecated")`
+#'
 #' @param cdm  CDM reference
 #'
 #' @param name name for the created death cohort table
@@ -83,10 +85,15 @@ generateDeathCohortSet <- function(
     cohortTable = NULL,
     cohortId = NULL){
 
+  lifecycle::deprecate_soft(
+    "0.6.0", "generateDeathCohortSet()"
+  )
+
   # 0. validate inputs...
-  checkCdm(cdm, tables = c("death", "observation_period"))
-  checkmate::assertNumeric(cohortId, any.missing = FALSE, null.ok = TRUE, len = 1)
-  checkmate::assertCharacter(name, min.chars = 1, any.missing = FALSE, len = 1)
+  omopgenerics::validateCdmArgument(cdm)
+  omopgenerics::assertTable(cdm[["death"]])
+  omopgenerics::assertNumeric(cohortId, null = TRUE, length = 1)
+  omopgenerics::assertCharacter(name, length = 1)
 
   x <-  cdm$death %>%
     PatientProfiles::addInObservation(indexDate = "death_date") %>%
@@ -96,7 +103,8 @@ generateDeathCohortSet <- function(
 
   # 1. cohortTable and cohortId
   if (!is.null(cohortTable)){
-    checkCdm(cdm, tables = c(cohortTable))
+    omopgenerics::validateCdmArgument(cdm)
+    omopgenerics::validateCohortArgument(cdm[[cohortTable]])
 
     if (!is.null(cohortId)){
       x <- x %>%

@@ -9,11 +9,13 @@ plotSurvival(
   x = "time",
   xscale = "days",
   ylim = c(0, NA),
+  xlim = NULL,
   cumulativeFailure = FALSE,
   ribbon = TRUE,
   facet = NULL,
   colour = NULL,
-  colourName = NULL
+  riskTable = FALSE,
+  riskInterval = 30
 )
 }
 \arguments{
@@ -25,6 +27,8 @@ plotSurvival(
 
 \item{ylim}{Limits for the Y axis}
 
+\item{xlim}{Limits for the X axis}
+
 \item{cumulativeFailure}{whether to plot the cumulative failure probability
 instead of the survival probability}
 
@@ -34,7 +38,9 @@ instead of the survival probability}
 
 \item{colour}{Variables to use for colours}
 
-\item{colourName}{Colour legend name}
+\item{riskTable}{Whether to print risk table below the plot}
+
+\item{riskInterval}{Interval of time to print risk table below the plot}
 }
 \value{
 A plot of survival probabilities over time

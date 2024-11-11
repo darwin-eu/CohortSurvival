@@ -2,7 +2,7 @@
 title: "Single outcome event of interest"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{a01_Single_event_of_interest}
+  %\VignetteIndexEntry{Single outcome event of interest}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -94,17 +94,6 @@ And we also now have summary statistics for each of the strata as well as overal
 
 ```{r}
 tableSurvival(MGUS_death)
-```
-
-## Summarising participants
-If we set returnParticipants as TRUE then we will also be able to access the individuals that contributed to the analysis.
-```{r}
-MGUS_death <- estimateSingleEventSurvival(cdm,
-  targetCohortTable = "mgus_diagnosis",
-  outcomeCohortTable = "death_cohort",
-  returnParticipants = TRUE
-)
-survivalParticipants(MGUS_death)
 ```
 
 ## Disconnect from the cdm database connection

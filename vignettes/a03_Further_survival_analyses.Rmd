@@ -2,7 +2,7 @@
 title: "Further survival analyses"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{a03_Further_survival_analyses}
+  %\VignetteIndexEntry{Further survival analyses}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---

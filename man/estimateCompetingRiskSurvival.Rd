@@ -8,12 +8,12 @@ cohorts in the OMOP Common Data Model}
 estimateCompetingRiskSurvival(
   cdm,
   targetCohortTable,
-  targetCohortId = NULL,
   outcomeCohortTable,
+  competingOutcomeCohortTable,
+  targetCohortId = NULL,
   outcomeCohortId = NULL,
   outcomeDateVariable = "cohort_start_date",
   outcomeWashout = Inf,
-  competingOutcomeCohortTable,
   competingOutcomeCohortId = NULL,
   competingOutcomeDateVariable = "cohort_start_date",
   competingOutcomeWashout = Inf,
@@ -25,8 +25,7 @@ estimateCompetingRiskSurvival(
   estimateGap = 1,
   restrictedMeanFollowUp = NULL,
   minimumSurvivalDays = 1,
-  minCellCount = 5,
-  returnParticipants = FALSE
+  minCellCount = 5
 )
 }
 \arguments{
@@ -34,9 +33,11 @@ estimateCompetingRiskSurvival(
 
 \item{targetCohortTable}{targetCohortTable}
 
-\item{targetCohortId}{targetCohortId}
-
 \item{outcomeCohortTable}{The outcome cohort table of interest.}
+
+\item{competingOutcomeCohortTable}{The competing outcome cohort table of interest.}
+
+\item{targetCohortId}{targetCohortId}
 
 \item{outcomeCohortId}{ID of event cohorts to include. Only one outcome
 (and so one ID) can be considered.}
@@ -44,8 +45,6 @@ estimateCompetingRiskSurvival(
 \item{outcomeDateVariable}{Variable containing date of outcome event}
 
 \item{outcomeWashout}{Washout time in days for the outcome}
-
-\item{competingOutcomeCohortTable}{The competing outcome cohort table of interest.}
 
 \item{competingOutcomeCohortId}{ID of event cohorts to include. Only one competing outcome
 (and so one ID) can be considered.}
@@ -81,10 +80,6 @@ to have survived}
 
 \item{minCellCount}{The minimum number of events to reported, below which
 results will be obscured. If 0, all results will be reported.}
-
-\item{returnParticipants}{Either TRUE or FALSE. If TRUE, references to
-participants from the analysis will be returned allowing for further
-analysis.}
 }
 \value{
 tibble with survival information for desired cohort, including:

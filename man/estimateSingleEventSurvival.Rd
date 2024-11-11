@@ -7,8 +7,8 @@
 estimateSingleEventSurvival(
   cdm,
   targetCohortTable,
-  targetCohortId = NULL,
   outcomeCohortTable,
+  targetCohortId = NULL,
   outcomeCohortId = NULL,
   outcomeDateVariable = "cohort_start_date",
   outcomeWashout = Inf,
@@ -20,8 +20,7 @@ estimateSingleEventSurvival(
   estimateGap = 1,
   restrictedMeanFollowUp = NULL,
   minimumSurvivalDays = 1,
-  minCellCount = 5,
-  returnParticipants = FALSE
+  minCellCount = 5
 )
 }
 \arguments{
@@ -29,9 +28,9 @@ estimateSingleEventSurvival(
 
 \item{targetCohortTable}{targetCohortTable}
 
-\item{targetCohortId}{targetCohortId}
-
 \item{outcomeCohortTable}{The outcome cohort table of interest.}
+
+\item{targetCohortId}{targetCohortId}
 
 \item{outcomeCohortId}{ID of event cohorts to include. Only one outcome
 (and so one ID) can be considered.}
@@ -67,10 +66,6 @@ to have survived}
 
 \item{minCellCount}{The minimum number of events to reported, below which
 results will be obscured. If 0, all results will be reported.}
-
-\item{returnParticipants}{Either TRUE or FALSE. If TRUE, references to
-participants from the analysis will be returned allowing for further
-analysis.}
 }
 \value{
 tibble with survival information for desired cohort, including:

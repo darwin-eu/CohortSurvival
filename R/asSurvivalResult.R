@@ -43,38 +43,54 @@ asSurvivalResult <- function(result) {
     cli::cli_abort("result is not a valid `summarised_result` object.")
   }
   result <- result %>%
-    visOmopResults::addSettings() %>%
-    #    suppress(minCellCount = minCellCount) %>%
-    dplyr::select(-c("package_name", "package_version", "estimate_type")) %>%
+     visOmopResults::addSettings() %>%
+     dplyr::select(c("cdm_name", "group_name", "group_level", "strata_name",
+                     "strata_level", "variable_name", "variable_level",
+                     "estimate_name", "estimate_type", "estimate_value",
+                     "additional_name", "additional_level", "result_type",
+                     "outcome", "competing_outcome",
+                     "eventgap")) %>%
     visOmopResults::splitAdditional() %>%
     visOmopResults::splitGroup() %>%
     dplyr::mutate(estimate_value = as.numeric(.data$estimate_value))
+
   estimates <- result %>%
-    dplyr::filter(.data$variable_name %in%
+    dplyr::filter(.data$result_type %in%
                     c("survival_probability",
                       "cumulative_failure_probability")) %>%
-    dplyr::select(-dplyr::any_of('eventgap')) %>%
-    dplyr::mutate(time = as.numeric(.data$time))
-  if("competing_outcome" %in% colnames(estimates)) {
-    estimates <- estimates %>%
-      dplyr::relocate("outcome", .after = "cohort") %>%
+    dplyr::select(-dplyr::any_of(c("eventgap", "reason_id"))) %>%
+    dplyr::mutate(time = as.numeric(.data$time)) %>%
+      dplyr::relocate("outcome", .after = "target_cohort") %>%
       dplyr::relocate("competing_outcome", .after = "outcome")
-  } else {
-    estimates <- estimates %>%
-      dplyr::relocate("outcome", .after = "cohort")
-  }
+
   summary <- result %>%
-    dplyr::filter(.data$variable_name == 'survival_summary') %>%
-    dplyr::select(-dplyr::any_of(c('variable_name', 'time', 'eventgap')))
+    dplyr::filter(.data$result_type == "survival_summary") %>%
+    dplyr::select(-dplyr::any_of(c("variable_name", "time", "eventgap", "result_type", "reason_id"))) %>%
+    dplyr::mutate(estimate_name = dplyr::if_else(
+      grepl("count", .data$estimate_name),
+      gsub("_count","",.data$estimate_name),
+      .data$estimate_name
+    ))
+
   events <- result %>%
-    dplyr::filter(.data$variable_name == 'survival_events') %>%
-    dplyr::select(-dplyr::any_of('variable_name')) %>%
+    dplyr::filter(.data$result_type == "survival_events") %>%
+    dplyr::select(-dplyr::any_of(c("reason_id", "result_type"))) %>%
     dplyr::distinct() %>%
-    dplyr::mutate(time = as.numeric(.data$time))
+    dplyr::mutate(time = as.numeric(.data$time)) %>%
+    dplyr::mutate(estimate_name = dplyr::if_else(
+      grepl("count", .data$estimate_name),
+      gsub("_count","",.data$estimate_name),
+      .data$estimate_name
+    ))
+
+  attrition <- result %>%
+    dplyr::filter(.data$result_type == "survival_attrition") %>%
+    dplyr::select(-c("result_type", "time", "eventgap"))
 
   result_final <- estimates
-  attr(result_final, 'events') <- events
-  attr(result_final, 'summary') <- summary
+  attr(result_final, "events") <- events
+  attr(result_final, "summary") <- summary
+  attr(result_final, "attrition") <- attrition
 
   return(result_final)
 }

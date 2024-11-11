@@ -81,23 +81,37 @@ addCohortSurvival <- function(x,
       futureObservationName = "days_to_exit"
     ) %>% dplyr::compute()
 
-  # get any events before or after index date
-  x <- x %>%
-    PatientProfiles::addCohortIntersectFlag(
-      indexDate = "cohort_start_date",
-      targetCohortTable = outcomeCohortTable,
-      targetCohortId = outcomeCohortId,
-      window = c(-outcomeWashout,-1),
-      nameStyle = "event_in_washout"
-    ) %>%
-    PatientProfiles::addCohortIntersectDays(
-      indexDate = "cohort_start_date",
-      targetCohortTable = outcomeCohortTable,
-      targetCohortId = outcomeCohortId,
-      targetDate = outcomeDateVariable,
-      window = c(0, Inf),
-      nameStyle = "days_to_event"
-    ) %>% dplyr::compute()
+  if(outcomeWashout == 0) {
+    # get any events before or after index date
+    x <- x %>%
+      dplyr::mutate(event_in_washout = 0L) %>%
+      PatientProfiles::addCohortIntersectDays(
+        indexDate = "cohort_start_date",
+        targetCohortTable = outcomeCohortTable,
+        targetCohortId = outcomeCohortId,
+        targetDate = outcomeDateVariable,
+        window = c(0, Inf),
+        nameStyle = "days_to_event"
+      ) %>% dplyr::compute()
+  } else {
+    # get any events before or after index date
+    x <- x %>%
+      PatientProfiles::addCohortIntersectFlag(
+        indexDate = "cohort_start_date",
+        targetCohortTable = outcomeCohortTable,
+        targetCohortId = outcomeCohortId,
+        window = c(-outcomeWashout,-1),
+        nameStyle = "event_in_washout"
+      ) %>%
+      PatientProfiles::addCohortIntersectDays(
+        indexDate = "cohort_start_date",
+        targetCohortTable = outcomeCohortTable,
+        targetCohortId = outcomeCohortId,
+        targetDate = outcomeDateVariable,
+        window = c(0, Inf),
+        nameStyle = "days_to_event"
+      ) %>% dplyr::compute()
+  }
 
   # whatever comes first
 
@@ -352,42 +366,15 @@ validateExtractSurvivalInputs <- function(cdm,
                                           censorOnCohortExit,
                                           censorOnDate,
                                           followUpDays) {
-  checkCdm(cdm, tables = c(
-    "person", "observation_period",
-    outcomeCohortTable
-  ))
-
-  checkIsCohort_exp(cohortTable)
+  omopgenerics::validateCdmArgument(cdm)
+  omopgenerics::validateCohortArgument(cdm[[outcomeCohortTable]])
   checkExposureCohortId(cohortTable)
-
-  checkIsCohort(cdm[[outcomeCohortTable]])
-
+  omopgenerics::assertDate(censorOnDate, null = TRUE, )
   checkCensorOnDate(cohortTable, censorOnDate)
-
-  errorMessage <- checkmate::makeAssertCollection()
-  checkmate::assertIntegerish(outcomeCohortId,
-    len = 1,
-    add = errorMessage
-  )
-  checkmate::assert_logical(censorOnCohortExit)
-  checkmate::assert_date(censorOnDate, null.ok = TRUE)
-  if (followUpDays != Inf) {
-    checkmate::assert_integerish(followUpDays,
-      len = 1,
-      lower = 1,
-      add = errorMessage
-    )
-  }
-  if (outcomeWashout != "Inf") {
-    checkmate::assertIntegerish(outcomeWashout,
-                                len = 1,
-                                lower = 1,
-                                add = errorMessage
-    )
-  }
-  checkmate::reportAssertions(collection = errorMessage)
-
-
+  omopgenerics::assertNumeric(outcomeCohortId, length = 1, min = 1)
+  omopgenerics::assertLogical(censorOnCohortExit, length = 1)
+  omopgenerics::assertNumeric(followUpDays, length = 1, min = 1, integerish = TRUE)
+  omopgenerics::assertNumeric(outcomeWashout, length = 1, min = 0, integerish = TRUE)
 
   # check specified cohort is in cohort table
   errorMessage <- checkmate::makeAssertCollection()

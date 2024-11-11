@@ -19,14 +19,12 @@ deathDiagnostics <- function(cdm,
                              cohortId = 1){
 
   # 0. validate inputs...
-  checkCdm(cdm, tables = c("death", "observation_period"))
-  checkmate::assert_character(cohortTable, len = 1, null.ok = TRUE)
+  omopgenerics::validateCdmArgument(cdm)
+  omopgenerics::assertTable(cdm[["death"]])
+  omopgenerics::assertCharacter(cohortTable, length = 1, null = TRUE)
   if(!is.null(cohortTable)) {
-    checkIsCohort(cdm[[cohortTable]])
-    cohortIdCheck = checkCohortId(cdm[[cohortTable]], cohortId)
-    if(!cohortIdCheck) {
-      cli::cli_abort(paste0("cohortId provided is not a valid id for the table ",cohortTable))
-    }
+    omopgenerics::validateCohortArgument(cdm[[cohortTable]])
+    omopgenerics::validateCohortIdArgument(cohortId, cdm[[cohortTable]])
   }
 
   # 1. start diagnosis whole table

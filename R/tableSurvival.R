@@ -53,15 +53,9 @@ tableSurvival <- function(x,
                           .options = list()){
 
   # initial checks
-  checkmate::assert_numeric(times,
-                            lower = 0,
-                            null.ok = TRUE)
-  checkmate::assert_character(timeScale,
-                              len = 1)
-  if(!(timeScale %in% c("days", "years"))){
-    cli::cli_abort(paste0("The input `timeScale` must be `days` or `years`
-                          but it is `",timeScale,"`"))
-  }
+  omopgenerics::assertNumeric(times, min = 0, null = TRUE)
+  omopgenerics::assertCharacter(timeScale, length = 1)
+  omopgenerics::assertChoice(timeScale, c("days", "years"))
 
   # .options:
   userOptions <- .options
@@ -71,36 +65,65 @@ tableSurvival <- function(x,
   }
 
   # check times in x
-  x_clean <- x %>% visOmopResults::splitAdditional()
+  x_clean <- x %>% visOmopResults::splitAdditional() %>%
+    dplyr::filter(.data$result_id %in% (omopgenerics::settings(x) %>%
+                    dplyr::filter(grepl("probability", .data$result_type) | grepl("summary", .data$result_type)) %>%
+                    dplyr::pull("result_id")))
 
   if (!is.null(times)) {
+    times_final <- dplyr::tibble(
+      name = times,
+      value = c(NA)
+    )
     if (timeScale == "years") {
       summary_times <- x_clean %>%
         dplyr::filter(.data$time != "overall") %>%
-        dplyr::mutate(time = round(as.numeric(.data$time)/364.25, digits = 3))
+        dplyr::mutate(time = round(as.numeric(.data$time)/365.25, digits = 3))
     } else {
       summary_times <- x_clean
     }
     for (t in times) {
       if (!(t %in% summary_times$time)) {
         if ((round(t + 0.001, digits = 3) %in% summary_times$time & timeScale == "years")) {
-          times[times == t] <- round(t + 0.001, digits = 3)
+          times_final <- times_final %>%
+            dplyr::mutate(value = dplyr::if_else(.data$name == t,
+                                                 round(t + 0.001, digits = 3),
+                                                 .data$value))
           cli::cli_alert(paste0("Because of the conversion from days to years,
-          the requested time ",t," has now been changed to ",t + 0.001))
+          the requested estimate for time ",t," will be given by ",t + 0.001))
         } else if ((round(t - 0.001, digits = 3) %in% summary_times$time & timeScale == "years")) {
-          times[times == t] <- round(t - 0.001, digits = 3)
+          times_final <- times_final %>%
+            dplyr::mutate(value = dplyr::if_else(.data$name == t,
+                                                 round(t - 0.001, digits = 3),
+                                                 .data$value))
           cli::cli_alert(paste0("Because of the conversion from days to years,
-          the requested time ",t," has now been changed to ",t - 0.001))
+          the requested estimate for time ",t," will be given by ",t - 0.001))
         } else {
           cli::cli_alert(paste0("Requested time ",t," is not in the list of times
                          of the survival output provided, so no estimate
                          will be included in the summary"))
         }
       }
+      if(t %in% summary_times$time) {
+        times_final <- times_final %>%
+          dplyr::mutate(value = dplyr::if_else(.data$name == t,
+                                               t,
+                                               .data$value))
+      }
     }
 
     summary_times <- summary_times %>%
-      dplyr::filter(.data$time %in% .env$times)
+      dplyr::left_join(omopgenerics::settings(x_clean) %>%
+                         dplyr::select(c("result_id", "result_type", "outcome", "competing_outcome")),
+                       by = "result_id") %>%
+      dplyr::filter(.data$time %in% (times_final %>%
+                      dplyr::pull("value")),
+                    grepl("probability", .data$result_type))
+
+    if(typeof(summary_times$time) == "character") {
+      times_final <- times_final %>%
+        dplyr::mutate(value = as.character(.data$value))
+    }
 
     if (nrow(summary_times) > 0) {
       summary_times <- summary_times %>%
@@ -117,8 +140,9 @@ tableSurvival <- function(x,
             c(" survival estimate" =
                 "<estimate> (<estimate_95CI_lower>, <estimate_95CI_upper>)")
         ) %>%
+        dplyr::left_join(times_final, by = c("time" = "value")) %>%
         dplyr::mutate(
-          "estimate_name" = paste0(.data$time, " ", .env$timeScale, .data$estimate_name)
+          "estimate_name" = paste0(.data$name, " ", .env$timeScale, .data$estimate_name)
         )
     }
   }
@@ -126,16 +150,16 @@ tableSurvival <- function(x,
   summary_table <- x_clean %>%
     dplyr::filter(
       .data$estimate_name %in%
-        c("median_survival", "number_records", "n_events",
+        c("median_survival", "number_records_count", "n_events_count",
           "median_survival_95CI_lower", "median_survival_95CI_higher",
           "restricted_mean_survival", "restricted_mean_survival_se"),
       .data$time == "overall"
     ) %>%
-    dplyr::select(!"time") %>%
+    dplyr::select(!c("time")) %>%
     dplyr::mutate(
       "estimate_name" = dplyr::case_when(
-        .data$estimate_name == "n_events" ~ "Number events",
-        .data$estimate_name == "number_records" ~ "Number records",
+        .data$estimate_name == "n_events_count" ~ "Number events",
+        .data$estimate_name == "number_records_count" ~ "Number records",
         .default = .data$estimate_name
       ),
       "estimate_type" = dplyr::if_else(
@@ -152,9 +176,25 @@ tableSurvival <- function(x,
     dplyr::arrange(.data$estimate_name) %>%
     dplyr::mutate("estimate_name" = as.character(.data$estimate_name))
 
+  if(timeScale == "years") {
+    summary_table <- summary_table %>%
+      dplyr::mutate(
+        "estimate_value" = dplyr::if_else(grepl("mean", .data$estimate_name) | grepl("median", .data$estimate_name),
+                                        as.character(round(as.numeric(.data$estimate_value)/365.25,3)),
+                                        .data$estimate_value)
+      )
+  }
+
+  summary_table <- summary_table %>%
+    dplyr::left_join(
+      omopgenerics::settings(summary_table) %>%
+        dplyr::select("result_id", "result_type", "outcome", "competing_outcome"),
+      by = "result_id"
+    )
+
   if (!is.null(times)) {
     summary_table <- summary_table %>%
-      dplyr::bind_rows(summary_times %>% dplyr::select(!"time"))
+      dplyr::bind_rows(summary_times %>% dplyr::select(!c("name","time")))
   }
 
 
@@ -165,7 +205,7 @@ tableSurvival <- function(x,
 
   excludeCols <- c("result_id", "estimate_type")
 
-  if ("competing_outcome" %in% visOmopResults::additionalColumns(x)) {
+  if ((summary_table %>% dplyr::pull("competing_outcome") %>% unique()) != "none") {
     summary_table <- summary_table %>%
       dplyr::mutate(
         "variable_name" = dplyr::if_else(

@@ -2,7 +2,7 @@
 title: "Competing risk survival"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{a02_Competing_risk_survival}
+  %\VignetteIndexEntry{Competing risk survival}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -108,21 +108,6 @@ And we also now have summary statistics for each of the strata as well as overal
 ```{r}
 tableSurvival(MGUS_death_prog)
 ```
-
-## Summarising participants
-
-If we set returnParticipants as TRUE then we will also be able to access the individuals that contributed to the analysis.
-
-```{r}
-MGUS_death_prog <- estimateCompetingRiskSurvival(cdm,
-  targetCohortTable = "mgus_diagnosis",
-  outcomeCohortTable = "progression",
-  competingOutcomeCohortTable = "death_cohort",
-  returnParticipants = TRUE
-) 
-survivalParticipants(MGUS_death_prog)
-```
-
 
 ## Disconnect from the cdm database connection
 

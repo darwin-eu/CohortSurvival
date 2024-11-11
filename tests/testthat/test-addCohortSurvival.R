@@ -547,6 +547,14 @@ test_that("expected errors", {
       temporary = "maybe"
     ))
 
+  expect_error(cdm$mgus_diagnosis %>%
+                 addCohortSurvival(
+                   cdm = cdm,
+                   outcomeCohortTable = "death_cohort",
+                   outcomeCohortId = 1,
+                   outcomeWashout = c(0,1)
+                 ))
+
 #  cdm <- PatientProfiles::mockPatientProfiles()
 #  cdm[["cohort1"]] <- cdm[["cohort1"]] %>%
 #    dplyr::group_by(subject_id) %>%
@@ -738,6 +746,7 @@ test_that("allow overwrite of time and status", {
   # currently need to add attribute back to rerun
   attr(cdm2$cohort1, "set") <- cohort1_set
   attr(cdm2$cohort1, "count") <- cohort1_count
+  attr(cdm2$cohort1, "tbl_name") <- "cohort1"
 
   cdm2$cohort1 <- cdm2$cohort1 %>%
     addCohortSurvival(

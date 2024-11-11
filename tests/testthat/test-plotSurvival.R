@@ -167,3 +167,40 @@ test_that("plot colour for cumulative incidence plots", {
   CDMConnector::cdmDisconnect(cdm)
 
 })
+
+test_that("plot risk tables", {
+  skip_on_cran()
+  cdm <- mockMGUS2cdm()
+  surv <- estimateSingleEventSurvival(cdm,
+                                      targetCohortTable = "mgus_diagnosis",
+                                      targetCohortId = 1,
+                                      outcomeCohortTable = "death_cohort",
+                                      outcomeCohortId = 1,
+                                      strata=list(c("sex", "age_group"))
+  )
+  plot <- plotSurvival(surv,
+                       facet = "strata_name",
+                       colour = "strata_level",
+                       riskTable = TRUE)
+
+  expect_true(ggplot2::is.ggplot(plot))
+  CDMConnector::cdmDisconnect(cdm)
+})
+
+test_that("plot options", {
+  skip_on_cran()
+  cdm <- mockMGUS2cdm()
+  surv <- estimateSingleEventSurvival(cdm,
+                                      targetCohortTable = "mgus_diagnosis",
+                                      targetCohortId = 1,
+                                      outcomeCohortTable = "death_cohort",
+                                      outcomeCohortId = 1)
+  plot <- plotSurvival(surv,
+                       xlim = 100,
+                       ylim = c(0.25, 1),
+                       riskTable = TRUE,
+                       riskInterval = 10)
+
+  expect_true(ggplot2::is.ggplot(plot))
+  CDMConnector::cdmDisconnect(cdm)
+})
