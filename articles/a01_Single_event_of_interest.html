@@ -6,6 +6,12 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <title>Single outcome event of interest • CohortSurvival</title>
+<!-- favicons --><link rel="icon" type="image/png" sizes="16x16" href="../favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="../favicon-32x32.png">
+<link rel="apple-touch-icon" type="image/png" sizes="180x180" href="../apple-touch-icon.png">
+<link rel="apple-touch-icon" type="image/png" sizes="120x120" href="../apple-touch-icon-120x120.png">
+<link rel="apple-touch-icon" type="image/png" sizes="76x76" href="../apple-touch-icon-76x76.png">
+<link rel="apple-touch-icon" type="image/png" sizes="60x60" href="../apple-touch-icon-60x60.png">
 <script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
 <script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.4.2/css/all.min.css" rel="stylesheet">
@@ -20,7 +26,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">CohortSurvival</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.6.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -51,8 +57,7 @@
 
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
-
-      <h1>Single outcome event of interest</h1>
+      <img src="../logo.png" class="logo" alt=""><h1>Single outcome event of interest</h1>
             
       
 
@@ -89,7 +94,7 @@ stratification.</p>
 <span><span class="co">#&gt; Columns: 10</span></span>
 <span><span class="co">#&gt; Database: DuckDB v1.1.2 [unknown@Linux 6.5.0-1025-azure:R 4.4.2/:memory:]</span></span>
 <span><span class="co">#&gt; $ cohort_definition_id <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1…</span></span>
-<span><span class="co">#&gt; $ subject_id           <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15…</span></span>
+<span><span class="co">#&gt; $ subject_id           <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15…</span></span>
 <span><span class="co">#&gt; $ cohort_start_date    <span style="color: #949494; font-style: italic;">&lt;date&gt;</span> 1981-01-01, 1968-01-01, 1980-01-01, 1977-01-01, …</span></span>
 <span><span class="co">#&gt; $ cohort_end_date      <span style="color: #949494; font-style: italic;">&lt;date&gt;</span> 1981-01-01, 1968-01-01, 1980-01-01, 1977-01-01, …</span></span>
 <span><span class="co">#&gt; $ age                  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> 88, 78, 94, 68, 90, 90, 89, 87, 86, 79, 86, 89, 8…</span></span>
@@ -105,7 +110,7 @@ stratification.</p>
 <span><span class="co">#&gt; Columns: 4</span></span>
 <span><span class="co">#&gt; Database: DuckDB v1.1.2 [unknown@Linux 6.5.0-1025-azure:R 4.4.2/:memory:]</span></span>
 <span><span class="co">#&gt; $ cohort_definition_id <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1…</span></span>
-<span><span class="co">#&gt; $ subject_id           <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> 1, 2, 3, 4, 5, 6, 7, 8, 10, 11, 12, 13, 14, 15, 1…</span></span>
+<span><span class="co">#&gt; $ subject_id           <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> 1, 2, 3, 4, 5, 6, 7, 8, 10, 11, 12, 13, 14, 15, 1…</span></span>
 <span><span class="co">#&gt; $ cohort_start_date    <span style="color: #949494; font-style: italic;">&lt;date&gt;</span> 1981-01-31, 1968-01-26, 1980-02-16, 1977-04-03, …</span></span>
 <span><span class="co">#&gt; $ cohort_end_date      <span style="color: #949494; font-style: italic;">&lt;date&gt;</span> 1981-01-31, 1968-01-26, 1980-02-16, 1977-04-03, …</span></span></code></pre></div>
 </div>
@@ -121,21 +126,21 @@ that the output will be in a summarised result format.</p>
 <span><span class="op">)</span></span>
 <span><span class="va">MGUS_death</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> </span>
 <span>  <span class="fu"><a href="https://pillar.r-lib.org/reference/glimpse.html" class="external-link">glimpse</a></span><span class="op">(</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Rows: 1,318</span></span>
+<span><span class="co">#&gt; Rows: 1,354</span></span>
 <span><span class="co">#&gt; Columns: 13</span></span>
 <span><span class="co">#&gt; $ result_id        <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,…</span></span>
 <span><span class="co">#&gt; $ cdm_name         <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "mock", "mock", "mock", "mock", "mock", "mock", "mock…</span></span>
-<span><span class="co">#&gt; $ group_name       <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "cohort", "cohort", "cohort", "cohort", "cohort", "co…</span></span>
+<span><span class="co">#&gt; $ group_name       <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "target_cohort", "target_cohort", "target_cohort", "t…</span></span>
 <span><span class="co">#&gt; $ group_level      <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "mgus_diagnosis", "mgus_diagnosis", "mgus_diagnosis",…</span></span>
 <span><span class="co">#&gt; $ strata_name      <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "overall", "overall", "overall", "overall", "overall"…</span></span>
 <span><span class="co">#&gt; $ strata_level     <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "overall", "overall", "overall", "overall", "overall"…</span></span>
-<span><span class="co">#&gt; $ variable_name    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "survival_probability", "survival_probability", "surv…</span></span>
+<span><span class="co">#&gt; $ variable_name    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "outcome", "outcome", "outcome", "outcome", "outcome"…</span></span>
 <span><span class="co">#&gt; $ variable_level   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "death_cohort", "death_cohort", "death_cohort", "deat…</span></span>
 <span><span class="co">#&gt; $ estimate_name    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "estimate", "estimate_95CI_lower", "estimate_95CI_upp…</span></span>
 <span><span class="co">#&gt; $ estimate_type    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "numeric", "numeric", "numeric", "numeric", "numeric"…</span></span>
 <span><span class="co">#&gt; $ estimate_value   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "1", "1", "1", "0.9697", "0.9607", "0.9787", "0.9494"…</span></span>
-<span><span class="co">#&gt; $ additional_name  <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "time &amp;&amp;&amp; outcome", "time &amp;&amp;&amp; outcome", "time &amp;&amp;&amp; out…</span></span>
-<span><span class="co">#&gt; $ additional_level <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "0 &amp;&amp;&amp; death_cohort", "0 &amp;&amp;&amp; death_cohort", "0 &amp;&amp;&amp; de…</span></span>
+<span><span class="co">#&gt; $ additional_name  <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "time", "time", "time", "time", "time", "time", "time…</span></span>
+<span><span class="co">#&gt; $ additional_level <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "0", "0", "0", "1", "1", "1", "2", "2", "2", "3", "3"…</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/class.html" class="external-link">class</a></span><span class="op">(</span><span class="va">MGUS_death</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] "summarised_result" "omop_result"       "tbl_df"           </span></span>
 <span><span class="co">#&gt; [4] "tbl"               "data.frame"</span></span></code></pre></div>
@@ -147,19 +152,19 @@ asSurvivalResult()</p>
 <span>  <span class="fu"><a href="https://pillar.r-lib.org/reference/glimpse.html" class="external-link">glimpse</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Rows: 1,275</span></span>
 <span><span class="co">#&gt; Columns: 13</span></span>
-<span><span class="co">#&gt; $ result_id      <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1…</span></span>
-<span><span class="co">#&gt; $ cdm_name       <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "mock", "mock", "mock", "mock", "mock", "mock", "mock",…</span></span>
-<span><span class="co">#&gt; $ cohort         <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "mgus_diagnosis", "mgus_diagnosis", "mgus_diagnosis", "…</span></span>
-<span><span class="co">#&gt; $ outcome        <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "death_cohort", "death_cohort", "death_cohort", "death_…</span></span>
-<span><span class="co">#&gt; $ strata_name    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "overall", "overall", "overall", "overall", "overall", …</span></span>
-<span><span class="co">#&gt; $ strata_level   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "overall", "overall", "overall", "overall", "overall", …</span></span>
-<span><span class="co">#&gt; $ variable_name  <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "survival_probability", "survival_probability", "surviv…</span></span>
-<span><span class="co">#&gt; $ variable_level <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "death_cohort", "death_cohort", "death_cohort", "death_…</span></span>
-<span><span class="co">#&gt; $ estimate_name  <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "estimate", "estimate_95CI_lower", "estimate_95CI_upper…</span></span>
-<span><span class="co">#&gt; $ estimate_value <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> 1.0000, 1.0000, 1.0000, 0.9697, 0.9607, 0.9787, 0.9494,…</span></span>
-<span><span class="co">#&gt; $ time           <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> 0, 0, 0, 1, 1, 1, 2, 2, 2, 3, 3, 3, 4, 4, 4, 5, 5, 5, 6…</span></span>
-<span><span class="co">#&gt; $ result_type    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "survival", "survival", "survival", "survival", "surviv…</span></span>
-<span><span class="co">#&gt; $ analysis_type  <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "single_event", "single_event", "single_event", "single…</span></span></code></pre></div>
+<span><span class="co">#&gt; $ cdm_name          <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "mock", "mock", "mock", "mock", "mock", "mock", "moc…</span></span>
+<span><span class="co">#&gt; $ target_cohort     <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "mgus_diagnosis", "mgus_diagnosis", "mgus_diagnosis"…</span></span>
+<span><span class="co">#&gt; $ outcome           <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "death_cohort", "death_cohort", "death_cohort", "dea…</span></span>
+<span><span class="co">#&gt; $ competing_outcome <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "none", "none", "none", "none", "none", "none", "non…</span></span>
+<span><span class="co">#&gt; $ strata_name       <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "overall", "overall", "overall", "overall", "overall…</span></span>
+<span><span class="co">#&gt; $ strata_level      <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "overall", "overall", "overall", "overall", "overall…</span></span>
+<span><span class="co">#&gt; $ variable_name     <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "outcome", "outcome", "outcome", "outcome", "outcome…</span></span>
+<span><span class="co">#&gt; $ variable_level    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "death_cohort", "death_cohort", "death_cohort", "dea…</span></span>
+<span><span class="co">#&gt; $ estimate_name     <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "estimate", "estimate_95CI_lower", "estimate_95CI_up…</span></span>
+<span><span class="co">#&gt; $ estimate_type     <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "numeric", "numeric", "numeric", "numeric", "numeric…</span></span>
+<span><span class="co">#&gt; $ estimate_value    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> 1.0000, 1.0000, 1.0000, 0.9697, 0.9607, 0.9787, 0.94…</span></span>
+<span><span class="co">#&gt; $ time              <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> 0, 0, 0, 1, 1, 1, 2, 2, 2, 3, 3, 3, 4, 4, 4, 5, 5, 5…</span></span>
+<span><span class="co">#&gt; $ result_type       <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "survival_probability", "survival_probability", "sur…</span></span></code></pre></div>
 <p>As we can see above our results have been outputted in long format.
 We can plot these results like so.</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
@@ -169,23 +174,23 @@ We can plot these results like so.</p>
 summarises survival.</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/tableSurvival.html">tableSurvival</a></span><span class="op">(</span><span class="va">MGUS_death</span><span class="op">)</span> </span></code></pre></div>
-<div id="wbhicvarwt" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
-<style>#wbhicvarwt table {
+<div id="mclgauxekn" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
+<style>#mclgauxekn table {
   font-family: system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-#wbhicvarwt thead, #wbhicvarwt tbody, #wbhicvarwt tfoot, #wbhicvarwt tr, #wbhicvarwt td, #wbhicvarwt th {
+#mclgauxekn thead, #mclgauxekn tbody, #mclgauxekn tfoot, #mclgauxekn tr, #mclgauxekn td, #mclgauxekn th {
   border-style: none;
 }
 
-#wbhicvarwt p {
+#mclgauxekn p {
   margin: 0;
   padding: 0;
 }
 
-#wbhicvarwt .gt_table {
+#mclgauxekn .gt_table {
   display: table;
   border-collapse: collapse;
   line-height: normal;
@@ -211,12 +216,12 @@ summarises survival.</p>
   border-left-color: #D3D3D3;
 }
 
-#wbhicvarwt .gt_caption {
+#mclgauxekn .gt_caption {
   padding-top: 4px;
   padding-bottom: 4px;
 }
 
-#wbhicvarwt .gt_title {
+#mclgauxekn .gt_title {
   color: #333333;
   font-size: 125%;
   font-weight: initial;
@@ -228,7 +233,7 @@ summarises survival.</p>
   border-bottom-width: 0;
 }
 
-#wbhicvarwt .gt_subtitle {
+#mclgauxekn .gt_subtitle {
   color: #333333;
   font-size: 85%;
   font-weight: initial;
@@ -240,7 +245,7 @@ summarises survival.</p>
   border-top-width: 0;
 }
 
-#wbhicvarwt .gt_heading {
+#mclgauxekn .gt_heading {
   background-color: #FFFFFF;
   text-align: center;
   border-bottom-color: #FFFFFF;
@@ -252,13 +257,13 @@ summarises survival.</p>
   border-right-color: #D3D3D3;
 }
 
-#wbhicvarwt .gt_bottom_border {
+#mclgauxekn .gt_bottom_border {
   border-bottom-style: solid;
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
 }
 
-#wbhicvarwt .gt_col_headings {
+#mclgauxekn .gt_col_headings {
   border-top-style: solid;
   border-top-width: 2px;
   border-top-color: #D3D3D3;
@@ -273,7 +278,7 @@ summarises survival.</p>
   border-right-color: #D3D3D3;
 }
 
-#wbhicvarwt .gt_col_heading {
+#mclgauxekn .gt_col_heading {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -293,7 +298,7 @@ summarises survival.</p>
   overflow-x: hidden;
 }
 
-#wbhicvarwt .gt_column_spanner_outer {
+#mclgauxekn .gt_column_spanner_outer {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -305,15 +310,15 @@ summarises survival.</p>
   padding-right: 4px;
 }
 
-#wbhicvarwt .gt_column_spanner_outer:first-child {
+#mclgauxekn .gt_column_spanner_outer:first-child {
   padding-left: 0;
 }
 
-#wbhicvarwt .gt_column_spanner_outer:last-child {
+#mclgauxekn .gt_column_spanner_outer:last-child {
   padding-right: 0;
 }
 
-#wbhicvarwt .gt_column_spanner {
+#mclgauxekn .gt_column_spanner {
   border-bottom-style: solid;
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
@@ -325,11 +330,11 @@ summarises survival.</p>
   width: 100%;
 }
 
-#wbhicvarwt .gt_spanner_row {
+#mclgauxekn .gt_spanner_row {
   border-bottom-style: hidden;
 }
 
-#wbhicvarwt .gt_group_heading {
+#mclgauxekn .gt_group_heading {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -355,7 +360,7 @@ summarises survival.</p>
   text-align: left;
 }
 
-#wbhicvarwt .gt_empty_group_heading {
+#mclgauxekn .gt_empty_group_heading {
   padding: 0.5px;
   color: #333333;
   background-color: #FFFFFF;
@@ -370,15 +375,15 @@ summarises survival.</p>
   vertical-align: middle;
 }
 
-#wbhicvarwt .gt_from_md > :first-child {
+#mclgauxekn .gt_from_md > :first-child {
   margin-top: 0;
 }
 
-#wbhicvarwt .gt_from_md > :last-child {
+#mclgauxekn .gt_from_md > :last-child {
   margin-bottom: 0;
 }
 
-#wbhicvarwt .gt_row {
+#mclgauxekn .gt_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -397,7 +402,7 @@ summarises survival.</p>
   overflow-x: hidden;
 }
 
-#wbhicvarwt .gt_stub {
+#mclgauxekn .gt_stub {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -410,7 +415,7 @@ summarises survival.</p>
   padding-right: 5px;
 }
 
-#wbhicvarwt .gt_stub_row_group {
+#mclgauxekn .gt_stub_row_group {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -424,15 +429,15 @@ summarises survival.</p>
   vertical-align: top;
 }
 
-#wbhicvarwt .gt_row_group_first td {
+#mclgauxekn .gt_row_group_first td {
   border-top-width: 2px;
 }
 
-#wbhicvarwt .gt_row_group_first th {
+#mclgauxekn .gt_row_group_first th {
   border-top-width: 2px;
 }
 
-#wbhicvarwt .gt_summary_row {
+#mclgauxekn .gt_summary_row {
   color: #333333;
   background-color: #FFFFFF;
   text-transform: inherit;
@@ -442,16 +447,16 @@ summarises survival.</p>
   padding-right: 5px;
 }
 
-#wbhicvarwt .gt_first_summary_row {
+#mclgauxekn .gt_first_summary_row {
   border-top-style: solid;
   border-top-color: #D3D3D3;
 }
 
-#wbhicvarwt .gt_first_summary_row.thick {
+#mclgauxekn .gt_first_summary_row.thick {
   border-top-width: 2px;
 }
 
-#wbhicvarwt .gt_last_summary_row {
+#mclgauxekn .gt_last_summary_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -461,7 +466,7 @@ summarises survival.</p>
   border-bottom-color: #D3D3D3;
 }
 
-#wbhicvarwt .gt_grand_summary_row {
+#mclgauxekn .gt_grand_summary_row {
   color: #333333;
   background-color: #FFFFFF;
   text-transform: inherit;
@@ -471,7 +476,7 @@ summarises survival.</p>
   padding-right: 5px;
 }
 
-#wbhicvarwt .gt_first_grand_summary_row {
+#mclgauxekn .gt_first_grand_summary_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -481,7 +486,7 @@ summarises survival.</p>
   border-top-color: #D3D3D3;
 }
 
-#wbhicvarwt .gt_last_grand_summary_row_top {
+#mclgauxekn .gt_last_grand_summary_row_top {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -491,11 +496,11 @@ summarises survival.</p>
   border-bottom-color: #D3D3D3;
 }
 
-#wbhicvarwt .gt_striped {
+#mclgauxekn .gt_striped {
   background-color: rgba(128, 128, 128, 0.05);
 }
 
-#wbhicvarwt .gt_table_body {
+#mclgauxekn .gt_table_body {
   border-top-style: solid;
   border-top-width: 2px;
   border-top-color: #D3D3D3;
@@ -504,7 +509,7 @@ summarises survival.</p>
   border-bottom-color: #D3D3D3;
 }
 
-#wbhicvarwt .gt_footnotes {
+#mclgauxekn .gt_footnotes {
   color: #333333;
   background-color: #FFFFFF;
   border-bottom-style: none;
@@ -518,7 +523,7 @@ summarises survival.</p>
   border-right-color: #D3D3D3;
 }
 
-#wbhicvarwt .gt_footnote {
+#mclgauxekn .gt_footnote {
   margin: 0px;
   font-size: 90%;
   padding-top: 4px;
@@ -527,7 +532,7 @@ summarises survival.</p>
   padding-right: 5px;
 }
 
-#wbhicvarwt .gt_sourcenotes {
+#mclgauxekn .gt_sourcenotes {
   color: #333333;
   background-color: #FFFFFF;
   border-bottom-style: none;
@@ -541,7 +546,7 @@ summarises survival.</p>
   border-right-color: #D3D3D3;
 }
 
-#wbhicvarwt .gt_sourcenote {
+#mclgauxekn .gt_sourcenote {
   font-size: 90%;
   padding-top: 4px;
   padding-bottom: 4px;
@@ -549,72 +554,72 @@ summarises survival.</p>
   padding-right: 5px;
 }
 
-#wbhicvarwt .gt_left {
+#mclgauxekn .gt_left {
   text-align: left;
 }
 
-#wbhicvarwt .gt_center {
+#mclgauxekn .gt_center {
   text-align: center;
 }
 
-#wbhicvarwt .gt_right {
+#mclgauxekn .gt_right {
   text-align: right;
   font-variant-numeric: tabular-nums;
 }
 
-#wbhicvarwt .gt_font_normal {
+#mclgauxekn .gt_font_normal {
   font-weight: normal;
 }
 
-#wbhicvarwt .gt_font_bold {
+#mclgauxekn .gt_font_bold {
   font-weight: bold;
 }
 
-#wbhicvarwt .gt_font_italic {
+#mclgauxekn .gt_font_italic {
   font-style: italic;
 }
 
-#wbhicvarwt .gt_super {
+#mclgauxekn .gt_super {
   font-size: 65%;
 }
 
-#wbhicvarwt .gt_footnote_marks {
+#mclgauxekn .gt_footnote_marks {
   font-size: 75%;
   vertical-align: 0.4em;
   position: initial;
 }
 
-#wbhicvarwt .gt_asterisk {
+#mclgauxekn .gt_asterisk {
   font-size: 100%;
   vertical-align: 0;
 }
 
-#wbhicvarwt .gt_indent_1 {
+#mclgauxekn .gt_indent_1 {
   text-indent: 5px;
 }
 
-#wbhicvarwt .gt_indent_2 {
+#mclgauxekn .gt_indent_2 {
   text-indent: 10px;
 }
 
-#wbhicvarwt .gt_indent_3 {
+#mclgauxekn .gt_indent_3 {
   text-indent: 15px;
 }
 
-#wbhicvarwt .gt_indent_4 {
+#mclgauxekn .gt_indent_4 {
   text-indent: 20px;
 }
 
-#wbhicvarwt .gt_indent_5 {
+#mclgauxekn .gt_indent_5 {
   text-indent: 25px;
 }
 
-#wbhicvarwt .katex-display {
+#mclgauxekn .katex-display {
   display: inline-flex !important;
   margin-bottom: 0.75em !important;
 }
 
-#wbhicvarwt div.Reactable > div.rt-table > div.rt-thead > div.rt-tr.rt-tr-group-header > div.rt-th-group:after {
+#mclgauxekn div.Reactable > div.rt-table > div.rt-thead > div.rt-tr.rt-tr-group-header > div.rt-th-group:after {
   height: 0px !important;
 }
 </style>
@@ -622,7 +627,7 @@ summarises survival.</p>
 <thead>
 <tr class="gt_col_headings gt_spanner_row">
 <th class="gt_col_heading gt_columns_bottom_border gt_left" rowspan="2" colspan="1" style="text-align: center; font-weight: bold;" scope="col" id="CDM-name">CDM name</th>
-      <th class="gt_col_heading gt_columns_bottom_border gt_left" rowspan="2" colspan="1" style="text-align: center; font-weight: bold;" scope="col" id="Cohort">Cohort</th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_left" rowspan="2" colspan="1" style="text-align: center; font-weight: bold;" scope="col" id="Target-cohort">Target cohort</th>
       <th class="gt_col_heading gt_columns_bottom_border gt_left" rowspan="2" colspan="1" style="text-align: center; font-weight: bold;" scope="col" id="Outcome-name">Outcome name</th>
       <th class="gt_center gt_columns_top_border gt_column_spanner_outer" rowspan="1" colspan="4" style="background-color: #D9D9D9; text-align: center; font-weight: bold;" scope="colgroup" id="spanner-[header_name]Estimate name
 [header_level]Number records">
@@ -638,7 +643,7 @@ summarises survival.</p>
 </thead>
 <tbody class="gt_table_body"><tr>
 <td headers="CDM name" class="gt_row gt_left" style="text-align: left;">mock</td>
-<td headers="Cohort" class="gt_row gt_left" style="text-align: left; border-left-width: 1px; border-left-style: solid; border-left-color: #D3D3D3; border-right-width: 1px; border-right-style: solid; border-right-color: #D3D3D3; border-top-width: 1px; border-top-style: solid; border-top-color: #D3D3D3; border-bottom-width: 1px; border-bottom-style: solid; border-bottom-color: #D3D3D3;">mgus_diagnosis</td>
+<td headers="Target cohort" class="gt_row gt_left" style="text-align: left; border-left-width: 1px; border-left-style: solid; border-left-color: #D3D3D3; border-right-width: 1px; border-right-style: solid; border-right-color: #D3D3D3; border-top-width: 1px; border-top-style: solid; border-top-color: #D3D3D3; border-bottom-width: 1px; border-bottom-style: solid; border-bottom-color: #D3D3D3;">mgus_diagnosis</td>
 <td headers="Outcome name" class="gt_row gt_left" style="text-align: left; border-left-width: 1px; border-left-style: solid; border-left-color: #D3D3D3; border-right-width: 1px; border-right-style: solid; border-right-color: #D3D3D3; border-top-width: 1px; border-top-style: solid; border-top-color: #D3D3D3; border-bottom-width: 1px; border-bottom-style: solid; border-bottom-color: #D3D3D3;">death_cohort</td>
 <td headers="[header_name]Estimate name
 [header_level]Number records" class="gt_row gt_right" style="text-align: right; border-left-width: 1px; border-left-style: solid; border-left-color: #D3D3D3; border-right-width: 1px; border-right-style: solid; border-right-color: #D3D3D3; border-top-width: 1px; border-top-style: solid; border-top-color: #D3D3D3; border-bottom-width: 1px; border-bottom-style: solid; border-bottom-color: #D3D3D3;">1,384</td>
@@ -679,23 +684,23 @@ have overall results returned.</p>
 well as overall.</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/tableSurvival.html">tableSurvival</a></span><span class="op">(</span><span class="va">MGUS_death</span><span class="op">)</span></span></code></pre></div>
-<div id="relrjgjaea" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
-<style>#relrjgjaea table {
+<div id="xmhhplenzx" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
+<style>#xmhhplenzx table {
   font-family: system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-#relrjgjaea thead, #relrjgjaea tbody, #relrjgjaea tfoot, #relrjgjaea tr, #relrjgjaea td, #relrjgjaea th {
+#xmhhplenzx thead, #xmhhplenzx tbody, #xmhhplenzx tfoot, #xmhhplenzx tr, #xmhhplenzx td, #xmhhplenzx th {
   border-style: none;
 }
 
-#relrjgjaea p {
+#xmhhplenzx p {
   margin: 0;
   padding: 0;
 }
 
-#relrjgjaea .gt_table {
+#xmhhplenzx .gt_table {
   display: table;
   border-collapse: collapse;
   line-height: normal;
@@ -721,12 +726,12 @@ well as overall.</p>
   border-left-color: #D3D3D3;
 }
 
-#relrjgjaea .gt_caption {
+#xmhhplenzx .gt_caption {
   padding-top: 4px;
   padding-bottom: 4px;
 }
 
-#relrjgjaea .gt_title {
+#xmhhplenzx .gt_title {
   color: #333333;
   font-size: 125%;
   font-weight: initial;
@@ -738,7 +743,7 @@ well as overall.</p>
   border-bottom-width: 0;
 }
 
-#relrjgjaea .gt_subtitle {
+#xmhhplenzx .gt_subtitle {
   color: #333333;
   font-size: 85%;
   font-weight: initial;
@@ -750,7 +755,7 @@ well as overall.</p>
   border-top-width: 0;
 }
 
-#relrjgjaea .gt_heading {
+#xmhhplenzx .gt_heading {
   background-color: #FFFFFF;
   text-align: center;
   border-bottom-color: #FFFFFF;
@@ -762,13 +767,13 @@ well as overall.</p>
   border-right-color: #D3D3D3;
 }
 
-#relrjgjaea .gt_bottom_border {
+#xmhhplenzx .gt_bottom_border {
   border-bottom-style: solid;
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
 }
 
-#relrjgjaea .gt_col_headings {
+#xmhhplenzx .gt_col_headings {
   border-top-style: solid;
   border-top-width: 2px;
   border-top-color: #D3D3D3;
@@ -783,7 +788,7 @@ well as overall.</p>
   border-right-color: #D3D3D3;
 }
 
-#relrjgjaea .gt_col_heading {
+#xmhhplenzx .gt_col_heading {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -803,7 +808,7 @@ well as overall.</p>
   overflow-x: hidden;
 }
 
-#relrjgjaea .gt_column_spanner_outer {
+#xmhhplenzx .gt_column_spanner_outer {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -815,15 +820,15 @@ well as overall.</p>
   padding-right: 4px;
 }
 
-#relrjgjaea .gt_column_spanner_outer:first-child {
+#xmhhplenzx .gt_column_spanner_outer:first-child {
   padding-left: 0;
 }
 
-#relrjgjaea .gt_column_spanner_outer:last-child {
+#xmhhplenzx .gt_column_spanner_outer:last-child {
   padding-right: 0;
 }
 
-#relrjgjaea .gt_column_spanner {
+#xmhhplenzx .gt_column_spanner {
   border-bottom-style: solid;
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
@@ -835,11 +840,11 @@ well as overall.</p>
   width: 100%;
 }
 
-#relrjgjaea .gt_spanner_row {
+#xmhhplenzx .gt_spanner_row {
   border-bottom-style: hidden;
 }
 
-#relrjgjaea .gt_group_heading {
+#xmhhplenzx .gt_group_heading {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -865,7 +870,7 @@ well as overall.</p>
   text-align: left;
 }
 
-#relrjgjaea .gt_empty_group_heading {
+#xmhhplenzx .gt_empty_group_heading {
   padding: 0.5px;
   color: #333333;
   background-color: #FFFFFF;
@@ -880,15 +885,15 @@ well as overall.</p>
   vertical-align: middle;
 }
 
-#relrjgjaea .gt_from_md > :first-child {
+#xmhhplenzx .gt_from_md > :first-child {
   margin-top: 0;
 }
 
-#relrjgjaea .gt_from_md > :last-child {
+#xmhhplenzx .gt_from_md > :last-child {
   margin-bottom: 0;
 }
 
-#relrjgjaea .gt_row {
+#xmhhplenzx .gt_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -907,7 +912,7 @@ well as overall.</p>
   overflow-x: hidden;
 }
 
-#relrjgjaea .gt_stub {
+#xmhhplenzx .gt_stub {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -920,7 +925,7 @@ well as overall.</p>
   padding-right: 5px;
 }
 
-#relrjgjaea .gt_stub_row_group {
+#xmhhplenzx .gt_stub_row_group {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -934,15 +939,15 @@ well as overall.</p>
   vertical-align: top;
 }
 
-#relrjgjaea .gt_row_group_first td {
+#xmhhplenzx .gt_row_group_first td {
   border-top-width: 2px;
 }
 
-#relrjgjaea .gt_row_group_first th {
+#xmhhplenzx .gt_row_group_first th {
   border-top-width: 2px;
 }
 
-#relrjgjaea .gt_summary_row {
+#xmhhplenzx .gt_summary_row {
   color: #333333;
   background-color: #FFFFFF;
   text-transform: inherit;
@@ -952,16 +957,16 @@ well as overall.</p>
   padding-right: 5px;
 }
 
-#relrjgjaea .gt_first_summary_row {
+#xmhhplenzx .gt_first_summary_row {
   border-top-style: solid;
   border-top-color: #D3D3D3;
 }
 
-#relrjgjaea .gt_first_summary_row.thick {
+#xmhhplenzx .gt_first_summary_row.thick {
   border-top-width: 2px;
 }
 
-#relrjgjaea .gt_last_summary_row {
+#xmhhplenzx .gt_last_summary_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -971,7 +976,7 @@ well as overall.</p>
   border-bottom-color: #D3D3D3;
 }
 
-#relrjgjaea .gt_grand_summary_row {
+#xmhhplenzx .gt_grand_summary_row {
   color: #333333;
   background-color: #FFFFFF;
   text-transform: inherit;
@@ -981,7 +986,7 @@ well as overall.</p>
   padding-right: 5px;
 }
 
-#relrjgjaea .gt_first_grand_summary_row {
+#xmhhplenzx .gt_first_grand_summary_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -991,7 +996,7 @@ well as overall.</p>
   border-top-color: #D3D3D3;
 }
 
-#relrjgjaea .gt_last_grand_summary_row_top {
+#xmhhplenzx .gt_last_grand_summary_row_top {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -1001,11 +1006,11 @@ well as overall.</p>
   border-bottom-color: #D3D3D3;
 }
 
-#relrjgjaea .gt_striped {
+#xmhhplenzx .gt_striped {
   background-color: rgba(128, 128, 128, 0.05);
 }
 
-#relrjgjaea .gt_table_body {
+#xmhhplenzx .gt_table_body {
   border-top-style: solid;
   border-top-width: 2px;
   border-top-color: #D3D3D3;
@@ -1014,7 +1019,7 @@ well as overall.</p>
   border-bottom-color: #D3D3D3;
 }
 
-#relrjgjaea .gt_footnotes {
+#xmhhplenzx .gt_footnotes {
   color: #333333;
   background-color: #FFFFFF;
   border-bottom-style: none;
@@ -1028,7 +1033,7 @@ well as overall.</p>
   border-right-color: #D3D3D3;
 }
 
-#relrjgjaea .gt_footnote {
+#xmhhplenzx .gt_footnote {
   margin: 0px;
   font-size: 90%;
   padding-top: 4px;
@@ -1037,7 +1042,7 @@ well as overall.</p>
   padding-right: 5px;
 }
 
-#relrjgjaea .gt_sourcenotes {
+#xmhhplenzx .gt_sourcenotes {
   color: #333333;
   background-color: #FFFFFF;
   border-bottom-style: none;
@@ -1051,7 +1056,7 @@ well as overall.</p>
   border-right-color: #D3D3D3;
 }
 
-#relrjgjaea .gt_sourcenote {
+#xmhhplenzx .gt_sourcenote {
   font-size: 90%;
   padding-top: 4px;
   padding-bottom: 4px;
@@ -1059,72 +1064,72 @@ well as overall.</p>
   padding-right: 5px;
 }
 
-#relrjgjaea .gt_left {
+#xmhhplenzx .gt_left {
   text-align: left;
 }
 
-#relrjgjaea .gt_center {
+#xmhhplenzx .gt_center {
   text-align: center;
 }
 
-#relrjgjaea .gt_right {
+#xmhhplenzx .gt_right {
   text-align: right;
   font-variant-numeric: tabular-nums;
 }
 
-#relrjgjaea .gt_font_normal {
+#xmhhplenzx .gt_font_normal {
   font-weight: normal;
 }
 
-#relrjgjaea .gt_font_bold {
+#xmhhplenzx .gt_font_bold {
   font-weight: bold;
 }
 
-#relrjgjaea .gt_font_italic {
+#xmhhplenzx .gt_font_italic {
   font-style: italic;
 }
 
-#relrjgjaea .gt_super {
+#xmhhplenzx .gt_super {
   font-size: 65%;
 }
 
-#relrjgjaea .gt_footnote_marks {
+#xmhhplenzx .gt_footnote_marks {
   font-size: 75%;
   vertical-align: 0.4em;
   position: initial;
 }
 
-#relrjgjaea .gt_asterisk {
+#xmhhplenzx .gt_asterisk {
   font-size: 100%;
   vertical-align: 0;
 }
 
-#relrjgjaea .gt_indent_1 {
+#xmhhplenzx .gt_indent_1 {
   text-indent: 5px;
 }
 
-#relrjgjaea .gt_indent_2 {
+#xmhhplenzx .gt_indent_2 {
   text-indent: 10px;
 }
 
-#relrjgjaea .gt_indent_3 {
+#xmhhplenzx .gt_indent_3 {
   text-indent: 15px;
 }
 
-#relrjgjaea .gt_indent_4 {
+#xmhhplenzx .gt_indent_4 {
   text-indent: 20px;
 }
 
-#relrjgjaea .gt_indent_5 {
+#xmhhplenzx .gt_indent_5 {
   text-indent: 25px;
 }
 
-#relrjgjaea .katex-display {
+#xmhhplenzx .katex-display {
   display: inline-flex !important;
   margin-bottom: 0.75em !important;
 }
 
-#relrjgjaea div.Reactable > div.rt-table > div.rt-thead > div.rt-tr.rt-tr-group-header > div.rt-th-group:after {
+#xmhhplenzx div.Reactable > div.rt-table > div.rt-thead > div.rt-tr.rt-tr-group-header > div.rt-th-group:after {
   height: 0px !important;
 }
 </style>
@@ -1132,7 +1137,7 @@ well as overall.</p>
 <thead>
 <tr class="gt_col_headings gt_spanner_row">
 <th class="gt_col_heading gt_columns_bottom_border gt_left" rowspan="2" colspan="1" style="text-align: center; font-weight: bold;" scope="col" id="CDM-name">CDM name</th>
-      <th class="gt_col_heading gt_columns_bottom_border gt_left" rowspan="2" colspan="1" style="text-align: center; font-weight: bold;" scope="col" id="Cohort">Cohort</th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_left" rowspan="2" colspan="1" style="text-align: center; font-weight: bold;" scope="col" id="Target-cohort">Target cohort</th>
       <th class="gt_col_heading gt_columns_bottom_border gt_left" rowspan="2" colspan="1" style="text-align: center; font-weight: bold;" scope="col" id="Age-group">Age group</th>
       <th class="gt_col_heading gt_columns_bottom_border gt_left" rowspan="2" colspan="1" style="text-align: center; font-weight: bold;" scope="col" id="Sex">Sex</th>
       <th class="gt_col_heading gt_columns_bottom_border gt_left" rowspan="2" colspan="1" style="text-align: center; font-weight: bold;" scope="col" id="Outcome-name">Outcome name</th>
@@ -1151,7 +1156,7 @@ well as overall.</p>
 <tbody class="gt_table_body">
 <tr>
 <td headers="CDM name" class="gt_row gt_left" style="text-align: left;">mock</td>
-<td headers="Cohort" class="gt_row gt_left" style="text-align: left; border-left-width: 1px; border-left-style: solid; border-left-color: #D3D3D3; border-right-width: 1px; border-right-style: solid; border-right-color: #D3D3D3; border-top-width: 1px; border-top-style: solid; border-top-color: #D3D3D3; border-bottom-width: 1px; border-bottom-style: solid; border-bottom-color: #D3D3D3;">mgus_diagnosis</td>
+<td headers="Target cohort" class="gt_row gt_left" style="text-align: left; border-left-width: 1px; border-left-style: solid; border-left-color: #D3D3D3; border-right-width: 1px; border-right-style: solid; border-right-color: #D3D3D3; border-top-width: 1px; border-top-style: solid; border-top-color: #D3D3D3; border-bottom-width: 1px; border-bottom-style: solid; border-bottom-color: #D3D3D3;">mgus_diagnosis</td>
 <td headers="Age group" class="gt_row gt_left" style="text-align: left; border-left-width: 1px; border-left-style: solid; border-left-color: #D3D3D3; border-right-width: 1px; border-right-style: solid; border-right-color: #D3D3D3; border-top-width: 1px; border-top-style: solid; border-top-color: #D3D3D3; border-bottom-width: 1px; border-bottom-style: solid; border-bottom-color: #D3D3D3;">overall</td>
 <td headers="Sex" class="gt_row gt_left" style="text-align: left; border-left-width: 1px; border-left-style: solid; border-left-color: #D3D3D3; border-right-width: 1px; border-right-style: solid; border-right-color: #D3D3D3; border-top-width: 1px; border-top-style: solid; border-top-color: #D3D3D3; border-bottom-width: 1px; border-bottom-style: solid; border-bottom-color: #D3D3D3;">overall</td>
 <td headers="Outcome name" class="gt_row gt_left" style="text-align: left; border-left-width: 1px; border-left-style: solid; border-left-color: #D3D3D3; border-right-width: 1px; border-right-style: solid; border-right-color: #D3D3D3; border-top-width: 1px; border-top-style: solid; border-top-color: #D3D3D3; border-bottom-width: 1px; border-bottom-style: solid; border-bottom-color: #D3D3D3;">death_cohort</td>
@@ -1166,7 +1171,7 @@ well as overall.</p>
 </tr>
 <tr>
 <td headers="CDM name" class="gt_row gt_left" style="text-align: left; border-top-width: 1px; border-top-style: hidden; border-top-color: #000000;"></td>
-<td headers="Cohort" class="gt_row gt_left" style="text-align: left; border-left-width: 1px; border-left-style: solid; border-left-color: #D3D3D3; border-right-width: 1px; border-right-style: solid; border-right-color: #D3D3D3; border-top-width: 1px; border-top-style: hidden; border-top-color: #000000; border-bottom-width: 1px; border-bottom-style: solid; border-bottom-color: #D3D3D3;"></td>
+<td headers="Target cohort" class="gt_row gt_left" style="text-align: left; border-left-width: 1px; border-left-style: solid; border-left-color: #D3D3D3; border-right-width: 1px; border-right-style: solid; border-right-color: #D3D3D3; border-top-width: 1px; border-top-style: hidden; border-top-color: #000000; border-bottom-width: 1px; border-bottom-style: solid; border-bottom-color: #D3D3D3;"></td>
 <td headers="Age group" class="gt_row gt_left" style="text-align: left; border-left-width: 1px; border-left-style: solid; border-left-color: #D3D3D3; border-right-width: 1px; border-right-style: solid; border-right-color: #D3D3D3; border-top-width: 1px; border-top-style: solid; border-top-color: #D3D3D3; border-bottom-width: 1px; border-bottom-style: solid; border-bottom-color: #D3D3D3;">&lt;70</td>
 <td headers="Sex" class="gt_row gt_left" style="text-align: left; border-left-width: 1px; border-left-style: solid; border-left-color: #D3D3D3; border-right-width: 1px; border-right-style: solid; border-right-color: #D3D3D3; border-top-width: 1px; border-top-style: solid; border-top-color: #D3D3D3; border-bottom-width: 1px; border-bottom-style: solid; border-bottom-color: #D3D3D3;">overall</td>
 <td headers="Outcome name" class="gt_row gt_left" style="text-align: left; border-left-width: 1px; border-left-style: solid; border-left-color: #D3D3D3; border-right-width: 1px; border-right-style: solid; border-right-color: #D3D3D3; border-top-width: 1px; border-top-style: solid; border-top-color: #D3D3D3; border-bottom-width: 1px; border-bottom-style: solid; border-bottom-color: #D3D3D3;">death_cohort</td>
@@ -1181,7 +1186,7 @@ well as overall.</p>
 </tr>
 <tr>
 <td headers="CDM name" class="gt_row gt_left" style="text-align: left; border-top-width: 1px; border-top-style: hidden; border-top-color: #000000;"></td>
-<td headers="Cohort" class="gt_row gt_left" style="text-align: left; border-left-width: 1px; border-left-style: solid; border-left-color: #D3D3D3; border-right-width: 1px; border-right-style: solid; border-right-color: #D3D3D3; border-top-width: 1px; border-top-style: hidden; border-top-color: #000000; border-bottom-width: 1px; border-bottom-style: solid; border-bottom-color: #D3D3D3;"></td>
+<td headers="Target cohort" class="gt_row gt_left" style="text-align: left; border-left-width: 1px; border-left-style: solid; border-left-color: #D3D3D3; border-right-width: 1px; border-right-style: solid; border-right-color: #D3D3D3; border-top-width: 1px; border-top-style: hidden; border-top-color: #000000; border-bottom-width: 1px; border-bottom-style: solid; border-bottom-color: #D3D3D3;"></td>
 <td headers="Age group" class="gt_row gt_left" style="text-align: left; border-left-width: 1px; border-left-style: solid; border-left-color: #D3D3D3; border-right-width: 1px; border-right-style: solid; border-right-color: #D3D3D3; border-top-width: 1px; border-top-style: solid; border-top-color: #D3D3D3; border-bottom-width: 1px; border-bottom-style: solid; border-bottom-color: #D3D3D3;">&gt;=70</td>
 <td headers="Sex" class="gt_row gt_left" style="text-align: left; border-left-width: 1px; border-left-style: solid; border-left-color: #D3D3D3; border-right-width: 1px; border-right-style: solid; border-right-color: #D3D3D3; border-top-width: 1px; border-top-style: solid; border-top-color: #D3D3D3; border-bottom-width: 1px; border-bottom-style: solid; border-bottom-color: #D3D3D3;">overall</td>
 <td headers="Outcome name" class="gt_row gt_left" style="text-align: left; border-left-width: 1px; border-left-style: solid; border-left-color: #D3D3D3; border-right-width: 1px; border-right-style: solid; border-right-color: #D3D3D3; border-top-width: 1px; border-top-style: solid; border-top-color: #D3D3D3; border-bottom-width: 1px; border-bottom-style: solid; border-bottom-color: #D3D3D3;">death_cohort</td>
@@ -1196,7 +1201,7 @@ well as overall.</p>
 </tr>
 <tr>
 <td headers="CDM name" class="gt_row gt_left" style="text-align: left; border-top-width: 1px; border-top-style: hidden; border-top-color: #000000;"></td>
-<td headers="Cohort" class="gt_row gt_left" style="text-align: left; border-left-width: 1px; border-left-style: solid; border-left-color: #D3D3D3; border-right-width: 1px; border-right-style: solid; border-right-color: #D3D3D3; border-top-width: 1px; border-top-style: hidden; border-top-color: #000000; border-bottom-width: 1px; border-bottom-style: solid; border-bottom-color: #D3D3D3;"></td>
+<td headers="Target cohort" class="gt_row gt_left" style="text-align: left; border-left-width: 1px; border-left-style: solid; border-left-color: #D3D3D3; border-right-width: 1px; border-right-style: solid; border-right-color: #D3D3D3; border-top-width: 1px; border-top-style: hidden; border-top-color: #000000; border-bottom-width: 1px; border-bottom-style: solid; border-bottom-color: #D3D3D3;"></td>
 <td headers="Age group" class="gt_row gt_left" style="text-align: left; border-left-width: 1px; border-left-style: solid; border-left-color: #D3D3D3; border-right-width: 1px; border-right-style: solid; border-right-color: #D3D3D3; border-top-width: 1px; border-top-style: solid; border-top-color: #D3D3D3; border-bottom-width: 1px; border-bottom-style: solid; border-bottom-color: #D3D3D3;">overall</td>
 <td headers="Sex" class="gt_row gt_left" style="text-align: left; border-left-width: 1px; border-left-style: solid; border-left-color: #D3D3D3; border-right-width: 1px; border-right-style: solid; border-right-color: #D3D3D3; border-top-width: 1px; border-top-style: solid; border-top-color: #D3D3D3; border-bottom-width: 1px; border-bottom-style: solid; border-bottom-color: #D3D3D3;">F</td>
 <td headers="Outcome name" class="gt_row gt_left" style="text-align: left; border-left-width: 1px; border-left-style: solid; border-left-color: #D3D3D3; border-right-width: 1px; border-right-style: solid; border-right-color: #D3D3D3; border-top-width: 1px; border-top-style: solid; border-top-color: #D3D3D3; border-bottom-width: 1px; border-bottom-style: solid; border-bottom-color: #D3D3D3;">death_cohort</td>
@@ -1211,7 +1216,7 @@ well as overall.</p>
 </tr>
 <tr>
 <td headers="CDM name" class="gt_row gt_left" style="text-align: left; border-top-width: 1px; border-top-style: hidden; border-top-color: #000000;"></td>
-<td headers="Cohort" class="gt_row gt_left" style="text-align: left; border-left-width: 1px; border-left-style: solid; border-left-color: #D3D3D3; border-right-width: 1px; border-right-style: solid; border-right-color: #D3D3D3; border-top-width: 1px; border-top-style: hidden; border-top-color: #000000; border-bottom-width: 1px; border-bottom-style: solid; border-bottom-color: #D3D3D3;"></td>
+<td headers="Target cohort" class="gt_row gt_left" style="text-align: left; border-left-width: 1px; border-left-style: solid; border-left-color: #D3D3D3; border-right-width: 1px; border-right-style: solid; border-right-color: #D3D3D3; border-top-width: 1px; border-top-style: hidden; border-top-color: #000000; border-bottom-width: 1px; border-bottom-style: solid; border-bottom-color: #D3D3D3;"></td>
 <td headers="Age group" class="gt_row gt_left" style="text-align: left; border-left-width: 1px; border-left-style: solid; border-left-color: #D3D3D3; border-right-width: 1px; border-right-style: solid; border-right-color: #D3D3D3; border-top-width: 1px; border-top-style: hidden; border-top-color: #000000; border-bottom-width: 1px; border-bottom-style: solid; border-bottom-color: #D3D3D3;"></td>
 <td headers="Sex" class="gt_row gt_left" style="text-align: left; border-left-width: 1px; border-left-style: solid; border-left-color: #D3D3D3; border-right-width: 1px; border-right-style: solid; border-right-color: #D3D3D3; border-top-width: 1px; border-top-style: solid; border-top-color: #D3D3D3; border-bottom-width: 1px; border-bottom-style: solid; border-bottom-color: #D3D3D3;">M</td>
 <td headers="Outcome name" class="gt_row gt_left" style="text-align: left; border-left-width: 1px; border-left-style: solid; border-left-color: #D3D3D3; border-right-width: 1px; border-right-style: solid; border-right-color: #D3D3D3; border-top-width: 1px; border-top-style: solid; border-top-color: #D3D3D3; border-bottom-width: 1px; border-bottom-style: solid; border-bottom-color: #D3D3D3;">death_cohort</td>
@@ -1226,7 +1231,7 @@ well as overall.</p>
 </tr>
 <tr>
 <td headers="CDM name" class="gt_row gt_left" style="text-align: left; border-top-width: 1px; border-top-style: hidden; border-top-color: #000000;"></td>
-<td headers="Cohort" class="gt_row gt_left" style="text-align: left; border-left-width: 1px; border-left-style: solid; border-left-color: #D3D3D3; border-right-width: 1px; border-right-style: solid; border-right-color: #D3D3D3; border-top-width: 1px; border-top-style: hidden; border-top-color: #000000; border-bottom-width: 1px; border-bottom-style: solid; border-bottom-color: #D3D3D3;"></td>
+<td headers="Target cohort" class="gt_row gt_left" style="text-align: left; border-left-width: 1px; border-left-style: solid; border-left-color: #D3D3D3; border-right-width: 1px; border-right-style: solid; border-right-color: #D3D3D3; border-top-width: 1px; border-top-style: hidden; border-top-color: #000000; border-bottom-width: 1px; border-bottom-style: solid; border-bottom-color: #D3D3D3;"></td>
 <td headers="Age group" class="gt_row gt_left" style="text-align: left; border-left-width: 1px; border-left-style: solid; border-left-color: #D3D3D3; border-right-width: 1px; border-right-style: solid; border-right-color: #D3D3D3; border-top-width: 1px; border-top-style: solid; border-top-color: #D3D3D3; border-bottom-width: 1px; border-bottom-style: solid; border-bottom-color: #D3D3D3;">&lt;70</td>
 <td headers="Sex" class="gt_row gt_left" style="text-align: left; border-left-width: 1px; border-left-style: solid; border-left-color: #D3D3D3; border-right-width: 1px; border-right-style: solid; border-right-color: #D3D3D3; border-top-width: 1px; border-top-style: solid; border-top-color: #D3D3D3; border-bottom-width: 1px; border-bottom-style: solid; border-bottom-color: #D3D3D3;">F</td>
 <td headers="Outcome name" class="gt_row gt_left" style="text-align: left; border-left-width: 1px; border-left-style: solid; border-left-color: #D3D3D3; border-right-width: 1px; border-right-style: solid; border-right-color: #D3D3D3; border-top-width: 1px; border-top-style: solid; border-top-color: #D3D3D3; border-bottom-width: 1px; border-bottom-style: solid; border-bottom-color: #D3D3D3;">death_cohort</td>
@@ -1241,7 +1246,7 @@ well as overall.</p>
 </tr>
 <tr>
 <td headers="CDM name" class="gt_row gt_left" style="text-align: left; border-top-width: 1px; border-top-style: hidden; border-top-color: #000000;"></td>
-<td headers="Cohort" class="gt_row gt_left" style="text-align: left; border-left-width: 1px; border-left-style: solid; border-left-color: #D3D3D3; border-right-width: 1px; border-right-style: solid; border-right-color: #D3D3D3; border-top-width: 1px; border-top-style: hidden; border-top-color: #000000; border-bottom-width: 1px; border-bottom-style: solid; border-bottom-color: #D3D3D3;"></td>
+<td headers="Target cohort" class="gt_row gt_left" style="text-align: left; border-left-width: 1px; border-left-style: solid; border-left-color: #D3D3D3; border-right-width: 1px; border-right-style: solid; border-right-color: #D3D3D3; border-top-width: 1px; border-top-style: hidden; border-top-color: #000000; border-bottom-width: 1px; border-bottom-style: solid; border-bottom-color: #D3D3D3;"></td>
 <td headers="Age group" class="gt_row gt_left" style="text-align: left; border-left-width: 1px; border-left-style: solid; border-left-color: #D3D3D3; border-right-width: 1px; border-right-style: solid; border-right-color: #D3D3D3; border-top-width: 1px; border-top-style: hidden; border-top-color: #000000; border-bottom-width: 1px; border-bottom-style: solid; border-bottom-color: #D3D3D3;"></td>
 <td headers="Sex" class="gt_row gt_left" style="text-align: left; border-left-width: 1px; border-left-style: solid; border-left-color: #D3D3D3; border-right-width: 1px; border-right-style: solid; border-right-color: #D3D3D3; border-top-width: 1px; border-top-style: solid; border-top-color: #D3D3D3; border-bottom-width: 1px; border-bottom-style: solid; border-bottom-color: #D3D3D3;">M</td>
 <td headers="Outcome name" class="gt_row gt_left" style="text-align: left; border-left-width: 1px; border-left-style: solid; border-left-color: #D3D3D3; border-right-width: 1px; border-right-style: solid; border-right-color: #D3D3D3; border-top-width: 1px; border-top-style: solid; border-top-color: #D3D3D3; border-bottom-width: 1px; border-bottom-style: solid; border-bottom-color: #D3D3D3;">death_cohort</td>
@@ -1256,7 +1261,7 @@ well as overall.</p>
 </tr>
 <tr>
 <td headers="CDM name" class="gt_row gt_left" style="text-align: left; border-top-width: 1px; border-top-style: hidden; border-top-color: #000000;"></td>
-<td headers="Cohort" class="gt_row gt_left" style="text-align: left; border-left-width: 1px; border-left-style: solid; border-left-color: #D3D3D3; border-right-width: 1px; border-right-style: solid; border-right-color: #D3D3D3; border-top-width: 1px; border-top-style: hidden; border-top-color: #000000; border-bottom-width: 1px; border-bottom-style: solid; border-bottom-color: #D3D3D3;"></td>
+<td headers="Target cohort" class="gt_row gt_left" style="text-align: left; border-left-width: 1px; border-left-style: solid; border-left-color: #D3D3D3; border-right-width: 1px; border-right-style: solid; border-right-color: #D3D3D3; border-top-width: 1px; border-top-style: hidden; border-top-color: #000000; border-bottom-width: 1px; border-bottom-style: solid; border-bottom-color: #D3D3D3;"></td>
 <td headers="Age group" class="gt_row gt_left" style="text-align: left; border-left-width: 1px; border-left-style: solid; border-left-color: #D3D3D3; border-right-width: 1px; border-right-style: solid; border-right-color: #D3D3D3; border-top-width: 1px; border-top-style: solid; border-top-color: #D3D3D3; border-bottom-width: 1px; border-bottom-style: solid; border-bottom-color: #D3D3D3;">&gt;=70</td>
 <td headers="Sex" class="gt_row gt_left" style="text-align: left; border-left-width: 1px; border-left-style: solid; border-left-color: #D3D3D3; border-right-width: 1px; border-right-style: solid; border-right-color: #D3D3D3; border-top-width: 1px; border-top-style: solid; border-top-color: #D3D3D3; border-bottom-width: 1px; border-bottom-style: solid; border-bottom-color: #D3D3D3;">F</td>
 <td headers="Outcome name" class="gt_row gt_left" style="text-align: left; border-left-width: 1px; border-left-style: solid; border-left-color: #D3D3D3; border-right-width: 1px; border-right-style: solid; border-right-color: #D3D3D3; border-top-width: 1px; border-top-style: solid; border-top-color: #D3D3D3; border-bottom-width: 1px; border-bottom-style: solid; border-bottom-color: #D3D3D3;">death_cohort</td>
@@ -1271,7 +1276,7 @@ well as overall.</p>
 </tr>
 <tr>
 <td headers="CDM name" class="gt_row gt_left" style="text-align: left; border-top-width: 1px; border-top-style: hidden; border-top-color: #000000;"></td>
-<td headers="Cohort" class="gt_row gt_left" style="text-align: left; border-left-width: 1px; border-left-style: solid; border-left-color: #D3D3D3; border-right-width: 1px; border-right-style: solid; border-right-color: #D3D3D3; border-top-width: 1px; border-top-style: hidden; border-top-color: #000000; border-bottom-width: 1px; border-bottom-style: solid; border-bottom-color: #D3D3D3;"></td>
+<td headers="Target cohort" class="gt_row gt_left" style="text-align: left; border-left-width: 1px; border-left-style: solid; border-left-color: #D3D3D3; border-right-width: 1px; border-right-style: solid; border-right-color: #D3D3D3; border-top-width: 1px; border-top-style: hidden; border-top-color: #000000; border-bottom-width: 1px; border-bottom-style: solid; border-bottom-color: #D3D3D3;"></td>
 <td headers="Age group" class="gt_row gt_left" style="text-align: left; border-left-width: 1px; border-left-style: solid; border-left-color: #D3D3D3; border-right-width: 1px; border-right-style: solid; border-right-color: #D3D3D3; border-top-width: 1px; border-top-style: hidden; border-top-color: #000000; border-bottom-width: 1px; border-bottom-style: solid; border-bottom-color: #D3D3D3;"></td>
 <td headers="Sex" class="gt_row gt_left" style="text-align: left; border-left-width: 1px; border-left-style: solid; border-left-color: #D3D3D3; border-right-width: 1px; border-right-style: solid; border-right-color: #D3D3D3; border-top-width: 1px; border-top-style: solid; border-top-color: #D3D3D3; border-bottom-width: 1px; border-bottom-style: solid; border-bottom-color: #D3D3D3;">M</td>
 <td headers="Outcome name" class="gt_row gt_left" style="text-align: left; border-left-width: 1px; border-left-style: solid; border-left-color: #D3D3D3; border-right-width: 1px; border-right-style: solid; border-right-color: #D3D3D3; border-top-width: 1px; border-top-style: solid; border-top-color: #D3D3D3; border-bottom-width: 1px; border-bottom-style: solid; border-bottom-color: #D3D3D3;">death_cohort</td>
@@ -1289,37 +1294,9 @@ well as overall.</p>
 </div>
 </div>
 <div class="section level2">
-<h2 id="summarising-participants">Summarising participants<a class="anchor" aria-label="anchor" href="#summarising-participants"></a>
-</h2>
-<p>If we set returnParticipants as TRUE then we will also be able to
-access the individuals that contributed to the analysis.</p>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">MGUS_death</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/estimateSingleEventSurvival.html">estimateSingleEventSurvival</a></span><span class="op">(</span><span class="va">cdm</span>,</span>
-<span>  targetCohortTable <span class="op">=</span> <span class="st">"mgus_diagnosis"</span>,</span>
-<span>  outcomeCohortTable <span class="op">=</span> <span class="st">"death_cohort"</span>,</span>
-<span>  returnParticipants <span class="op">=</span> <span class="cn">TRUE</span></span>
-<span><span class="op">)</span></span>
-<span><span class="fu"><a href="../reference/survivalParticipants.html">survivalParticipants</a></span><span class="op">(</span><span class="va">MGUS_death</span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 1,384 × 6</span></span></span>
-<span><span class="co">#&gt;    cohort_definition_id subject_id cohort_start_date cohort_end_date exposure_id</span></span>
-<span><span class="co">#&gt;                   <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;date&gt;</span>            <span style="color: #949494; font-style: italic;">&lt;date&gt;</span>                <span style="color: #949494; font-style: italic;">&lt;int&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span>                    1          1 1981-01-01        1981-01-01                1</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span>                    1          2 1968-01-01        1968-01-01                1</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span>                    1          3 1980-01-01        1980-01-01                1</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span>                    1          4 1977-01-01        1977-01-01                1</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span>                    1          5 1973-01-01        1973-01-01                1</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span>                    1          6 1990-01-01        1990-01-01                1</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span>                    1          7 1974-01-01        1974-01-01                1</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span>                    1          8 1974-01-01        1974-01-01                1</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span>                    1         10 1981-01-01        1981-01-01                1</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span>                    1         11 1972-01-01        1972-01-01                1</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 1,374 more rows</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 1 more variable: outcome_id &lt;int&gt;</span></span></span></code></pre></div>
-</div>
-<div class="section level2">
 <h2 id="disconnect-from-the-cdm-database-connection">Disconnect from the cdm database connection<a class="anchor" aria-label="anchor" href="#disconnect-from-the-cdm-database-connection"></a>
 </h2>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://darwin-eu.github.io/CDMConnector/reference/cdmDisconnect.html" class="external-link">cdm_disconnect</a></span><span class="op">(</span><span class="va">cdm</span><span class="op">)</span></span></code></pre></div>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
@@ -1329,7 +1306,7 @@ access the individuals that contributed to the analysis.</p>
 
 
     <footer><div class="pkgdown-footer-left">
-  <p>Developed by Edward Burn, Kim Lopez.</p>
+  <p>Developed by Edward Burn, Kim López-Güell, Marti Catala, Xintong Li, Danielle Newby, Nuria Mercade-Besora.</p>
 </div>
 
 <div class="pkgdown-footer-right">

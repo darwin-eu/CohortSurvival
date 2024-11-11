@@ -6,6 +6,12 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <title>Estimate Survival from Common Data Model Cohorts • CohortSurvival</title>
+<!-- favicons --><link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+<link rel="apple-touch-icon" type="image/png" sizes="180x180" href="apple-touch-icon.png">
+<link rel="apple-touch-icon" type="image/png" sizes="120x120" href="apple-touch-icon-120x120.png">
+<link rel="apple-touch-icon" type="image/png" sizes="76x76" href="apple-touch-icon-76x76.png">
+<link rel="apple-touch-icon" type="image/png" sizes="60x60" href="apple-touch-icon-60x60.png">
 <script src="deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
 <script src="deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="deps/font-awesome-6.4.2/css/all.min.css" rel="stylesheet">
@@ -13,6 +19,7 @@
 <script src="deps/headroom-0.11.0/headroom.min.js"></script><script src="deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="deps/search-1.0.0/fuse.min.js"></script><script src="deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="pkgdown.js"></script><meta property="og:title" content="Estimate Survival from Common Data Model Cohorts">
 <meta name="description" content="Estimate survival using data mapped to the Observational Medical Outcomes Partnership common data model. Survival can be estimated based on user-defined study cohorts.">
 <meta property="og:description" content="Estimate survival using data mapped to the Observational Medical Outcomes Partnership common data model. Survival can be estimated based on user-defined study cohorts.">
+<meta property="og:image" content="https://darwin-eu.github.io/CohortSurvival/logo.png">
 </head>
 <body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
@@ -22,7 +29,7 @@
 
     <a class="navbar-brand me-2" href="index.html">CohortSurvival</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.6.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -49,9 +56,12 @@
 </nav><div class="container template-home">
 <div class="row">
   <main id="main" class="col-md-9"><div class="section level1">
-<div class="page-header"><h1 id="cohortsurvival-">CohortSurvival <img src="reference/figures/hexsticker.png" align="right" height="139"><a class="anchor" aria-label="anchor" href="#cohortsurvival-"></a>
-</h1></div>
-<p><a href="https://CRAN.R-project.org/package=CohortSurvival" class="external-link"><img src="https://www.r-pkg.org/badges/version/CohortSurvival" alt="CRANstatus"></a><a href="https://app.codecov.io/github/darwin-eu/CohortSurvival?branch=main" class="external-link"><img src="https://codecov.io/github/darwin-eu/CohortSurvival/coverage.svg?branch=main" alt="codecov.io"></a> <a href="https://github.com/darwin-eu/CohortSurvival/actions" class="external-link"><img src="https://github.com/darwin-eu/CohortSurvival/workflows/R-CMD-check/badge.svg" alt="R-CMD-check"></a> <a href="https://lifecycle.r-lib.org/articles/stages.html" class="external-link"><img src="https://img.shields.io/badge/Lifecycle-Experimental-339999" alt="Lifecycle:Experimental"></a></p>
+<div class="page-header">
+<img src="logo.png" class="logo" alt=""><h1 id="cohortsurvival-">CohortSurvival 
+<a class="anchor" aria-label="anchor" href="#cohortsurvival-"></a>
+</h1>
+</div>
+<p><a href="https://CRAN.R-project.org/package=CohortSurvival" class="external-link"><img src="https://www.r-pkg.org/badges/version/CohortSurvival" alt="CRANstatus"></a> <a href="https://app.codecov.io/github/darwin-eu/CohortSurvival?branch=main" class="external-link"><img src="https://codecov.io/github/darwin-eu/CohortSurvival/coverage.svg?branch=main" alt="codecov.io"></a> <a href="https://github.com/darwin-eu/CohortSurvival/actions" class="external-link"><img src="https://github.com/darwin-eu/CohortSurvival/workflows/R-CMD-check/badge.svg" alt="R-CMD-check"></a> <a href="https://lifecycle.r-lib.org/articles/stages.html" class="external-link"><img src="https://img.shields.io/badge/Lifecycle-Experimental-339999" alt="Lifecycle:Experimental"></a></p>
 <p>CohortSurvival contains functions for extracting and summarising survival data using the OMOP common data model.</p>
 <div class="section level2">
 <h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
@@ -81,9 +91,9 @@
 <span>  <span class="fu"><a href="https://pillar.r-lib.org/reference/glimpse.html" class="external-link">glimpse</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Rows: ??</span></span>
 <span><span class="co">#&gt; Columns: 10</span></span>
-<span><span class="co">#&gt; Database: DuckDB v0.10.3-dev163 [eburn@Windows 10 x64:R 4.2.1/:memory:]</span></span>
+<span><span class="co">#&gt; Database: DuckDB v1.0.0 [eburn@Windows 10 x64:R 4.4.0/:memory:]</span></span>
 <span><span class="co">#&gt; $ cohort_definition_id &lt;int&gt; 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1…</span></span>
-<span><span class="co">#&gt; $ subject_id           &lt;dbl&gt; 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15…</span></span>
+<span><span class="co">#&gt; $ subject_id           &lt;int&gt; 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15…</span></span>
 <span><span class="co">#&gt; $ cohort_start_date    &lt;date&gt; 1981-01-01, 1968-01-01, 1980-01-01, 1977-01-01, …</span></span>
 <span><span class="co">#&gt; $ cohort_end_date      &lt;date&gt; 1981-01-01, 1968-01-01, 1980-01-01, 1977-01-01, …</span></span>
 <span><span class="co">#&gt; $ age                  &lt;dbl&gt; 88, 78, 94, 68, 90, 90, 89, 87, 86, 79, 86, 89, 8…</span></span>
@@ -100,9 +110,9 @@
 <span>  <span class="fu"><a href="https://pillar.r-lib.org/reference/glimpse.html" class="external-link">glimpse</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Rows: ??</span></span>
 <span><span class="co">#&gt; Columns: 4</span></span>
-<span><span class="co">#&gt; Database: DuckDB v0.10.3-dev163 [eburn@Windows 10 x64:R 4.2.1/:memory:]</span></span>
+<span><span class="co">#&gt; Database: DuckDB v1.0.0 [eburn@Windows 10 x64:R 4.4.0/:memory:]</span></span>
 <span><span class="co">#&gt; $ cohort_definition_id &lt;int&gt; 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1…</span></span>
-<span><span class="co">#&gt; $ subject_id           &lt;dbl&gt; 56, 81, 83, 111, 124, 127, 147, 163, 165, 167, 18…</span></span>
+<span><span class="co">#&gt; $ subject_id           &lt;int&gt; 56, 81, 83, 111, 124, 127, 147, 163, 165, 167, 18…</span></span>
 <span><span class="co">#&gt; $ cohort_start_date    &lt;date&gt; 1978-01-30, 1985-01-15, 1974-08-17, 1993-01-14, …</span></span>
 <span><span class="co">#&gt; $ cohort_end_date      &lt;date&gt; 1978-01-30, 1985-01-15, 1974-08-17, 1993-01-14, …</span></span></code></pre></div>
 <ol start="3" style="list-style-type: decimal">
@@ -113,9 +123,9 @@
 <span>  <span class="fu"><a href="https://pillar.r-lib.org/reference/glimpse.html" class="external-link">glimpse</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Rows: ??</span></span>
 <span><span class="co">#&gt; Columns: 4</span></span>
-<span><span class="co">#&gt; Database: DuckDB v0.10.3-dev163 [eburn@Windows 10 x64:R 4.2.1/:memory:]</span></span>
+<span><span class="co">#&gt; Database: DuckDB v1.0.0 [eburn@Windows 10 x64:R 4.4.0/:memory:]</span></span>
 <span><span class="co">#&gt; $ cohort_definition_id &lt;int&gt; 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1…</span></span>
-<span><span class="co">#&gt; $ subject_id           &lt;dbl&gt; 1, 2, 3, 4, 5, 6, 7, 8, 10, 11, 12, 13, 14, 15, 1…</span></span>
+<span><span class="co">#&gt; $ subject_id           &lt;int&gt; 1, 2, 3, 4, 5, 6, 7, 8, 10, 11, 12, 13, 14, 15, 1…</span></span>
 <span><span class="co">#&gt; $ cohort_start_date    &lt;date&gt; 1981-01-31, 1968-01-26, 1980-02-16, 1977-04-03, …</span></span>
 <span><span class="co">#&gt; $ cohort_end_date      &lt;date&gt; 1981-01-31, 1968-01-26, 1980-02-16, 1977-04-03, …</span></span></code></pre></div>
 </div>
@@ -130,7 +140,7 @@
 <span><span class="op">)</span></span>
 <span><span class="va">MGUS_death</span> <span class="op">|&gt;</span> </span>
 <span>  <span class="fu"><a href="https://pillar.r-lib.org/reference/glimpse.html" class="external-link">glimpse</a></span><span class="op">(</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Rows: 1,318</span></span>
+<span><span class="co">#&gt; Rows: 1,330</span></span>
 <span><span class="co">#&gt; Columns: 13</span></span>
 <span><span class="co">#&gt; $ result_id        &lt;int&gt; 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,…</span></span>
 <span><span class="co">#&gt; $ cdm_name         &lt;chr&gt; "mock", "mock", "mock", "mock", "mock", "mock", "mock…</span></span>
@@ -229,8 +239,11 @@
 <h2 data-toc-skip>Developers</h2>
 <ul class="list-unstyled">
 <li>Edward Burn <br><small class="roles"> Author, maintainer </small> <a href="https://orcid.org/0000-0002-9286-1128" target="orcid.widget" aria-label="ORCID" class="external-link"><span class="fab fa-orcid orcid" aria-hidden="true"></span></a> </li>
-<li>Kim Lopez <br><small class="roles"> Author </small> <a href="https://orcid.org/0000-0002-8462-8668" target="orcid.widget" aria-label="ORCID" class="external-link"><span class="fab fa-orcid orcid" aria-hidden="true"></span></a> </li>
-<li><a href="authors.html">More about authors...</a></li>
+<li>Kim López-Güell <br><small class="roles"> Author </small> <a href="https://orcid.org/0000-0002-8462-8668" target="orcid.widget" aria-label="ORCID" class="external-link"><span class="fab fa-orcid orcid" aria-hidden="true"></span></a> </li>
+<li>Marti Catala <br><small class="roles"> Author </small> <a href="https://orcid.org/0000-0003-3308-9905" target="orcid.widget" aria-label="ORCID" class="external-link"><span class="fab fa-orcid orcid" aria-hidden="true"></span></a> </li>
+<li>Xintong Li <br><small class="roles"> Author </small> <a href="https://orcid.org/0000-0002-6872-5804" target="orcid.widget" aria-label="ORCID" class="external-link"><span class="fab fa-orcid orcid" aria-hidden="true"></span></a> </li>
+<li>Danielle Newby <br><small class="roles"> Author </small> <a href="https://orcid.org/0000-0002-3001-1478" target="orcid.widget" aria-label="ORCID" class="external-link"><span class="fab fa-orcid orcid" aria-hidden="true"></span></a> </li>
+<li>Nuria Mercade-Besora <br><small class="roles"> Author </small> <a href="https://orcid.org/0009-0006-7948-3747" target="orcid.widget" aria-label="ORCID" class="external-link"><span class="fab fa-orcid orcid" aria-hidden="true"></span></a> </li>
 </ul>
 </div>
 
@@ -241,7 +254,7 @@
 
 
     <footer><div class="pkgdown-footer-left">
-  <p>Developed by Edward Burn, Kim Lopez.</p>
+  <p>Developed by Edward Burn, Kim López-Güell, Marti Catala, Xintong Li, Danielle Newby, Nuria Mercade-Besora.</p>
 </div>
 
 <div class="pkgdown-footer-right">
