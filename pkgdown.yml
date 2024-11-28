@@ -5,7 +5,7 @@ articles:
   a01_Single_event_of_interest: a01_Single_event_of_interest.html
   a02_Competing_risk_survival: a02_Competing_risk_survival.html
   a03_Further_survival_analyses: a03_Further_survival_analyses.html
-last_built: 2024-11-11T09:33Z
+last_built: 2024-11-28T17:44Z
 urls:
   reference: https://darwin-eu.github.io/CohortSurvival/reference
   article: https://darwin-eu.github.io/CohortSurvival/articles
