@@ -52,6 +52,8 @@ tableSurvival <- function(x,
                           groupColumn = NULL,
                           .options = list()){
 
+  rlang::check_installed("visOmopResults", version = "0.5.0")
+
   # initial checks
   omopgenerics::assertNumeric(times, min = 0, null = TRUE)
   omopgenerics::assertCharacter(timeScale, length = 1)
@@ -65,10 +67,12 @@ tableSurvival <- function(x,
   }
 
   # check times in x
-  x_clean <- x %>% visOmopResults::splitAdditional() %>%
+  x_clean <- x %>%
     dplyr::filter(.data$result_id %in% (omopgenerics::settings(x) %>%
                     dplyr::filter(grepl("probability", .data$result_type) | grepl("summary", .data$result_type)) %>%
-                    dplyr::pull("result_id")))
+                    dplyr::pull("result_id"))) %>%
+    omopgenerics::splitAdditional() %>%
+    dplyr::select(-"reason_id")
 
   if (!is.null(times)) {
     times_final <- dplyr::tibble(
@@ -136,7 +140,7 @@ tableSurvival <- function(x,
           bigMark = .options$bigMark
         ) %>%
         visOmopResults::formatEstimateName(
-          estimateNameFormat =
+          estimateName =
             c(" survival estimate" =
                 "<estimate> (<estimate_95CI_lower>, <estimate_95CI_upper>)")
         ) %>%
@@ -216,9 +220,10 @@ tableSurvival <- function(x,
       "Outcome type" = "variable_name",
       "Outcome name" = "variable_level"
     )
+    excludeCols = c("time", "reason_id", "reason")
     formatEstimateName = c("Restricted mean survival" = "<restricted_mean_survival>")
   } else {
-    excludeCols = c(excludeCols, "variable_name")
+    excludeCols = c(excludeCols, "variable_name","time", "reason_id", "reason")
     renameCols = c("Outcome name" = "variable_level")
     formatEstimateName = c("Restricted mean survival (SE)" =
                              "<restricted_mean_survival> (<restricted_mean_survival_se>)")
@@ -233,19 +238,18 @@ tableSurvival <- function(x,
 
   # to SR
   summary_table <- summary_table %>%
-    visOmopResults::uniteAdditional() %>%
+    omopgenerics::uniteAdditional() %>%
     dplyr::select(omopgenerics::resultColumns())
 
   summary_table <- visOmopResults::visOmopTable(
     summary_table,
-    formatEstimateName = formatEstimateName,
+    estimateName = formatEstimateName,
     header = header,
-    split = split,
     groupColumn = groupColumn,
     type = type,
-    renameColumns = renameCols,
+    rename = renameCols,
     showMinCellCount = TRUE,
-    excludeColumns = excludeCols,
+    hide = excludeCols,
     .options = c(.options, list(useFormatOrder = FALSE)) # to keep order set when factoring
   )
 
@@ -270,7 +274,7 @@ tableSurvival <- function(x,
 #'
 #'
 optionsTableSurvival <- function() {
-  default <- visOmopResults::optionsVisOmopTable()
+  default <- visOmopResults::tableOptions()
   default <- default[!names(default) %in% c("useFormatOrder", "keepNotFormatted")]
   return(default)
 }

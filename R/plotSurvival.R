@@ -53,6 +53,9 @@ plotSurvival <- function(result,
                          riskTable = FALSE,
                          riskInterval = 30) {
 
+  rlang::check_installed("ggplot2")
+  rlang::check_installed("scales")
+
   # Missing input checks
    omopgenerics::assertNumeric(xlim, min = 1, length = 1, integerish = TRUE, null = TRUE)
   if(is.null(xlim)) {xlim <- "Inf"}

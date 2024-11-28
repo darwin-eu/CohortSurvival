@@ -43,15 +43,16 @@ asSurvivalResult <- function(result) {
     cli::cli_abort("result is not a valid `summarised_result` object.")
   }
   result <- result %>%
-     visOmopResults::addSettings() %>%
+     omopgenerics::addSettings(
+       settingsColumn = c("result_type",omopgenerics::settingsColumns(result))) %>%
      dplyr::select(c("cdm_name", "group_name", "group_level", "strata_name",
                      "strata_level", "variable_name", "variable_level",
                      "estimate_name", "estimate_type", "estimate_value",
                      "additional_name", "additional_level", "result_type",
                      "outcome", "competing_outcome",
                      "eventgap")) %>%
-    visOmopResults::splitAdditional() %>%
-    visOmopResults::splitGroup() %>%
+    omopgenerics::splitAdditional() %>%
+    omopgenerics::splitGroup() %>%
     dplyr::mutate(estimate_value = as.numeric(.data$estimate_value))
 
   estimates <- result %>%

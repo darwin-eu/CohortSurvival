@@ -96,6 +96,7 @@ deathDiagnostics <- function(cdm,
   output <- output %>%
     dplyr::mutate(
       cdm_name = attr(cdm, "cdm_name"),
+      result_id = 1,
       result_type = "death_diagnostics",
       package_name = "CohortSurvival",
       package_version = as.character(utils::packageVersion("CohortSurvival")),
@@ -178,6 +179,7 @@ deathDiagnostics <- function(cdm,
       output_w <- output_w %>%
         dplyr::mutate(
           cdm_name = attr(cdm, "cdm_name"),
+          result_id = 1,
           result_type = "death_diagnostics",
           package_name = "CohortSurvival",
           package_version = as.character(utils::packageVersion("CohortSurvival")),
@@ -207,6 +209,15 @@ deathDiagnostics <- function(cdm,
       cli::cli_alert_warning(paste0(ez[i,3]," of ",ez[i,2]," for group ",ez[i,1]," should be 0 but is ",ez[i,4]))
     }
   }
+
+  settings <- output %>%
+    dplyr::select("result_id", "result_type", "package_name", "package_version") %>%
+    dplyr::distinct()
+
+  output <- output %>%
+    dplyr::select(-c("result_type", "package_name", "package_version"))
+
+  output <- omopgenerics::newSummarisedResult(output, settings = settings)
 
   return(output)
 }

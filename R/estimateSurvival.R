@@ -189,8 +189,8 @@ estimateSingleEventSurvival <- function(cdm,
       "estimate_type" = "integer",
       competing_outcome = "none"
     ) %>%
-    visOmopResults::uniteStrata("reason") %>%
-    visOmopResults::uniteAdditional("reason_id")
+    omopgenerics::uniteStrata("reason") %>%
+    omopgenerics::uniteAdditional("reason_id")
 
   if(attrition %>% dplyr::group_by("target_cohort") %>% dplyr::tally() %>% dplyr::pull("n") ==
      attrition %>% dplyr::group_by("target_cohort", "cohort_definition_id") %>% dplyr::tally() %>% dplyr::pull("n")) {
@@ -288,8 +288,7 @@ estimateSingleEventSurvival <- function(cdm,
       censor_on_date = .env$censorOnDate,
       follow_up_days = .env$followUpDays,
       restricted_mean_follow_up = .env$restrictedMeanFollowUp,
-      minimum_survival_days = .env$minimumSurvivalDays,
-      min_cell_count = .env$minCellCount
+      minimum_survival_days = .env$minimumSurvivalDays
     )
 
   surv_estimates <- omopgenerics::newSummarisedResult(complete_results,
@@ -520,8 +519,8 @@ estimateCompetingRiskSurvival <- function(cdm,
       "estimate_value" = as.character(.data$estimate_value),
       "estimate_type" = "integer"
     ) %>%
-    visOmopResults::uniteStrata("reason") %>%
-    visOmopResults::uniteAdditional("reason_id")
+    omopgenerics::uniteStrata("reason") %>%
+    omopgenerics::uniteAdditional("reason_id")
 
   if(attrition %>% dplyr::group_by("target_cohort") %>% dplyr::tally() %>% dplyr::pull("n") ==
      attrition %>% dplyr::group_by("target_cohort", "cohort_definition_id") %>% dplyr::tally() %>% dplyr::pull("n")) {
@@ -621,8 +620,7 @@ estimateCompetingRiskSurvival <- function(cdm,
       censor_on_date = .env$censorOnDate,
       follow_up_days = .env$followUpDays,
       restricted_mean_follow_up = .env$restrictedMeanFollowUp,
-      minimum_survival_days = .env$minimumSurvivalDays,
-      min_cell_count = .env$minCellCount
+      minimum_survival_days = .env$minimumSurvivalDays
     )
 
   surv_estimates <- omopgenerics::newSummarisedResult(complete_results,
