@@ -61,7 +61,7 @@ tableSurvival <- function(x,
 
   # .options:
   userOptions <- .options
-  .options = optionsTableSurvival()
+  .options <- optionsTableSurvival()
   for (opt in names(userOptions)) {
     .options[[opt]] <- userOptions[[opt]]
   }
@@ -204,7 +204,7 @@ tableSurvival <- function(x,
 
   split <- c("group", "additional")
   if (splitStrata) {
-    split = c(split, "strata")
+    split <- c(split, "strata")
   }
 
   excludeCols <- c("result_id", "estimate_type")
@@ -216,20 +216,20 @@ tableSurvival <- function(x,
           .data$variable_level == .data$outcome, "outcome", "competing_outcome"
         )
       )
-    renameCols = c(
+    renameCols <- c(
       "Outcome type" = "variable_name",
       "Outcome name" = "variable_level"
     )
-    excludeCols = c("time", "reason_id", "reason")
-    formatEstimateName = c("Restricted mean survival" = "<restricted_mean_survival>")
+    excludeCols <- c("time", "reason_id", "reason")
+    formatEstimateName <- c("Restricted mean survival" = "<restricted_mean_survival>")
   } else {
-    excludeCols = c(excludeCols, "variable_name","time", "reason_id", "reason")
-    renameCols = c("Outcome name" = "variable_level")
-    formatEstimateName = c("Restricted mean survival (SE)" =
+    excludeCols <- c(excludeCols, "variable_name","time", "reason_id", "reason")
+    renameCols <- c("Outcome name" = "variable_level")
+    formatEstimateName <- c("Restricted mean survival (SE)" =
                              "<restricted_mean_survival> (<restricted_mean_survival_se>)")
   }
   if ("median_survival" %in% unique(summary_table$estimate_name)) {
-    formatEstimateName = c(
+    formatEstimateName <- c(
       "Median survival (95% CI)" =
         "<median_survival> (<median_survival_95CI_lower>, <median_survival_95CI_higher>)",
       formatEstimateName
@@ -248,7 +248,6 @@ tableSurvival <- function(x,
     groupColumn = groupColumn,
     type = type,
     rename = renameCols,
-    showMinCellCount = TRUE,
     hide = excludeCols,
     .options = c(.options, list(useFormatOrder = FALSE)) # to keep order set when factoring
   )

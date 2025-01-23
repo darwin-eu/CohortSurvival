@@ -223,7 +223,7 @@ generateRiskData <- function(result, riskTimes, colour) {
 
     for (i in colnames(riskdata %>% dplyr::select(dplyr::starts_with("n_risk")))) {
       riskdataend <- riskdataend %>%
-        dplyr::mutate(!!i := as.character(NA))
+        dplyr::mutate(!!i := NA_character_)
     }
 
     riskdata <- dplyr::union_all(riskdata, riskdataend) %>%
@@ -249,7 +249,7 @@ generateRiskData <- function(result, riskTimes, colour) {
 
     for (i in colnames(riskdata %>% dplyr::select(dplyr::starts_with("n_risk")))) {
       riskdataend <- riskdataend %>%
-        dplyr::mutate(!!i := as.character(NA))
+        dplyr::mutate(!!i := NA_character_)
     }
 
     riskdata <- dplyr::union_all(riskdata, riskdataend) %>%
@@ -393,6 +393,6 @@ addRibbon <- function(plot, yLower, yUpper){
     ggplot2::geom_ribbon(
       ggplot2::aes(ymin = !!rlang::sym(yLower),
                    ymax = !!rlang::sym(yUpper)),
-      alpha = .3, color = NA, show.legend = FALSE) +
+      alpha = 0.3, color = NA, show.legend = FALSE) +
     ggplot2::geom_line(linewidth = 0.25)
 }

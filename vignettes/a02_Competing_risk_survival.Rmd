@@ -112,5 +112,5 @@ tableSurvival(MGUS_death_prog)
 ## Disconnect from the cdm database connection
 
 ```{r}
-cdm_disconnect(cdm)
+cdmDisconnect(cdm)
 ```

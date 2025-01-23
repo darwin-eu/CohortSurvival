@@ -39,7 +39,7 @@ test_that("basic example", {
     cdmName = "mock_es"
   )
 
-  cdm2 = CDMConnector::copy_cdm_to(db,
+  cdm2 = CDMConnector::copyCdmTo(db,
                                    cdm,
                                    schema = "main",
                                    overwrite = TRUE)
@@ -100,7 +100,7 @@ test_that("first death record per person", {
     cdmName = "mock_es"
   )
 
-  cdm2 = CDMConnector::copy_cdm_to(db,
+  cdm2 = CDMConnector::copyCdmTo(db,
                                    cdm,
                                    schema = "main",
                                    overwrite = TRUE)
@@ -166,7 +166,7 @@ test_that("test death in observation criteria", {
     cdmName = "mock_es"
   )
 
-  cdm2 = CDMConnector::copy_cdm_to(db,
+  cdm2 = CDMConnector::copyCdmTo(db,
                                    cdm,
                                    schema = "main",
                                    overwrite = TRUE)
@@ -235,7 +235,7 @@ test_that("test different cohort table name", {
     cdmName = "mock_es"
   )
 
-  cdm2 = CDMConnector::copy_cdm_to(db,
+  cdm2 = CDMConnector::copyCdmTo(db,
                                    cdm,
                                    schema = "main",
                                    overwrite = TRUE)
@@ -246,9 +246,9 @@ test_that("test different cohort table name", {
   cdm2 <- generateDeathCohortSet(cdm=cdm2,
                                  name = "my_cohort_death")
 
-  expect_error(CDMConnector::assertTables(cdm2, tables=c("death_cohort")))
+  expect_error(omopgenerics::assertTable(cdm2$death_cohort))
 
-  expect_no_error(CDMConnector::assertTables(cdm2, tables=c("my_cohort_death")))
+  expect_no_error(omopgenerics::assertTable(cdm2$my_cohort_death))
 
   expect_true(all(c("cohort_definition_id", "subject_id",
                     "cohort_start_date", "cohort_end_date") %in%
@@ -310,7 +310,7 @@ test_that("test subsetting death table by a cohort table", {
     cdmName = "mock_es"
   )
 
-  cdm2 = CDMConnector::copy_cdm_to(db,
+  cdm2 = CDMConnector::copyCdmTo(db,
                                    cdm,
                                    schema = "main",
                                    overwrite = TRUE)
@@ -393,7 +393,7 @@ test_that("test expected errors", {
     cdmName = "mock_es"
   )
 
-  cdm2 = CDMConnector::copy_cdm_to(db,
+  cdm2 = CDMConnector::copyCdmTo(db,
                                    cdm,
                                    schema = "main",
                                    overwrite = TRUE)
@@ -426,7 +426,7 @@ test_that("test expected errors", {
     cdmName = "mock_es"
   )
 
-  cdm2 = CDMConnector::copy_cdm_to(db,
+  cdm2 = CDMConnector::copyCdmTo(db,
                                    cdm,
                                    schema = "main",
                                    overwrite = TRUE)
@@ -490,7 +490,7 @@ test_that("test single permanent table created", {
     cdmName = "mock_es"
   )
 
-  cdm2 = CDMConnector::copy_cdm_to(db,
+  cdm2 = CDMConnector::copyCdmTo(db,
                                    cdm,
                                    schema = "main",
                                    overwrite = TRUE)

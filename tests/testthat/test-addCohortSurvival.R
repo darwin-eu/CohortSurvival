@@ -43,7 +43,7 @@ test_that("working example", {
     cdmName = "mock_es"
   )
 
-  cdm2 = CDMConnector::copy_cdm_to(db,
+  cdm2 = CDMConnector::copyCdmTo(db,
                                    cdm,
                                    schema = "main",
                                    overwrite = TRUE)
@@ -74,7 +74,7 @@ test_that("another working example", {
   if (Sys.getenv("EUNOMIA_DATA_FOLDER") == "") {
     Sys.setenv("EUNOMIA_DATA_FOLDER" = tempdir())
   }
-  skip_if_not(CDMConnector::eunomia_is_available())
+  skip_if_not(CDMConnector::eunomiaIsAvailable())
 
   con <- DBI::dbConnect(duckdb::duckdb(), dbdir = CDMConnector::eunomia_dir())
   cdm <- CDMConnector::cdm_from_con(con, cdm_schema = "main", write_schema = "main")
@@ -211,7 +211,7 @@ test_that("censorOnCohortExit", {
     cdmName = "mock_es"
   )
 
-  cdm2 = CDMConnector::copy_cdm_to(db,
+  cdm2 = CDMConnector::copyCdmTo(db,
                                    cdm,
                                    schema = "main",
                                    overwrite = TRUE)
@@ -324,7 +324,7 @@ test_that("censorOnDate", {
     cdmName = "mock_es"
   )
 
-  cdm2 = CDMConnector::copy_cdm_to(db,
+  cdm2 = CDMConnector::copyCdmTo(db,
                                    cdm,
                                    schema = "main",
                                    overwrite = TRUE)
@@ -430,7 +430,7 @@ test_that("followUpDays", {
     cdmName = "mock_es"
   )
 
-  cdm2 = CDMConnector::copy_cdm_to(db,
+  cdm2 = CDMConnector::copyCdmTo(db,
                                    cdm,
                                    schema = "main",
                                    overwrite = TRUE)
@@ -617,7 +617,7 @@ test_that("within cohort survival", {
     cdmName = "mock_es"
   )
 
-  cdm2 = CDMConnector::copy_cdm_to(db,
+  cdm2 = CDMConnector::copyCdmTo(db,
                                    cdm,
                                    schema = "main",
                                    overwrite = TRUE)
@@ -717,7 +717,7 @@ test_that("allow overwrite of time and status", {
     cdmName = "mock_es"
   )
 
-  cdm2 = CDMConnector::copy_cdm_to(db,
+  cdm2 = CDMConnector::copyCdmTo(db,
                                    cdm,
                                    schema = "main",
                                    overwrite = TRUE)
@@ -830,7 +830,7 @@ test_that("multiple records per person", {
     cdmName = "mock_es"
   )
 
-  cdm2 = CDMConnector::copy_cdm_to(db,
+  cdm2 = CDMConnector::copyCdmTo(db,
                                    cdm,
                                    schema = "main",
                                    overwrite = TRUE)
@@ -865,5 +865,5 @@ test_that("multiple records per person", {
                     dplyr::filter(subject_id == 3) %>%
                     dplyr::pull("status") == 0)
 
-  CDMConnector::cdm_disconnect(cdm2)
+  CDMConnector::cdmDisconnect(cdm2)
   })

@@ -30,16 +30,16 @@ mockMGUS2cdm <- function() {
       cohort_start_date_diag = as.Date(paste0(
         .data$dxyr, "-01-01"
       )),
-      cohort_start_date_progression = .data$cohort_start_date_diag +
-        lubridate::days(.data$ptime),
-      cohort_start_date_death = .data$cohort_start_date_diag +
-        lubridate::days(.data$futime)
+      cohort_start_date_progression = clock::add_days(.data$cohort_start_date_diag,
+        .data$ptime),
+      cohort_start_date_death = clock::add_days(.data$cohort_start_date_diag,
+        .data$futime)
     ) %>%
     dplyr::rename("subject_id" = "id") %>%
     dplyr::mutate(
-      observation_period_start_date =
-        .data$cohort_start_date_diag -
-        lubridate::years(.data$age)
+      observation_period_start_date = clock::add_days(
+        .data$cohort_start_date_diag,
+        -.data$age)
     ) %>%
     dplyr::mutate(subject_id = as.integer(.data$subject_id))
 
@@ -129,9 +129,9 @@ mockMGUS2cdm <- function() {
       gender_concept_id = dplyr::if_else(
         .data$sex == "F", 8532L, 8507L
       ),
-      year_of_birth = as.integer(lubridate::year(mgus2$observation_period_start_date)),
-      month_of_birth = as.integer(lubridate::month(mgus2$observation_period_start_date)),
-      day_of_birth = lubridate::day(mgus2$observation_period_start_date),
+      year_of_birth = as.integer(clock::get_year(mgus2$observation_period_start_date)),
+      month_of_birth = as.integer(clock::get_month(mgus2$observation_period_start_date)),
+      day_of_birth = clock::get_day(mgus2$observation_period_start_date),
       race_concept_id = 0L,
       ethnicity_concept_id = 0L
     ) %>%
@@ -179,7 +179,7 @@ mockMGUS2cdm <- function() {
                                      ),
                                      cdmName = "mock")
 
-  cdm2 = CDMConnector::copy_cdm_to(db,
+  cdm2 <- CDMConnector::copyCdmTo(db,
                             cdm,
                             schema = "main",
                             overwrite = TRUE)

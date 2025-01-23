@@ -19,8 +19,7 @@ estimateSingleEventSurvival(
   eventGap = 30,
   estimateGap = 1,
   restrictedMeanFollowUp = NULL,
-  minimumSurvivalDays = 1,
-  minCellCount = 5
+  minimumSurvivalDays = 1
 )
 }
 \arguments{
@@ -63,9 +62,6 @@ when calculating restricted mean for all cohorts}
 
 \item{minimumSurvivalDays}{Minimum number of days required for the main cohort
 to have survived}
-
-\item{minCellCount}{The minimum number of events to reported, below which
-results will be obscured. If 0, all results will be reported.}
 }
 \value{
 tibble with survival information for desired cohort, including:

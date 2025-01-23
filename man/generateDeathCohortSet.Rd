@@ -62,7 +62,7 @@ cdm <- omopgenerics::cdmFromTables(
   cdmName = "mock_es"
 )
  db <- DBI::dbConnect(duckdb::duckdb(), ":memory:")
-cdm2 = CDMConnector::copy_cdm_to(db,
+cdm2 = CDMConnector::copyCdmTo(db,
                                  cdm,
                                  schema = "main")
 

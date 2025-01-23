@@ -3,7 +3,8 @@ test_that("omopgenerics reexports work", {
   cdm <- mockMGUS2cdm()
   surv <- estimateSingleEventSurvival(cdm,
                                       "mgus_diagnosis",
-                                      "death_cohort")
+                                      "death_cohort") %>%
+    omopgenerics::suppress(minCellCount = 5)
 
   survCR <- estimateCompetingRiskSurvival(cdm,
                                           "mgus_diagnosis",
@@ -24,8 +25,8 @@ test_that("omopgenerics reexports work", {
   # suppresing results
   surv_nosup <- estimateSingleEventSurvival(cdm,
                                            "mgus_diagnosis",
-                                           "death_cohort",
-                                           minCellCount = 0)
+                                           "death_cohort") %>%
+    omopgenerics::suppress(minCellCount = 0)
 
   expect_false(isTRUE(all.equal(surv, surv_nosup, check.attributes = FALSE)))
 

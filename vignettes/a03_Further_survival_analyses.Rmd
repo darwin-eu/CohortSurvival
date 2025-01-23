@@ -93,5 +93,5 @@ summary(cmprsk::crr(ftime = input_survival_cr$time,
 ## Disconnect from the cdm database connection
 
 ```{r}
-cdm_disconnect(cdm)
+cdmDisconnect(cdm)
 ```

@@ -42,8 +42,6 @@
 #' when calculating restricted mean for all cohorts
 #' @param minimumSurvivalDays Minimum number of days required for the main cohort
 #' to have survived
-#' @param minCellCount The minimum number of events to reported, below which
-#' results will be obscured. If 0, all results will be reported.
 #'
 #' @return tibble with survival information for desired cohort, including:
 #' time, people at risk, survival probability, cumulative incidence,
@@ -78,17 +76,16 @@ estimateSingleEventSurvival <- function(cdm,
                                         eventGap = 30,
                                         estimateGap = 1,
                                         restrictedMeanFollowUp = NULL,
-                                        minimumSurvivalDays = 1,
-                                        minCellCount = 5) {
+                                        minimumSurvivalDays = 1) {
   if (is.null(targetCohortId)) {
-    CDMConnector::assertTables(cdm, targetCohortTable)
-    targetCohortId <- CDMConnector::cohort_count(cdm[[targetCohortTable]]) %>%
+    omopgenerics::assertTable(cdm[[targetCohortTable]])
+    targetCohortId <- omopgenerics::cohortCount(cdm[[targetCohortTable]]) %>%
       dplyr::filter(.data$number_records > 0) %>%
       dplyr::pull("cohort_definition_id")
   }
   if (is.null(outcomeCohortId)) {
-    CDMConnector::assertTables(cdm, outcomeCohortTable, empty.ok = TRUE)
-    outcomeCohortId <- CDMConnector::cohort_count(cdm[[outcomeCohortTable]]) %>%
+    omopgenerics::assertTable(cdm[[outcomeCohortTable]])
+    outcomeCohortId <- omopgenerics::cohortCount(cdm[[outcomeCohortTable]]) %>%
       dplyr::pull("cohort_definition_id")
   }
 
@@ -142,8 +139,7 @@ estimateSingleEventSurvival <- function(cdm,
         eventGap = eventGap,
         estimateGap = estimateGap,
         restrictedMeanFollowUp = restrictedMeanFollowUp,
-        minimumSurvivalDays = minimumSurvivalDays,
-        minCellCount = minCellCount
+        minimumSurvivalDays = minimumSurvivalDays
       )
       attrition[[paste0(i, "_", j)]] <- attr(surv[[paste0(i, "_", j)]], "cohort_attrition") %>%
         dplyr::mutate(
@@ -295,14 +291,15 @@ estimateSingleEventSurvival <- function(cdm,
                                                       settings = settings)
 
   attr(surv_estimates, "cohort_attrition") <- NULL
+  attr(surv_estimates, "summary") <- NULL
+  attr(surv_estimates, "events") <- NULL
 
   # Suppress results with omopgenerics
   surv_estimates <- surv_estimates %>%
     dplyr::mutate(estimate_name = dplyr::if_else(
       .data$estimate_name %in% c("n_risk", "n_events", "n_censor", "number_records"),
       paste0(.data$estimate_name,"_count"), .data$estimate_name
-    )) %>%
-    omopgenerics::suppress(minCellCount = minCellCount)
+    ))
 
   return(surv_estimates)
 }
@@ -340,8 +337,6 @@ estimateSingleEventSurvival <- function(cdm,
 #' when calculating restricted mean for all cohorts
 #' @param minimumSurvivalDays Minimum number of days required for the main cohort
 #' to have survived
-#' @param minCellCount The minimum number of events to reported, below which
-#' results will be obscured. If 0, all results will be reported.
 #'
 #' @return tibble with survival information for desired cohort, including:
 #' time, people at risk, survival probability, cumulative incidence,
@@ -382,23 +377,22 @@ estimateCompetingRiskSurvival <- function(cdm,
                                           eventGap = 30,
                                           estimateGap = 1,
                                           restrictedMeanFollowUp = NULL,
-                                          minimumSurvivalDays = 1,
-                                          minCellCount = 5) {
+                                          minimumSurvivalDays = 1) {
   if (is.null(targetCohortId)) {
-    CDMConnector::assertTables(cdm, targetCohortTable)
-    targetCohortId <- CDMConnector::cohort_count(cdm[[targetCohortTable]]) %>%
+    omopgenerics::assertTable(cdm[[targetCohortTable]])
+    targetCohortId <- omopgenerics::cohortCount(cdm[[targetCohortTable]]) %>%
       dplyr::filter(.data$number_records >0) %>%
       dplyr::pull("cohort_definition_id")
   }
   if (is.null(outcomeCohortId)) {
-    CDMConnector::assertTables(cdm, outcomeCohortTable, empty.ok = TRUE)
-    outcomeCohortId <- CDMConnector::cohort_count(cdm[[outcomeCohortTable]]) %>%
+    omopgenerics::assertTable(cdm[[outcomeCohortTable]])
+    outcomeCohortId <- omopgenerics::cohortCount(cdm[[outcomeCohortTable]]) %>%
       dplyr::filter(.data$number_records >0) %>%
       dplyr::pull("cohort_definition_id")
   }
   if (is.null(competingOutcomeCohortId)) {
-    CDMConnector::assertTables(cdm, competingOutcomeCohortTable, empty.ok = TRUE)
-    competingOutcomeCohortId <- CDMConnector::cohort_count(cdm[[competingOutcomeCohortTable]])  %>%
+    omopgenerics::assertTable(cdm[[competingOutcomeCohortTable]])
+    competingOutcomeCohortId <- omopgenerics::cohortCount(cdm[[competingOutcomeCohortTable]])  %>%
       dplyr::filter(.data$number_records >0) %>%
       dplyr::pull("cohort_definition_id")
   }
@@ -466,8 +460,7 @@ estimateCompetingRiskSurvival <- function(cdm,
           eventGap = eventGap,
           estimateGap = estimateGap,
           restrictedMeanFollowUp = restrictedMeanFollowUp,
-          minimumSurvivalDays = minimumSurvivalDays,
-          minCellCount = minCellCount
+          minimumSurvivalDays = minimumSurvivalDays
         )
         if(length(surv[[paste0(i, "_", j, "_", k)]]) > 0) {
           attrition[[paste0(i, "_", j, "_", k)]] <- attr(surv[[paste0(i, "_", j, "_", k)]], "cohort_attrition") %>%
@@ -627,14 +620,15 @@ estimateCompetingRiskSurvival <- function(cdm,
                                                       settings = settings)
 
   attr(surv_estimates, "cohort_attrition") <- NULL
+  attr(surv_estimates, "summary") <- NULL
+  attr(surv_estimates, "events") <- NULL
 
   # Suppress results with omopgenerics
   surv_estimates <- surv_estimates %>%
     dplyr::mutate(estimate_name = dplyr::if_else(
       .data$estimate_name %in% c("n_risk", "n_events", "n_censor", "number_records"),
       paste0(.data$estimate_name,"_count"), .data$estimate_name
-    )) %>%
-    omopgenerics::suppress(minCellCount = minCellCount)
+    ))
 
   return(surv_estimates)
 }
@@ -658,8 +652,7 @@ estimateSurvival <- function(cdm,
                              eventGap = 30,
                              estimateGap = 1,
                              restrictedMeanFollowUp = NULL,
-                             minimumSurvivalDays = 1,
-                             minCellCount = 5) {
+                             minimumSurvivalDays = 1) {
 
   # check inputs
   validateInputSurvival(cdm, targetCohortTable, targetCohortId, outcomeCohortTable,
@@ -668,7 +661,7 @@ estimateSurvival <- function(cdm,
                         competingOutcomeDateVariable, competingOutcomeWashout,
                         censorOnCohortExit, censorOnDate, followUpDays,
                         strata, eventGap, estimateGap, restrictedMeanFollowUp,
-                        minimumSurvivalDays, minCellCount)
+                        minimumSurvivalDays)
 
 # extract and prepare exposure data
   workingExposureTable <- cdm[[targetCohortTable]] %>%
@@ -1442,8 +1435,7 @@ validateInputSurvival <- function(cdm,
                                   eventGap,
                                   estimateGap,
                                   restrictedMeanFollowUp,
-                                  minimumSurvivalDays,
-                                  minCellCount) {
+                                  minimumSurvivalDays) {
 
   omopgenerics::assertCharacter(targetCohortTable, length = 1)
   omopgenerics::assertCharacter(outcomeCohortTable, length = 1)
@@ -1467,6 +1459,5 @@ validateInputSurvival <- function(cdm,
   omopgenerics::assertNumeric(estimateGap, integerish = TRUE, min = 1)
   omopgenerics::assertNumeric(restrictedMeanFollowUp, integerish = TRUE, min = 1, length = 1, null = TRUE)
   omopgenerics::assertNumeric(minimumSurvivalDays, integerish = TRUE, min = 0, length = 1)
-  omopgenerics::assertNumeric(minCellCount, integerish = TRUE, min = 0, length = 1)
 
 }
