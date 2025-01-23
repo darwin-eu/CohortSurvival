@@ -29,7 +29,7 @@
 
     <a class="navbar-brand me-2" href="index.html">CohortSurvival</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.6.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.6.2</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -91,7 +91,7 @@
 <span>  <span class="fu"><a href="https://pillar.r-lib.org/reference/glimpse.html" class="external-link">glimpse</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Rows: ??</span></span>
 <span><span class="co">#&gt; Columns: 10</span></span>
-<span><span class="co">#&gt; Database: DuckDB v1.0.0 [eburn@Windows 10 x64:R 4.4.0/:memory:]</span></span>
+<span><span class="co">#&gt; Database: DuckDB v1.1.3 [eburn@Windows 10 x64:R 4.4.0/:memory:]</span></span>
 <span><span class="co">#&gt; $ cohort_definition_id &lt;int&gt; 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1…</span></span>
 <span><span class="co">#&gt; $ subject_id           &lt;int&gt; 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15…</span></span>
 <span><span class="co">#&gt; $ cohort_start_date    &lt;date&gt; 1981-01-01, 1968-01-01, 1980-01-01, 1977-01-01, …</span></span>
@@ -110,7 +110,7 @@
 <span>  <span class="fu"><a href="https://pillar.r-lib.org/reference/glimpse.html" class="external-link">glimpse</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Rows: ??</span></span>
 <span><span class="co">#&gt; Columns: 4</span></span>
-<span><span class="co">#&gt; Database: DuckDB v1.0.0 [eburn@Windows 10 x64:R 4.4.0/:memory:]</span></span>
+<span><span class="co">#&gt; Database: DuckDB v1.1.3 [eburn@Windows 10 x64:R 4.4.0/:memory:]</span></span>
 <span><span class="co">#&gt; $ cohort_definition_id &lt;int&gt; 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1…</span></span>
 <span><span class="co">#&gt; $ subject_id           &lt;int&gt; 56, 81, 83, 111, 124, 127, 147, 163, 165, 167, 18…</span></span>
 <span><span class="co">#&gt; $ cohort_start_date    &lt;date&gt; 1978-01-30, 1985-01-15, 1974-08-17, 1993-01-14, …</span></span>
@@ -123,7 +123,7 @@
 <span>  <span class="fu"><a href="https://pillar.r-lib.org/reference/glimpse.html" class="external-link">glimpse</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Rows: ??</span></span>
 <span><span class="co">#&gt; Columns: 4</span></span>
-<span><span class="co">#&gt; Database: DuckDB v1.0.0 [eburn@Windows 10 x64:R 4.4.0/:memory:]</span></span>
+<span><span class="co">#&gt; Database: DuckDB v1.1.3 [eburn@Windows 10 x64:R 4.4.0/:memory:]</span></span>
 <span><span class="co">#&gt; $ cohort_definition_id &lt;int&gt; 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1…</span></span>
 <span><span class="co">#&gt; $ subject_id           &lt;int&gt; 1, 2, 3, 4, 5, 6, 7, 8, 10, 11, 12, 13, 14, 15, 1…</span></span>
 <span><span class="co">#&gt; $ cohort_start_date    &lt;date&gt; 1981-01-31, 1968-01-26, 1980-02-16, 1977-04-03, …</span></span>
@@ -140,21 +140,21 @@
 <span><span class="op">)</span></span>
 <span><span class="va">MGUS_death</span> <span class="op">|&gt;</span> </span>
 <span>  <span class="fu"><a href="https://pillar.r-lib.org/reference/glimpse.html" class="external-link">glimpse</a></span><span class="op">(</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Rows: 1,330</span></span>
+<span><span class="co">#&gt; Rows: 1,354</span></span>
 <span><span class="co">#&gt; Columns: 13</span></span>
 <span><span class="co">#&gt; $ result_id        &lt;int&gt; 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,…</span></span>
 <span><span class="co">#&gt; $ cdm_name         &lt;chr&gt; "mock", "mock", "mock", "mock", "mock", "mock", "mock…</span></span>
-<span><span class="co">#&gt; $ group_name       &lt;chr&gt; "cohort", "cohort", "cohort", "cohort", "cohort", "co…</span></span>
+<span><span class="co">#&gt; $ group_name       &lt;chr&gt; "target_cohort", "target_cohort", "target_cohort", "t…</span></span>
 <span><span class="co">#&gt; $ group_level      &lt;chr&gt; "mgus_diagnosis", "mgus_diagnosis", "mgus_diagnosis",…</span></span>
 <span><span class="co">#&gt; $ strata_name      &lt;chr&gt; "overall", "overall", "overall", "overall", "overall"…</span></span>
 <span><span class="co">#&gt; $ strata_level     &lt;chr&gt; "overall", "overall", "overall", "overall", "overall"…</span></span>
-<span><span class="co">#&gt; $ variable_name    &lt;chr&gt; "survival_probability", "survival_probability", "surv…</span></span>
+<span><span class="co">#&gt; $ variable_name    &lt;chr&gt; "outcome", "outcome", "outcome", "outcome", "outcome"…</span></span>
 <span><span class="co">#&gt; $ variable_level   &lt;chr&gt; "death_cohort", "death_cohort", "death_cohort", "deat…</span></span>
 <span><span class="co">#&gt; $ estimate_name    &lt;chr&gt; "estimate", "estimate_95CI_lower", "estimate_95CI_upp…</span></span>
 <span><span class="co">#&gt; $ estimate_type    &lt;chr&gt; "numeric", "numeric", "numeric", "numeric", "numeric"…</span></span>
 <span><span class="co">#&gt; $ estimate_value   &lt;chr&gt; "1", "1", "1", "0.9697", "0.9607", "0.9787", "0.9494"…</span></span>
-<span><span class="co">#&gt; $ additional_name  &lt;chr&gt; "time &amp;&amp;&amp; outcome", "time &amp;&amp;&amp; outcome", "time &amp;&amp;&amp; out…</span></span>
-<span><span class="co">#&gt; $ additional_level &lt;chr&gt; "0 &amp;&amp;&amp; death_cohort", "0 &amp;&amp;&amp; death_cohort", "0 &amp;&amp;&amp; de…</span></span></code></pre></div>
+<span><span class="co">#&gt; $ additional_name  &lt;chr&gt; "time", "time", "time", "time", "time", "time", "time…</span></span>
+<span><span class="co">#&gt; $ additional_level &lt;chr&gt; "0", "0", "0", "1", "1", "1", "2", "2", "2", "3", "3"…</span></span></code></pre></div>
 <p>Now we have our results, we can quickly create a plot summarising survival over time.</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="reference/plotSurvival.html">plotSurvival</a></span><span class="op">(</span><span class="va">MGUS_death</span><span class="op">)</span></span></code></pre></div>
@@ -208,7 +208,7 @@
 <h3 id="disconnect-from-the-cdm-database-connection">Disconnect from the cdm database connection<a class="anchor" aria-label="anchor" href="#disconnect-from-the-cdm-database-connection"></a>
 </h3>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://darwin-eu.github.io/CDMConnector/reference/cdmDisconnect.html" class="external-link">cdm_disconnect</a></span><span class="op">(</span><span class="va">cdm</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu"><a href="https://darwin-eu.github.io/CDMConnector/reference/cdmDisconnect.html" class="external-link">cdmDisconnect</a></span><span class="op">(</span><span class="va">cdm</span><span class="op">)</span></span></code></pre></div>
 </div>
 </div>
 </div>
