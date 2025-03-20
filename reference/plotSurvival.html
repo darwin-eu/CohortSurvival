@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">CohortSurvival</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.6.2</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -42,14 +42,10 @@
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">plotSurvival</span><span class="op">(</span></span>
 <span>  <span class="va">result</span>,</span>
-<span>  x <span class="op">=</span> <span class="st">"time"</span>,</span>
-<span>  xscale <span class="op">=</span> <span class="st">"days"</span>,</span>
-<span>  ylim <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="cn">NA</span><span class="op">)</span>,</span>
-<span>  xlim <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  cumulativeFailure <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  ribbon <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  facet <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  colour <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  cumulativeFailure <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  riskTable <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  riskInterval <span class="op">=</span> <span class="fl">30</span></span>
 <span><span class="op">)</span></span></code></pre></div>
@@ -63,27 +59,6 @@
 <dd><p>Survival results</p></dd>
 
 
-<dt id="arg-x">x<a class="anchor" aria-label="anchor" href="#arg-x"></a></dt>
-<dd><p>Variable to plot on x axis</p></dd>
-
-
-<dt id="arg-xscale">xscale<a class="anchor" aria-label="anchor" href="#arg-xscale"></a></dt>
-<dd><p>X axis scale. Can be "days" or "years".</p></dd>
-
-
-<dt id="arg-ylim">ylim<a class="anchor" aria-label="anchor" href="#arg-ylim"></a></dt>
-<dd><p>Limits for the Y axis</p></dd>
-
-
-<dt id="arg-xlim">xlim<a class="anchor" aria-label="anchor" href="#arg-xlim"></a></dt>
-<dd><p>Limits for the X axis</p></dd>
-
-
-<dt id="arg-cumulativefailure">cumulativeFailure<a class="anchor" aria-label="anchor" href="#arg-cumulativefailure"></a></dt>
-<dd><p>whether to plot the cumulative failure probability
-instead of the survival probability</p></dd>
-
-
 <dt id="arg-ribbon">ribbon<a class="anchor" aria-label="anchor" href="#arg-ribbon"></a></dt>
 <dd><p>If TRUE, the plot will join points using a ribbon</p></dd>
 
@@ -94,6 +69,11 @@ instead of the survival probability</p></dd>
 
 <dt id="arg-colour">colour<a class="anchor" aria-label="anchor" href="#arg-colour"></a></dt>
 <dd><p>Variables to use for colours</p></dd>
+
+
+<dt id="arg-cumulativefailure">cumulativeFailure<a class="anchor" aria-label="anchor" href="#arg-cumulativefailure"></a></dt>
+<dd><p>whether to plot the cumulative failure probability
+instead of the survival probability</p></dd>
 
 
 <dt id="arg-risktable">riskTable<a class="anchor" aria-label="anchor" href="#arg-risktable"></a></dt>
@@ -122,8 +102,6 @@ instead of the survival probability</p></dd>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> `eventgap`, `outcome_washout`, `censor_on_cohort_exit`, `follow_up_days`, and</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> `minimum_survival_days` casted to character.</span>
 <span class="r-in"><span><span class="fu">plotSurvival</span><span class="op">(</span><span class="va">surv</span><span class="op">)</span></span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> `result_id` is not present in <span style="color: #0000BB;">result</span>.</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> `result_id` is not present in <span style="color: #0000BB;">result</span>.</span>
 <span class="r-plt img"><img src="plotSurvival-1.png" alt="" width="700" height="433"></span>
 <span class="r-in"><span><span class="co"># }</span></span></span>
 <span class="r-in"><span></span></span>
@@ -134,7 +112,7 @@ instead of the survival probability</p></dd>
 
 
     <footer><div class="pkgdown-footer-left">
-  <p>Developed by Edward Burn, Kim López-Güell, Marti Catala, Xintong Li, Danielle Newby, Nuria Mercade-Besora.</p>
+  <p>Developed by Kim López-Güell, Edward Burn, Marti Catala, Xintong Li, Danielle Newby, Nuria Mercade-Besora.</p>
 </div>
 
 <div class="pkgdown-footer-right">

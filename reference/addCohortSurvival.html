@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">CohortSurvival</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.6.2</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -49,7 +49,8 @@
 <span>  outcomeWashout <span class="op">=</span> <span class="cn">Inf</span>,</span>
 <span>  censorOnCohortExit <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  censorOnDate <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  followUpDays <span class="op">=</span> <span class="cn">Inf</span></span>
+<span>  followUpDays <span class="op">=</span> <span class="cn">Inf</span>,</span>
+<span>  name <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -96,6 +97,10 @@ at the given date</p></dd>
 <dd><p>Number of days to follow up individuals (lower bound 1,
 upper bound Inf)</p></dd>
 
+
+<dt id="arg-name">name<a class="anchor" aria-label="anchor" href="#arg-name"></a></dt>
+<dd><p>Name of the new table, if NULL a temporary table is returned.</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
@@ -110,6 +115,7 @@ whether the patient had the event (value: 1), or did not have the event
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># \donttest{</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="va">cdm</span> <span class="op">&lt;-</span> <span class="fu"><a href="mockMGUS2cdm.html">mockMGUS2cdm</a></span><span class="op">(</span><span class="op">)</span></span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">■■■■■■■■■■■■■■■■■■■■■■■■■       </span>  80% | ETA:  1s</span>
 <span class="r-in"><span><span class="va">cdm</span><span class="op">$</span><span class="va">mgus_diagnosis</span> <span class="op">&lt;-</span> <span class="va">cdm</span><span class="op">$</span><span class="va">mgus_diagnosis</span> <span class="op"><a href="pipe.html">%&gt;%</a></span></span></span>
 <span class="r-in"><span>  <span class="fu">addCohortSurvival</span><span class="op">(</span></span></span>
 <span class="r-in"><span>    cdm <span class="op">=</span> <span class="va">cdm</span>,</span></span>
@@ -125,7 +131,7 @@ whether the patient had the event (value: 1), or did not have the event
 
 
     <footer><div class="pkgdown-footer-left">
-  <p>Developed by Edward Burn, Kim López-Güell, Marti Catala, Xintong Li, Danielle Newby, Nuria Mercade-Besora.</p>
+  <p>Developed by Kim López-Güell, Edward Burn, Marti Catala, Xintong Li, Danielle Newby, Nuria Mercade-Besora.</p>
 </div>
 
 <div class="pkgdown-footer-right">

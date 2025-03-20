@@ -26,7 +26,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">CohortSurvival</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.6.2</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -69,31 +69,38 @@
 <div class="section level2">
 <h2 id="set-up">Set up<a class="anchor" aria-label="anchor" href="#set-up"></a>
 </h2>
-<p>Let’s first load the packages required.</p>
+<p>Let us first load the packages required.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://darwin-eu.github.io/CDMConnector/" class="external-link">CDMConnector</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://darwin-eu-dev.github.io/CohortSurvival/" class="external-link">CohortSurvival</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org" class="external-link">dplyr</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org" class="external-link">ggplot2</a></span><span class="op">)</span></span></code></pre></div>
-<p>We’ll create a cdm reference to use our example MGUS2 survival
-dataset. In practice you would use the CDMConnector package to connect
-to your data mapped to the OMOP CDM.</p>
+<p>We will create a cdm reference to use our example MGUS2 survival
+dataset again. In practice you would use the CDMConnector package to
+connect to your data mapped to the OMOP CDM.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">cdm</span> <span class="op">&lt;-</span> <span class="fu">CohortSurvival</span><span class="fu">::</span><span class="fu"><a href="../reference/mockMGUS2cdm.html">mockMGUS2cdm</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <p>We will proceed as we did with the single event survival, but this
 time we are considering an event of interest (progression of disease)
 with a competing risk (mortality).</p>
-<p>We would typically need to define study cohorts ourselves, but in the
-case of our example data we already have these cohorts available. You
-can see for our diagnosis cohort we also have a number of additional
-features recorded for individuals which we’ll use for
-stratification.</p>
+<p>All the details provided in the single event survival vignette are
+also valid in this study case: the potential input changes for the
+estimation, the different output formats available or the options for
+the table and plot functions. Everything discussed previously is also
+applicable when adding a competing outcome, as we will show in this
+vignette. Therefore we will not provide as much detail in all the
+possible combinations of inputs here, but rather focus in the
+particularities of estimating survival with an outcome and a competing
+outcome.</p>
+<p>Let us take a glimpse at the three cohorts we will use this time: the
+mgus diagnosis as a target, and both the death cohort and the
+progression to multiple myeloma as outcomes.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">cdm</span><span class="op">$</span><span class="va">mgus_diagnosis</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> </span>
 <span>  <span class="fu"><a href="https://pillar.r-lib.org/reference/glimpse.html" class="external-link">glimpse</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Rows: ??</span></span>
 <span><span class="co">#&gt; Columns: 10</span></span>
-<span><span class="co">#&gt; Database: DuckDB v1.1.3 [unknown@Linux 6.8.0-1020-azure:R 4.4.2/:memory:]</span></span>
+<span><span class="co">#&gt; Database: DuckDB v1.2.1 [unknown@Linux 6.8.0-1021-azure:R 4.4.3/:memory:]</span></span>
 <span><span class="co">#&gt; $ cohort_definition_id <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1…</span></span>
 <span><span class="co">#&gt; $ subject_id           <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15…</span></span>
 <span><span class="co">#&gt; $ cohort_start_date    <span style="color: #949494; font-style: italic;">&lt;date&gt;</span> 1981-01-01, 1968-01-01, 1980-01-01, 1977-01-01, …</span></span>
@@ -109,7 +116,7 @@ stratification.</p>
 <span>  <span class="fu"><a href="https://pillar.r-lib.org/reference/glimpse.html" class="external-link">glimpse</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Rows: ??</span></span>
 <span><span class="co">#&gt; Columns: 4</span></span>
-<span><span class="co">#&gt; Database: DuckDB v1.1.3 [unknown@Linux 6.8.0-1020-azure:R 4.4.2/:memory:]</span></span>
+<span><span class="co">#&gt; Database: DuckDB v1.2.1 [unknown@Linux 6.8.0-1021-azure:R 4.4.3/:memory:]</span></span>
 <span><span class="co">#&gt; $ cohort_definition_id <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1…</span></span>
 <span><span class="co">#&gt; $ subject_id           <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> 1, 2, 3, 4, 5, 6, 7, 8, 10, 11, 12, 13, 14, 15, 1…</span></span>
 <span><span class="co">#&gt; $ cohort_start_date    <span style="color: #949494; font-style: italic;">&lt;date&gt;</span> 1981-01-31, 1968-01-26, 1980-02-16, 1977-04-03, …</span></span>
@@ -119,7 +126,7 @@ stratification.</p>
 <span>  <span class="fu"><a href="https://pillar.r-lib.org/reference/glimpse.html" class="external-link">glimpse</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Rows: ??</span></span>
 <span><span class="co">#&gt; Columns: 4</span></span>
-<span><span class="co">#&gt; Database: DuckDB v1.1.3 [unknown@Linux 6.8.0-1020-azure:R 4.4.2/:memory:]</span></span>
+<span><span class="co">#&gt; Database: DuckDB v1.2.1 [unknown@Linux 6.8.0-1021-azure:R 4.4.3/:memory:]</span></span>
 <span><span class="co">#&gt; $ cohort_definition_id <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1…</span></span>
 <span><span class="co">#&gt; $ subject_id           <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> 56, 81, 83, 111, 124, 127, 147, 163, 165, 167, 18…</span></span>
 <span><span class="co">#&gt; $ cohort_start_date    <span style="color: #949494; font-style: italic;">&lt;date&gt;</span> 1978-01-30, 1985-01-15, 1974-08-17, 1993-01-14, …</span></span>
@@ -128,10 +135,11 @@ stratification.</p>
 <div class="section level2">
 <h2 id="estimating-survival-with-competing-risk">Estimating survival with competing risk<a class="anchor" aria-label="anchor" href="#estimating-survival-with-competing-risk"></a>
 </h2>
-<p>The package allows to estimate survival of both an outcome and
-competing risk outcome. We can then stratify, see information on events,
-summarise the estimates and check the contributing participants in the
-same way we did for the single event survival analysis.</p>
+<p>This package allows to estimate survival of both an outcome and
+competing risk outcome. We can then stratify, see information on events
+or summarise the estimates, among others, in the same way we did for the
+single event survival analysis. The only additional requirement here is
+to specify the <code>competingOutcomeCohortTable</code> argument.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">MGUS_death_prog</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/estimateCompetingRiskSurvival.html">estimateCompetingRiskSurvival</a></span><span class="op">(</span><span class="va">cdm</span>,</span>
 <span>  targetCohortTable <span class="op">=</span> <span class="st">"mgus_diagnosis"</span>,</span>
@@ -142,49 +150,47 @@ same way we did for the single event survival analysis.</p>
 <span><span class="va">MGUS_death_prog</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> </span>
 <span>  <span class="fu"><a href="../reference/asSurvivalResult.html">asSurvivalResult</a></span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> </span>
 <span>  <span class="fu"><a href="https://pillar.r-lib.org/reference/glimpse.html" class="external-link">glimpse</a></span><span class="op">(</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Rows: 2,550</span></span>
-<span><span class="co">#&gt; Columns: 13</span></span>
-<span><span class="co">#&gt; $ cdm_name          <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "mock", "mock", "mock", "mock", "mock", "mock", "moc…</span></span>
-<span><span class="co">#&gt; $ target_cohort     <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "mgus_diagnosis", "mgus_diagnosis", "mgus_diagnosis"…</span></span>
-<span><span class="co">#&gt; $ outcome           <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "progression", "progression", "progression", "progre…</span></span>
-<span><span class="co">#&gt; $ competing_outcome <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "death_cohort", "death_cohort", "death_cohort", "dea…</span></span>
-<span><span class="co">#&gt; $ strata_name       <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "overall", "overall", "overall", "overall", "overall…</span></span>
-<span><span class="co">#&gt; $ strata_level      <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "overall", "overall", "overall", "overall", "overall…</span></span>
-<span><span class="co">#&gt; $ variable_name     <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "outcome", "outcome", "outcome", "outcome", "outcome…</span></span>
-<span><span class="co">#&gt; $ variable_level    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "progression", "progression", "progression", "progre…</span></span>
-<span><span class="co">#&gt; $ estimate_name     <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "estimate", "estimate_95CI_lower", "estimate_95CI_up…</span></span>
-<span><span class="co">#&gt; $ estimate_type     <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "numeric", "numeric", "numeric", "numeric", "numeric…</span></span>
-<span><span class="co">#&gt; $ estimate_value    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> 0.0000, 0.0000, 0.0000, 0.0000, <span style="color: #BB0000;">NA</span>, <span style="color: #BB0000;">NA</span>, 0.0014, 0.00…</span></span>
-<span><span class="co">#&gt; $ time              <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> 0, 0, 0, 1, 1, 1, 2, 2, 2, 3, 3, 3, 4, 4, 4, 5, 5, 5…</span></span>
-<span><span class="co">#&gt; $ result_type       <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "cumulative_failure_probability", "cumulative_failur…</span></span></code></pre></div>
-<p>As we can see above our results have been outputted in long format.
-We can plot these results like so.</p>
+<span><span class="co">#&gt; Rows: 850</span></span>
+<span><span class="co">#&gt; Columns: 10</span></span>
+<span><span class="co">#&gt; $ cdm_name            <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "mock", "mock", "mock", "mock", "mock", "mock", "m…</span></span>
+<span><span class="co">#&gt; $ target_cohort       <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "mgus_diagnosis", "mgus_diagnosis", "mgus_diagnosi…</span></span>
+<span><span class="co">#&gt; $ outcome             <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "progression", "progression", "progression", "prog…</span></span>
+<span><span class="co">#&gt; $ competing_outcome   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "death_cohort", "death_cohort", "death_cohort", "d…</span></span>
+<span><span class="co">#&gt; $ variable            <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "progression", "progression", "progression", "prog…</span></span>
+<span><span class="co">#&gt; $ time                <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, …</span></span>
+<span><span class="co">#&gt; $ result_type         <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "cumulative_failure_probability", "cumulative_fail…</span></span>
+<span><span class="co">#&gt; $ estimate            <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> 0.0000, 0.0000, 0.0014, 0.0014, 0.0022, 0.0029, 0.…</span></span>
+<span><span class="co">#&gt; $ estimate_95CI_lower <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> 0.0000, <span style="color: #BB0000;">NA</span>, 0.0004, 0.0004, 0.0007, 0.0011, 0.0015…</span></span>
+<span><span class="co">#&gt; $ estimate_95CI_upper <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> 0.0000, <span style="color: #BB0000;">NA</span>, 0.0058, 0.0058, 0.0067, 0.0077, 0.0087…</span></span></code></pre></div>
+<p>As we can see above our results have been outputted in long format,
+once transformed into the survival format. We can plot these results as
+we did in the previous vignette:</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/plotSurvival.html">plotSurvival</a></span><span class="op">(</span><span class="va">MGUS_death_prog</span>, cumulativeFailure <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>             colour <span class="op">=</span> <span class="st">"variable_level"</span><span class="op">)</span> <span class="op">+</span> </span>
+<span>             colour <span class="op">=</span> <span class="st">"variable"</span><span class="op">)</span> <span class="op">+</span> </span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html" class="external-link">theme</a></span><span class="op">(</span>legend.position <span class="op">=</span> <span class="st">"top"</span><span class="op">)</span></span></code></pre></div>
 <p><img src="a02_Competing_risk_survival_files/figure-html/unnamed-chunk-6-1.png" width="75%"></p>
-<p>Our returned results also have attributes containing information that
-summarises survival.</p>
+<p>The summary table of survival now has a row for each of the
+outcomes:</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/tableSurvival.html">tableSurvival</a></span><span class="op">(</span><span class="va">MGUS_death_prog</span><span class="op">)</span> </span></code></pre></div>
-<div id="eekpmjgfdy" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
-<style>#eekpmjgfdy table {
+<div id="hmvrgwuvwx" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
+<style>#hmvrgwuvwx table {
   font-family: system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-#eekpmjgfdy thead, #eekpmjgfdy tbody, #eekpmjgfdy tfoot, #eekpmjgfdy tr, #eekpmjgfdy td, #eekpmjgfdy th {
+#hmvrgwuvwx thead, #hmvrgwuvwx tbody, #hmvrgwuvwx tfoot, #hmvrgwuvwx tr, #hmvrgwuvwx td, #hmvrgwuvwx th {
   border-style: none;
 }
 
-#eekpmjgfdy p {
+#hmvrgwuvwx p {
   margin: 0;
   padding: 0;
 }
 
-#eekpmjgfdy .gt_table {
+#hmvrgwuvwx .gt_table {
   display: table;
   border-collapse: collapse;
   line-height: normal;
@@ -210,12 +216,12 @@ summarises survival.</p>
   border-left-color: #D3D3D3;
 }
 
-#eekpmjgfdy .gt_caption {
+#hmvrgwuvwx .gt_caption {
   padding-top: 4px;
   padding-bottom: 4px;
 }
 
-#eekpmjgfdy .gt_title {
+#hmvrgwuvwx .gt_title {
   color: #333333;
   font-size: 125%;
   font-weight: initial;
@@ -227,7 +233,7 @@ summarises survival.</p>
   border-bottom-width: 0;
 }
 
-#eekpmjgfdy .gt_subtitle {
+#hmvrgwuvwx .gt_subtitle {
   color: #333333;
   font-size: 85%;
   font-weight: initial;
@@ -239,7 +245,7 @@ summarises survival.</p>
   border-top-width: 0;
 }
 
-#eekpmjgfdy .gt_heading {
+#hmvrgwuvwx .gt_heading {
   background-color: #FFFFFF;
   text-align: center;
   border-bottom-color: #FFFFFF;
@@ -251,13 +257,13 @@ summarises survival.</p>
   border-right-color: #D3D3D3;
 }
 
-#eekpmjgfdy .gt_bottom_border {
+#hmvrgwuvwx .gt_bottom_border {
   border-bottom-style: solid;
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
 }
 
-#eekpmjgfdy .gt_col_headings {
+#hmvrgwuvwx .gt_col_headings {
   border-top-style: solid;
   border-top-width: 2px;
   border-top-color: #D3D3D3;
@@ -272,7 +278,7 @@ summarises survival.</p>
   border-right-color: #D3D3D3;
 }
 
-#eekpmjgfdy .gt_col_heading {
+#hmvrgwuvwx .gt_col_heading {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -292,7 +298,7 @@ summarises survival.</p>
   overflow-x: hidden;
 }
 
-#eekpmjgfdy .gt_column_spanner_outer {
+#hmvrgwuvwx .gt_column_spanner_outer {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -304,15 +310,15 @@ summarises survival.</p>
   padding-right: 4px;
 }
 
-#eekpmjgfdy .gt_column_spanner_outer:first-child {
+#hmvrgwuvwx .gt_column_spanner_outer:first-child {
   padding-left: 0;
 }
 
-#eekpmjgfdy .gt_column_spanner_outer:last-child {
+#hmvrgwuvwx .gt_column_spanner_outer:last-child {
   padding-right: 0;
 }
 
-#eekpmjgfdy .gt_column_spanner {
+#hmvrgwuvwx .gt_column_spanner {
   border-bottom-style: solid;
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
@@ -324,11 +330,11 @@ summarises survival.</p>
   width: 100%;
 }
 
-#eekpmjgfdy .gt_spanner_row {
+#hmvrgwuvwx .gt_spanner_row {
   border-bottom-style: hidden;
 }
 
-#eekpmjgfdy .gt_group_heading {
+#hmvrgwuvwx .gt_group_heading {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -354,7 +360,7 @@ summarises survival.</p>
   text-align: left;
 }
 
-#eekpmjgfdy .gt_empty_group_heading {
+#hmvrgwuvwx .gt_empty_group_heading {
   padding: 0.5px;
   color: #333333;
   background-color: #FFFFFF;
@@ -369,15 +375,15 @@ summarises survival.</p>
   vertical-align: middle;
 }
 
-#eekpmjgfdy .gt_from_md > :first-child {
+#hmvrgwuvwx .gt_from_md > :first-child {
   margin-top: 0;
 }
 
-#eekpmjgfdy .gt_from_md > :last-child {
+#hmvrgwuvwx .gt_from_md > :last-child {
   margin-bottom: 0;
 }
 
-#eekpmjgfdy .gt_row {
+#hmvrgwuvwx .gt_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -396,7 +402,7 @@ summarises survival.</p>
   overflow-x: hidden;
 }
 
-#eekpmjgfdy .gt_stub {
+#hmvrgwuvwx .gt_stub {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -409,7 +415,7 @@ summarises survival.</p>
   padding-right: 5px;
 }
 
-#eekpmjgfdy .gt_stub_row_group {
+#hmvrgwuvwx .gt_stub_row_group {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -423,15 +429,15 @@ summarises survival.</p>
   vertical-align: top;
 }
 
-#eekpmjgfdy .gt_row_group_first td {
+#hmvrgwuvwx .gt_row_group_first td {
   border-top-width: 2px;
 }
 
-#eekpmjgfdy .gt_row_group_first th {
+#hmvrgwuvwx .gt_row_group_first th {
   border-top-width: 2px;
 }
 
-#eekpmjgfdy .gt_summary_row {
+#hmvrgwuvwx .gt_summary_row {
   color: #333333;
   background-color: #FFFFFF;
   text-transform: inherit;
@@ -441,16 +447,16 @@ summarises survival.</p>
   padding-right: 5px;
 }
 
-#eekpmjgfdy .gt_first_summary_row {
+#hmvrgwuvwx .gt_first_summary_row {
   border-top-style: solid;
   border-top-color: #D3D3D3;
 }
 
-#eekpmjgfdy .gt_first_summary_row.thick {
+#hmvrgwuvwx .gt_first_summary_row.thick {
   border-top-width: 2px;
 }
 
-#eekpmjgfdy .gt_last_summary_row {
+#hmvrgwuvwx .gt_last_summary_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -460,7 +466,7 @@ summarises survival.</p>
   border-bottom-color: #D3D3D3;
 }
 
-#eekpmjgfdy .gt_grand_summary_row {
+#hmvrgwuvwx .gt_grand_summary_row {
   color: #333333;
   background-color: #FFFFFF;
   text-transform: inherit;
@@ -470,7 +476,7 @@ summarises survival.</p>
   padding-right: 5px;
 }
 
-#eekpmjgfdy .gt_first_grand_summary_row {
+#hmvrgwuvwx .gt_first_grand_summary_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -480,7 +486,7 @@ summarises survival.</p>
   border-top-color: #D3D3D3;
 }
 
-#eekpmjgfdy .gt_last_grand_summary_row_top {
+#hmvrgwuvwx .gt_last_grand_summary_row_top {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -490,11 +496,11 @@ summarises survival.</p>
   border-bottom-color: #D3D3D3;
 }
 
-#eekpmjgfdy .gt_striped {
+#hmvrgwuvwx .gt_striped {
   background-color: rgba(128, 128, 128, 0.05);
 }
 
-#eekpmjgfdy .gt_table_body {
+#hmvrgwuvwx .gt_table_body {
   border-top-style: solid;
   border-top-width: 2px;
   border-top-color: #D3D3D3;
@@ -503,7 +509,7 @@ summarises survival.</p>
   border-bottom-color: #D3D3D3;
 }
 
-#eekpmjgfdy .gt_footnotes {
+#hmvrgwuvwx .gt_footnotes {
   color: #333333;
   background-color: #FFFFFF;
   border-bottom-style: none;
@@ -517,7 +523,7 @@ summarises survival.</p>
   border-right-color: #D3D3D3;
 }
 
-#eekpmjgfdy .gt_footnote {
+#hmvrgwuvwx .gt_footnote {
   margin: 0px;
   font-size: 90%;
   padding-top: 4px;
@@ -526,7 +532,7 @@ summarises survival.</p>
   padding-right: 5px;
 }
 
-#eekpmjgfdy .gt_sourcenotes {
+#hmvrgwuvwx .gt_sourcenotes {
   color: #333333;
   background-color: #FFFFFF;
   border-bottom-style: none;
@@ -540,7 +546,7 @@ summarises survival.</p>
   border-right-color: #D3D3D3;
 }
 
-#eekpmjgfdy .gt_sourcenote {
+#hmvrgwuvwx .gt_sourcenote {
   font-size: 90%;
   padding-top: 4px;
   padding-bottom: 4px;
@@ -548,72 +554,72 @@ summarises survival.</p>
   padding-right: 5px;
 }
 
-#eekpmjgfdy .gt_left {
+#hmvrgwuvwx .gt_left {
   text-align: left;
 }
 
-#eekpmjgfdy .gt_center {
+#hmvrgwuvwx .gt_center {
   text-align: center;
 }
 
-#eekpmjgfdy .gt_right {
+#hmvrgwuvwx .gt_right {
   text-align: right;
   font-variant-numeric: tabular-nums;
 }
 
-#eekpmjgfdy .gt_font_normal {
+#hmvrgwuvwx .gt_font_normal {
   font-weight: normal;
 }
 
-#eekpmjgfdy .gt_font_bold {
+#hmvrgwuvwx .gt_font_bold {
   font-weight: bold;
 }
 
-#eekpmjgfdy .gt_font_italic {
+#hmvrgwuvwx .gt_font_italic {
   font-style: italic;
 }
 
-#eekpmjgfdy .gt_super {
+#hmvrgwuvwx .gt_super {
   font-size: 65%;
 }
 
-#eekpmjgfdy .gt_footnote_marks {
+#hmvrgwuvwx .gt_footnote_marks {
   font-size: 75%;
   vertical-align: 0.4em;
   position: initial;
 }
 
-#eekpmjgfdy .gt_asterisk {
+#hmvrgwuvwx .gt_asterisk {
   font-size: 100%;
   vertical-align: 0;
 }
 
-#eekpmjgfdy .gt_indent_1 {
+#hmvrgwuvwx .gt_indent_1 {
   text-indent: 5px;
 }
 
-#eekpmjgfdy .gt_indent_2 {
+#hmvrgwuvwx .gt_indent_2 {
   text-indent: 10px;
 }
 
-#eekpmjgfdy .gt_indent_3 {
+#hmvrgwuvwx .gt_indent_3 {
   text-indent: 15px;
 }
 
-#eekpmjgfdy .gt_indent_4 {
+#hmvrgwuvwx .gt_indent_4 {
   text-indent: 20px;
 }
 
-#eekpmjgfdy .gt_indent_5 {
+#hmvrgwuvwx .gt_indent_5 {
   text-indent: 25px;
 }
 
-#eekpmjgfdy .katex-display {
+#hmvrgwuvwx .katex-display {
   display: inline-flex !important;
   margin-bottom: 0.75em !important;
 }
 
-#eekpmjgfdy div.Reactable > div.rt-table > div.rt-thead > div.rt-tr.rt-tr-group-header > div.rt-th-group:after {
+#hmvrgwuvwx div.Reactable > div.rt-table > div.rt-thead > div.rt-tr.rt-tr-group-header > div.rt-th-group:after {
   height: 0px !important;
 }
 </style>
@@ -667,11 +673,10 @@ summarises survival.</p>
 <div class="section level2">
 <h2 id="with-stratification">With stratification<a class="anchor" aria-label="anchor" href="#with-stratification"></a>
 </h2>
-<p>To estimate survival for particular strata of interest we need these
-features to have been added to the target cohort table. Once we have
-them defined, and as seen above we already have a number of example
-characteristics added to our diagnosis cohort, we can add
-stratifications like so.</p>
+<p>Again, to estimate survival for particular strata of interest we need
+these features to have been added to the target cohort table. We can
+them give the names of these strata columns to the estimating function
+like so:</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">MGUS_death_prog</span> <span class="op">&lt;-</span>  <span class="fu"><a href="../reference/estimateCompetingRiskSurvival.html">estimateCompetingRiskSurvival</a></span><span class="op">(</span><span class="va">cdm</span>,</span>
 <span>  targetCohortTable <span class="op">=</span> <span class="st">"mgus_diagnosis"</span>,</span>
@@ -679,39 +684,40 @@ stratifications like so.</p>
 <span>  competingOutcomeCohortTable <span class="op">=</span> <span class="st">"death_cohort"</span>,</span>
 <span>  strata <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"sex"</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
-<p>As we can see as well as results for each strata, we’ll always also
-have overall results returned. We can filter the output table to plot
-only the results for the different strata levels. We can also ask for
-the cumulative failure probability to be plotted instead of the survival
-probability.</p>
+<p>As well as results for each strata, we will always also have overall
+results returned. We can filter the output table to plot only the
+results for the different strata levels, if we do not wish to add the
+overall cohort in the plot. We can also ask for the cumulative failure
+probability to be plotted instead of the survival probability, which
+makes more sense in the competing outcome case.</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/plotSurvival.html">plotSurvival</a></span><span class="op">(</span><span class="va">MGUS_death_prog</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> </span>
 <span>               <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">strata_name</span> <span class="op">!=</span> <span class="st">"Overall"</span><span class="op">)</span>, </span>
-<span>             facet <span class="op">=</span> <span class="st">"strata_level"</span>,</span>
-<span>             colour <span class="op">=</span> <span class="st">"variable_level"</span>,</span>
+<span>             facet <span class="op">=</span> <span class="st">"sex"</span>,</span>
+<span>             colour <span class="op">=</span> <span class="st">"variable"</span>,</span>
 <span>             cumulativeFailure <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
 <p><img src="a02_Competing_risk_survival_files/figure-html/unnamed-chunk-9-1.png" width="100%"></p>
 <p>And we also now have summary statistics for each of the strata as
 well as overall.</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/tableSurvival.html">tableSurvival</a></span><span class="op">(</span><span class="va">MGUS_death_prog</span><span class="op">)</span></span></code></pre></div>
-<div id="zebpunfail" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
-<style>#zebpunfail table {
+<div id="jbfixkfcki" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
+<style>#jbfixkfcki table {
   font-family: system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-#zebpunfail thead, #zebpunfail tbody, #zebpunfail tfoot, #zebpunfail tr, #zebpunfail td, #zebpunfail th {
+#jbfixkfcki thead, #jbfixkfcki tbody, #jbfixkfcki tfoot, #jbfixkfcki tr, #jbfixkfcki td, #jbfixkfcki th {
   border-style: none;
 }
 
-#zebpunfail p {
+#jbfixkfcki p {
   margin: 0;
   padding: 0;
 }
 
-#zebpunfail .gt_table {
+#jbfixkfcki .gt_table {
   display: table;
   border-collapse: collapse;
   line-height: normal;
@@ -737,12 +743,12 @@ well as overall.</p>
   border-left-color: #D3D3D3;
 }
 
-#zebpunfail .gt_caption {
+#jbfixkfcki .gt_caption {
   padding-top: 4px;
   padding-bottom: 4px;
 }
 
-#zebpunfail .gt_title {
+#jbfixkfcki .gt_title {
   color: #333333;
   font-size: 125%;
   font-weight: initial;
@@ -754,7 +760,7 @@ well as overall.</p>
   border-bottom-width: 0;
 }
 
-#zebpunfail .gt_subtitle {
+#jbfixkfcki .gt_subtitle {
   color: #333333;
   font-size: 85%;
   font-weight: initial;
@@ -766,7 +772,7 @@ well as overall.</p>
   border-top-width: 0;
 }
 
-#zebpunfail .gt_heading {
+#jbfixkfcki .gt_heading {
   background-color: #FFFFFF;
   text-align: center;
   border-bottom-color: #FFFFFF;
@@ -778,13 +784,13 @@ well as overall.</p>
   border-right-color: #D3D3D3;
 }
 
-#zebpunfail .gt_bottom_border {
+#jbfixkfcki .gt_bottom_border {
   border-bottom-style: solid;
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
 }
 
-#zebpunfail .gt_col_headings {
+#jbfixkfcki .gt_col_headings {
   border-top-style: solid;
   border-top-width: 2px;
   border-top-color: #D3D3D3;
@@ -799,7 +805,7 @@ well as overall.</p>
   border-right-color: #D3D3D3;
 }
 
-#zebpunfail .gt_col_heading {
+#jbfixkfcki .gt_col_heading {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -819,7 +825,7 @@ well as overall.</p>
   overflow-x: hidden;
 }
 
-#zebpunfail .gt_column_spanner_outer {
+#jbfixkfcki .gt_column_spanner_outer {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -831,15 +837,15 @@ well as overall.</p>
   padding-right: 4px;
 }
 
-#zebpunfail .gt_column_spanner_outer:first-child {
+#jbfixkfcki .gt_column_spanner_outer:first-child {
   padding-left: 0;
 }
 
-#zebpunfail .gt_column_spanner_outer:last-child {
+#jbfixkfcki .gt_column_spanner_outer:last-child {
   padding-right: 0;
 }
 
-#zebpunfail .gt_column_spanner {
+#jbfixkfcki .gt_column_spanner {
   border-bottom-style: solid;
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
@@ -851,11 +857,11 @@ well as overall.</p>
   width: 100%;
 }
 
-#zebpunfail .gt_spanner_row {
+#jbfixkfcki .gt_spanner_row {
   border-bottom-style: hidden;
 }
 
-#zebpunfail .gt_group_heading {
+#jbfixkfcki .gt_group_heading {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -881,7 +887,7 @@ well as overall.</p>
   text-align: left;
 }
 
-#zebpunfail .gt_empty_group_heading {
+#jbfixkfcki .gt_empty_group_heading {
   padding: 0.5px;
   color: #333333;
   background-color: #FFFFFF;
@@ -896,15 +902,15 @@ well as overall.</p>
   vertical-align: middle;
 }
 
-#zebpunfail .gt_from_md > :first-child {
+#jbfixkfcki .gt_from_md > :first-child {
   margin-top: 0;
 }
 
-#zebpunfail .gt_from_md > :last-child {
+#jbfixkfcki .gt_from_md > :last-child {
   margin-bottom: 0;
 }
 
-#zebpunfail .gt_row {
+#jbfixkfcki .gt_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -923,7 +929,7 @@ well as overall.</p>
   overflow-x: hidden;
 }
 
-#zebpunfail .gt_stub {
+#jbfixkfcki .gt_stub {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -936,7 +942,7 @@ well as overall.</p>
   padding-right: 5px;
 }
 
-#zebpunfail .gt_stub_row_group {
+#jbfixkfcki .gt_stub_row_group {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -950,15 +956,15 @@ well as overall.</p>
   vertical-align: top;
 }
 
-#zebpunfail .gt_row_group_first td {
+#jbfixkfcki .gt_row_group_first td {
   border-top-width: 2px;
 }
 
-#zebpunfail .gt_row_group_first th {
+#jbfixkfcki .gt_row_group_first th {
   border-top-width: 2px;
 }
 
-#zebpunfail .gt_summary_row {
+#jbfixkfcki .gt_summary_row {
   color: #333333;
   background-color: #FFFFFF;
   text-transform: inherit;
@@ -968,16 +974,16 @@ well as overall.</p>
   padding-right: 5px;
 }
 
-#zebpunfail .gt_first_summary_row {
+#jbfixkfcki .gt_first_summary_row {
   border-top-style: solid;
   border-top-color: #D3D3D3;
 }
 
-#zebpunfail .gt_first_summary_row.thick {
+#jbfixkfcki .gt_first_summary_row.thick {
   border-top-width: 2px;
 }
 
-#zebpunfail .gt_last_summary_row {
+#jbfixkfcki .gt_last_summary_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -987,7 +993,7 @@ well as overall.</p>
   border-bottom-color: #D3D3D3;
 }
 
-#zebpunfail .gt_grand_summary_row {
+#jbfixkfcki .gt_grand_summary_row {
   color: #333333;
   background-color: #FFFFFF;
   text-transform: inherit;
@@ -997,7 +1003,7 @@ well as overall.</p>
   padding-right: 5px;
 }
 
-#zebpunfail .gt_first_grand_summary_row {
+#jbfixkfcki .gt_first_grand_summary_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -1007,7 +1013,7 @@ well as overall.</p>
   border-top-color: #D3D3D3;
 }
 
-#zebpunfail .gt_last_grand_summary_row_top {
+#jbfixkfcki .gt_last_grand_summary_row_top {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -1017,11 +1023,11 @@ well as overall.</p>
   border-bottom-color: #D3D3D3;
 }
 
-#zebpunfail .gt_striped {
+#jbfixkfcki .gt_striped {
   background-color: rgba(128, 128, 128, 0.05);
 }
 
-#zebpunfail .gt_table_body {
+#jbfixkfcki .gt_table_body {
   border-top-style: solid;
   border-top-width: 2px;
   border-top-color: #D3D3D3;
@@ -1030,7 +1036,7 @@ well as overall.</p>
   border-bottom-color: #D3D3D3;
 }
 
-#zebpunfail .gt_footnotes {
+#jbfixkfcki .gt_footnotes {
   color: #333333;
   background-color: #FFFFFF;
   border-bottom-style: none;
@@ -1044,7 +1050,7 @@ well as overall.</p>
   border-right-color: #D3D3D3;
 }
 
-#zebpunfail .gt_footnote {
+#jbfixkfcki .gt_footnote {
   margin: 0px;
   font-size: 90%;
   padding-top: 4px;
@@ -1053,7 +1059,7 @@ well as overall.</p>
   padding-right: 5px;
 }
 
-#zebpunfail .gt_sourcenotes {
+#jbfixkfcki .gt_sourcenotes {
   color: #333333;
   background-color: #FFFFFF;
   border-bottom-style: none;
@@ -1067,7 +1073,7 @@ well as overall.</p>
   border-right-color: #D3D3D3;
 }
 
-#zebpunfail .gt_sourcenote {
+#jbfixkfcki .gt_sourcenote {
   font-size: 90%;
   padding-top: 4px;
   padding-bottom: 4px;
@@ -1075,72 +1081,72 @@ well as overall.</p>
   padding-right: 5px;
 }
 
-#zebpunfail .gt_left {
+#jbfixkfcki .gt_left {
   text-align: left;
 }
 
-#zebpunfail .gt_center {
+#jbfixkfcki .gt_center {
   text-align: center;
 }
 
-#zebpunfail .gt_right {
+#jbfixkfcki .gt_right {
   text-align: right;
   font-variant-numeric: tabular-nums;
 }
 
-#zebpunfail .gt_font_normal {
+#jbfixkfcki .gt_font_normal {
   font-weight: normal;
 }
 
-#zebpunfail .gt_font_bold {
+#jbfixkfcki .gt_font_bold {
   font-weight: bold;
 }
 
-#zebpunfail .gt_font_italic {
+#jbfixkfcki .gt_font_italic {
   font-style: italic;
 }
 
-#zebpunfail .gt_super {
+#jbfixkfcki .gt_super {
   font-size: 65%;
 }
 
-#zebpunfail .gt_footnote_marks {
+#jbfixkfcki .gt_footnote_marks {
   font-size: 75%;
   vertical-align: 0.4em;
   position: initial;
 }
 
-#zebpunfail .gt_asterisk {
+#jbfixkfcki .gt_asterisk {
   font-size: 100%;
   vertical-align: 0;
 }
 
-#zebpunfail .gt_indent_1 {
+#jbfixkfcki .gt_indent_1 {
   text-indent: 5px;
 }
 
-#zebpunfail .gt_indent_2 {
+#jbfixkfcki .gt_indent_2 {
   text-indent: 10px;
 }
 
-#zebpunfail .gt_indent_3 {
+#jbfixkfcki .gt_indent_3 {
   text-indent: 15px;
 }
 
-#zebpunfail .gt_indent_4 {
+#jbfixkfcki .gt_indent_4 {
   text-indent: 20px;
 }
 
-#zebpunfail .gt_indent_5 {
+#jbfixkfcki .gt_indent_5 {
   text-indent: 25px;
 }
 
-#zebpunfail .katex-display {
+#jbfixkfcki .katex-display {
   display: inline-flex !important;
   margin-bottom: 0.75em !important;
 }
 
-#zebpunfail div.Reactable > div.rt-table > div.rt-thead > div.rt-tr.rt-tr-group-header > div.rt-th-group:after {
+#jbfixkfcki div.Reactable > div.rt-table > div.rt-thead > div.rt-tr.rt-tr-group-header > div.rt-th-group:after {
   height: 0px !important;
 }
 </style>
@@ -1249,8 +1255,9 @@ well as overall.</p>
 <div class="section level2">
 <h2 id="disconnect-from-the-cdm-database-connection">Disconnect from the cdm database connection<a class="anchor" aria-label="anchor" href="#disconnect-from-the-cdm-database-connection"></a>
 </h2>
+<p>As always, we finish by disconnecting from the cdm.</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://darwin-eu.github.io/CDMConnector/reference/cdmDisconnect.html" class="external-link">cdmDisconnect</a></span><span class="op">(</span><span class="va">cdm</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu"><a href="https://darwin-eu.github.io/omopgenerics/reference/cdmDisconnect.html" class="external-link">cdmDisconnect</a></span><span class="op">(</span><span class="va">cdm</span><span class="op">)</span></span></code></pre></div>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>
@@ -1259,7 +1266,7 @@ well as overall.</p>
 
 
     <footer><div class="pkgdown-footer-left">
-  <p>Developed by Edward Burn, Kim López-Güell, Marti Catala, Xintong Li, Danielle Newby, Nuria Mercade-Besora.</p>
+  <p>Developed by Kim López-Güell, Edward Burn, Marti Catala, Xintong Li, Danielle Newby, Nuria Mercade-Besora.</p>
 </div>
 
 <div class="pkgdown-footer-right">

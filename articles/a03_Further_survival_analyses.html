@@ -26,7 +26,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">CohortSurvival</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.6.2</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -69,16 +69,15 @@
 <div class="section level2">
 <h2 id="set-up">Set up<a class="anchor" aria-label="anchor" href="#set-up"></a>
 </h2>
-<p>Let’s first load the packages required.</p>
+<p>Let us first load the packages required.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://darwin-eu.github.io/CDMConnector/" class="external-link">CDMConnector</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://darwin-eu-dev.github.io/CohortSurvival/" class="external-link">CohortSurvival</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org" class="external-link">dplyr</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://www.R-project.org" class="external-link">cmprsk</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/therneau/survival" class="external-link">survival</a></span><span class="op">)</span></span></code></pre></div>
-<p>We’ll create a cdm reference to use our example MGUS2 survival
-dataset. In practice you would use the CDMConnector package to connect
-to your data mapped to the OMOP CDM.</p>
+<p>We will create a cdm reference to use our example MGUS2 survival
+dataset.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">cdm</span> <span class="op">&lt;-</span> <span class="fu">CohortSurvival</span><span class="fu">::</span><span class="fu"><a href="../reference/mockMGUS2cdm.html">mockMGUS2cdm</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <p>The CohortSurvival package does not have implemented functionality to
@@ -86,7 +85,7 @@ do more complex survival analyses than Kaplar Meier curves, like Cox
 Proportional Hazards modelling. However, the format the data has to be
 in to be inputted to well-known modelling functions from packages like
 <code>survival</code> or <code>cmprsk</code>can be retrieved from OMOP
-data with some in-built functions in this package. Let’s see how to do
+data with some in-built functions in this package. Let us see how to do
 it in both single event and competing risk survival settings.</p>
 </div>
 <div class="section level2">
@@ -109,23 +108,83 @@ columns previously added to the cohort by the user.</p>
 <span>  <span class="fu"><a href="https://pillar.r-lib.org/reference/glimpse.html" class="external-link">glimpse</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Rows: ??</span></span>
 <span><span class="co">#&gt; Columns: 13</span></span>
-<span><span class="co">#&gt; Database: DuckDB v1.1.3 [unknown@Linux 6.8.0-1020-azure:R 4.4.2/:memory:]</span></span>
+<span><span class="co">#&gt; Database: DuckDB v1.2.1 [unknown@Linux 6.8.0-1021-azure:R 4.4.3/:memory:]</span></span>
 <span><span class="co">#&gt; $ cohort_definition_id <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1…</span></span>
-<span><span class="co">#&gt; $ subject_id           <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> 1, 2, 3, 4, 5, 6, 7, 8, 10, 11, 14, 15, 16, 19, 2…</span></span>
+<span><span class="co">#&gt; $ subject_id           <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> 1, 2, 3, 4, 5, 6, 7, 8, 10, 11, 12, 14, 15, 16, 1…</span></span>
 <span><span class="co">#&gt; $ cohort_start_date    <span style="color: #949494; font-style: italic;">&lt;date&gt;</span> 1981-01-01, 1968-01-01, 1980-01-01, 1977-01-01, …</span></span>
 <span><span class="co">#&gt; $ cohort_end_date      <span style="color: #949494; font-style: italic;">&lt;date&gt;</span> 1981-01-01, 1968-01-01, 1980-01-01, 1977-01-01, …</span></span>
-<span><span class="co">#&gt; $ age                  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> 88, 78, 94, 68, 90, 90, 89, 87, 79, 86, 80, 85, 9…</span></span>
-<span><span class="co">#&gt; $ sex                  <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span> F, F, M, M, F, M, F, F, F, M, F, M, F, M, M, F, F…</span></span>
+<span><span class="co">#&gt; $ age                  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> 88, 78, 94, 68, 90, 90, 89, 87, 79, 86, 89, 80, 8…</span></span>
+<span><span class="co">#&gt; $ sex                  <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span> F, F, M, M, F, M, F, F, F, M, F, F, M, F, F, M, M…</span></span>
 <span><span class="co">#&gt; $ hgb                  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> 13.1, 11.5, 10.5, 15.2, 10.7, 12.9, 10.5, 12.3, 9…</span></span>
-<span><span class="co">#&gt; $ creat                <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> 1.3, 1.2, 1.5, 1.2, 0.8, 1.0, 0.9, 1.2, 1.1, 1.0,…</span></span>
+<span><span class="co">#&gt; $ creat                <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> 1.30, 1.20, 1.50, 1.20, 0.80, 1.00, 0.90, 1.20, 1…</span></span>
 <span><span class="co">#&gt; $ mspike               <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> 0.5, 2.0, 2.6, 1.2, 1.0, 0.5, 1.3, 1.6, 2.3, 2.3,…</span></span>
 <span><span class="co">#&gt; $ age_group            <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "&gt;=70", "&gt;=70", "&gt;=70", "&lt;70", "&gt;=70", "&gt;=70", "&gt;…</span></span>
-<span><span class="co">#&gt; $ days_to_exit         <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> 30, 25, 46, 92, 8, 4, 151, 2, 136, 2, 14, 18, 43,…</span></span>
+<span><span class="co">#&gt; $ days_to_exit         <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> 30, 25, 46, 92, 8, 4, 151, 2, 136, 2, 108, 14, 18…</span></span>
 <span><span class="co">#&gt; $ status               <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1…</span></span>
-<span><span class="co">#&gt; $ time                 <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> 30, 25, 46, 92, 8, 4, 151, 2, 136, 2, 14, 18, 43,…</span></span></code></pre></div>
-<p>This information should be enough to call any advanced function,
-like:</p>
+<span><span class="co">#&gt; $ time                 <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> 30, 25, 46, 92, 8, 4, 151, 2, 136, 2, 108, 14, 18…</span></span></code></pre></div>
+<p>We can decide to change some of the default parameters in this
+function. Information on all these can be found
+<code><a href="../reference/addCohortSurvival.html">?addCohortSurvival</a></code>. For instance, we can choose to exclude
+people with an outcome only 180 days before index date, instead of
+anytime, and follow them up for only one year. We can also decide to use
+<code>cohort_end_date</code> as their outcome variable and censor them
+at a particular date, for instance, the 1st of January of 1994. We see
+how that gives us different results:</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">cdm</span><span class="op">$</span><span class="va">mgus_diagnosis</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
+<span>       <span class="fu"><a href="../reference/addCohortSurvival.html">addCohortSurvival</a></span><span class="op">(</span></span>
+<span>       cdm <span class="op">=</span> <span class="va">cdm</span>,</span>
+<span>       outcomeCohortTable <span class="op">=</span> <span class="st">"death_cohort"</span>,</span>
+<span>       outcomeWashout <span class="op">=</span> <span class="fl">180</span>,</span>
+<span>       followUpDays <span class="op">=</span> <span class="fl">365</span></span>
+<span>       <span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">cohort_start_date</span> <span class="op">&gt;</span> <span class="st">"1993-01-01"</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
+<span>  <span class="fu"><a href="https://pillar.r-lib.org/reference/glimpse.html" class="external-link">glimpse</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Rows: ??</span></span>
+<span><span class="co">#&gt; Columns: 13</span></span>
+<span><span class="co">#&gt; Database: DuckDB v1.2.1 [unknown@Linux 6.8.0-1021-azure:R 4.4.3/:memory:]</span></span>
+<span><span class="co">#&gt; $ cohort_definition_id <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1…</span></span>
+<span><span class="co">#&gt; $ subject_id           <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> 213, 1245, 1248, 1340, 1374, 1376, 1380, 1384, 94…</span></span>
+<span><span class="co">#&gt; $ cohort_start_date    <span style="color: #949494; font-style: italic;">&lt;date&gt;</span> 1994-01-01, 1994-01-01, 1994-01-01, 1994-01-01, …</span></span>
+<span><span class="co">#&gt; $ cohort_end_date      <span style="color: #949494; font-style: italic;">&lt;date&gt;</span> 1994-01-01, 1994-01-01, 1994-01-01, 1994-01-01, …</span></span>
+<span><span class="co">#&gt; $ age                  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> 93, 82, 87, 67, 68, 67, 69, 79, 85, 81, 66, 86, 8…</span></span>
+<span><span class="co">#&gt; $ sex                  <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span> F, M, M, F, F, F, M, M, M, M, M, F, F, F, F, F, M…</span></span>
+<span><span class="co">#&gt; $ hgb                  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> 12.8, 11.4, 12.7, 12.2, 9.2, 13.7, 15.0, 9.6, 13.…</span></span>
+<span><span class="co">#&gt; $ creat                <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> 1.1, 1.5, 1.5, 1.4, 1.8, 1.1, 0.8, 1.1, 1.1, 1.4,…</span></span>
+<span><span class="co">#&gt; $ mspike               <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> 0.8, 1.4, 0.5, 1.2, 0.5, 1.5, 0.0, 1.7, 1.5, 1.3,…</span></span>
+<span><span class="co">#&gt; $ age_group            <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "&gt;=70", "&gt;=70", "&gt;=70", "&lt;70", "&lt;70", "&lt;70", "&lt;70…</span></span>
+<span><span class="co">#&gt; $ days_to_exit         <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> 19, 1, 10, 46, 40, 41, 22, 6, 12, 43, 31, 57, 52,…</span></span>
+<span><span class="co">#&gt; $ status               <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0…</span></span>
+<span><span class="co">#&gt; $ time                 <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> 19, 1, 10, 46, 40, 41, 22, 6, 12, 43, 31, 57, 52,…</span></span>
+<span><span class="va">cdm</span><span class="op">$</span><span class="va">mgus_diagnosis</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
+<span>       <span class="fu"><a href="../reference/addCohortSurvival.html">addCohortSurvival</a></span><span class="op">(</span></span>
+<span>       cdm <span class="op">=</span> <span class="va">cdm</span>,</span>
+<span>       outcomeCohortTable <span class="op">=</span> <span class="st">"death_cohort"</span>,</span>
+<span>       outcomeDateVariable <span class="op">=</span> <span class="st">"cohort_end_date"</span>,</span>
+<span>       censorOnDate <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/as.Date.html" class="external-link">as.Date</a></span><span class="op">(</span><span class="st">"1994-01-01"</span><span class="op">)</span></span>
+<span>       <span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
+<span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">cohort_start_date</span> <span class="op">&gt;</span> <span class="st">"1993-01-01"</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
+<span>  <span class="fu"><a href="https://pillar.r-lib.org/reference/glimpse.html" class="external-link">glimpse</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Rows: ??</span></span>
+<span><span class="co">#&gt; Columns: 13</span></span>
+<span><span class="co">#&gt; Database: DuckDB v1.2.1 [unknown@Linux 6.8.0-1021-azure:R 4.4.3/:memory:]</span></span>
+<span><span class="co">#&gt; $ cohort_definition_id <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1…</span></span>
+<span><span class="co">#&gt; $ subject_id           <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> 213, 1245, 1248, 1340, 1374, 1376, 1380, 1384, 94…</span></span>
+<span><span class="co">#&gt; $ cohort_start_date    <span style="color: #949494; font-style: italic;">&lt;date&gt;</span> 1994-01-01, 1994-01-01, 1994-01-01, 1994-01-01, …</span></span>
+<span><span class="co">#&gt; $ cohort_end_date      <span style="color: #949494; font-style: italic;">&lt;date&gt;</span> 1994-01-01, 1994-01-01, 1994-01-01, 1994-01-01, …</span></span>
+<span><span class="co">#&gt; $ age                  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> 93, 82, 87, 67, 68, 67, 69, 79, 85, 81, 66, 86, 8…</span></span>
+<span><span class="co">#&gt; $ sex                  <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span> F, M, M, F, F, F, M, M, M, M, M, F, F, F, F, F, M…</span></span>
+<span><span class="co">#&gt; $ hgb                  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> 12.8, 11.4, 12.7, 12.2, 9.2, 13.7, 15.0, 9.6, 13.…</span></span>
+<span><span class="co">#&gt; $ creat                <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> 1.1, 1.5, 1.5, 1.4, 1.8, 1.1, 0.8, 1.1, 1.1, 1.4,…</span></span>
+<span><span class="co">#&gt; $ mspike               <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> 0.8, 1.4, 0.5, 1.2, 0.5, 1.5, 0.0, 1.7, 1.5, 1.3,…</span></span>
+<span><span class="co">#&gt; $ age_group            <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "&gt;=70", "&gt;=70", "&gt;=70", "&lt;70", "&lt;70", "&lt;70", "&lt;70…</span></span>
+<span><span class="co">#&gt; $ days_to_exit         <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0…</span></span>
+<span><span class="co">#&gt; $ status               <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0…</span></span>
+<span><span class="co">#&gt; $ time                 <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0…</span></span></code></pre></div>
+<p>This table with the added <code>time</code> and <code>status</code>
+information should be enough to call any advanced function, like the
+aforementioned Cox Proportional Hazards model:</p>
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">survival</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/survival/man/coxph.html" class="external-link">coxph</a></span><span class="op">(</span><span class="fu">survival</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/survival/man/Surv.html" class="external-link">Surv</a></span><span class="op">(</span><span class="va">time</span>, <span class="va">status</span><span class="op">)</span> <span class="op">~</span> <span class="va">age</span> <span class="op">+</span> <span class="va">sex</span>, data <span class="op">=</span> <span class="va">input_survival_single</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Call:</span></span>
 <span><span class="co">#&gt; survival::coxph(formula = survival::Surv(time, status) ~ age + </span></span>
@@ -151,40 +210,40 @@ like:</p>
 <div class="section level2">
 <h2 id="further-analysis-with-competing-risk-survival">Further analysis with competing risk survival<a class="anchor" aria-label="anchor" href="#further-analysis-with-competing-risk-survival"></a>
 </h2>
-<p>For competing risk, there is a similar function that adds
-<code>time</code> and <code>status</code> information to the cohort of
-interest. We only need to specify which are the outcome and competing
-outcome of interest. We can also choose other options such as follow up
-time, censoring on a specific date, washout periods, or others.</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">input_survival_cr</span> <span class="op">&lt;-</span> <span class="va">cdm</span><span class="op">$</span><span class="va">mgus_diagnosis</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
-<span>  <span class="fu"><a href="../reference/addCompetingRiskCohortSurvival.html">addCompetingRiskCohortSurvival</a></span><span class="op">(</span></span>
-<span>    cdm <span class="op">=</span> <span class="va">cdm</span>,</span>
-<span>    outcomeCohortTable <span class="op">=</span> <span class="st">"progression"</span>,</span>
-<span>    outcomeCohortId <span class="op">=</span> <span class="fl">1</span>,</span>
-<span>    competingOutcomeCohortTable <span class="op">=</span> <span class="st">"death_cohort"</span>,</span>
-<span>    competingOutcomeCohortId <span class="op">=</span> <span class="fl">1</span></span>
-<span>  <span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> </span>
-<span>  <span class="fu"><a href="https://pillar.r-lib.org/reference/glimpse.html" class="external-link">glimpse</a></span><span class="op">(</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Rows: 1,384</span></span>
-<span><span class="co">#&gt; Columns: 13</span></span>
-<span><span class="co">#&gt; $ cohort_definition_id <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1…</span></span>
-<span><span class="co">#&gt; $ subject_id           <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> 56, 81, 124, 127, 147, 163, 165, 180, 186, 190, 1…</span></span>
-<span><span class="co">#&gt; $ cohort_start_date    <span style="color: #949494; font-style: italic;">&lt;date&gt;</span> 1978-01-01, 1985-01-01, 1974-01-01, 1978-01-01, …</span></span>
-<span><span class="co">#&gt; $ cohort_end_date      <span style="color: #949494; font-style: italic;">&lt;date&gt;</span> 1978-01-01, 1985-01-01, 1974-01-01, 1978-01-01, …</span></span>
-<span><span class="co">#&gt; $ age                  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> 78, 91, 73, 73, 58, 57, 80, 70, 76, 78, 54, 79, 6…</span></span>
-<span><span class="co">#&gt; $ sex                  <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span> M, F, M, M, M, F, M, F, F, M, F, M, M, M, F, M, F…</span></span>
-<span><span class="co">#&gt; $ hgb                  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> 10.3, 5.9, 15.3, 12.4, 13.1, 12.2, 11.0, 14.3, 12…</span></span>
-<span><span class="co">#&gt; $ creat                <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> 3.0, 1.0, 1.2, 1.6, 1.1, 0.8, 1.4, 1.2, 0.9, 1.1,…</span></span>
-<span><span class="co">#&gt; $ mspike               <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> 1.9, 0.0, 1.7, 1.4, 0.8, 1.9, 2.0, 1.6, 1.9, 0.9,…</span></span>
-<span><span class="co">#&gt; $ age_group            <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "&gt;=70", "&gt;=70", "&gt;=70", "&gt;=70", "&lt;70", "&lt;70", "&gt;=…</span></span>
-<span><span class="co">#&gt; $ days_to_exit         <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> 44, 21, 82, 60, 189, 260, 85, 107, 104, 101, 171,…</span></span>
-<span><span class="co">#&gt; $ time                 <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> 29, 14, 80, 30, 188, 201, 76, 81, 51, 101, 153, 8…</span></span>
-<span><span class="co">#&gt; $ status               <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span> 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1…</span></span></code></pre></div>
+<p>For competing risk settings, we need to use the same function that
+adds <code>time</code> and <code>status</code> information, but twice.
+We first need to add time and status information for the outcome, then
+for the competing outcome. Then we leverage all those variables to get
+what outcome (if any) to count per individual so that we can feed the
+result to subsequent models.</p>
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span></span>
+<span><span class="co"># Add all status and time information for both outcomes</span></span>
+<span>  <span class="va">input_survival_cr</span> <span class="op">&lt;-</span> <span class="va">cdm</span><span class="op">$</span><span class="va">mgus_diagnosis</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
+<span>    <span class="fu"><a href="../reference/addCohortSurvival.html">addCohortSurvival</a></span><span class="op">(</span><span class="va">cdm</span>, <span class="st">"progression"</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
+<span>    <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/rename.html" class="external-link">rename</a></span><span class="op">(</span></span>
+<span>      <span class="st">"outcome_time"</span> <span class="op">=</span> <span class="st">"time"</span>,</span>
+<span>      <span class="st">"outcome_status"</span> <span class="op">=</span> <span class="st">"status"</span></span>
+<span>    <span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
+<span>     <span class="fu"><a href="../reference/addCohortSurvival.html">addCohortSurvival</a></span><span class="op">(</span><span class="va">cdm</span>, <span class="st">"death_cohort"</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
+<span>    <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/rename.html" class="external-link">rename</a></span><span class="op">(</span></span>
+<span>      <span class="st">"competing_outcome_time"</span> <span class="op">=</span> <span class="st">"time"</span>,</span>
+<span>      <span class="st">"competing_outcome_status"</span> <span class="op">=</span> <span class="st">"status"</span></span>
+<span>    <span class="op">)</span></span>
+<span>  </span>
+<span>  <span class="co"># Collect and </span></span>
+<span>  <span class="va">input_survival_cr</span> <span class="op">&lt;-</span> <span class="va">input_survival_cr</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
+<span>    <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/compute.html" class="external-link">collect</a></span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
+<span>    <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span></span>
+<span>      time <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">pmin</a></span><span class="op">(</span><span class="va">outcome_time</span>, <span class="va">competing_outcome_time</span><span class="op">)</span>,</span>
+<span>      status <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span></span>
+<span>        <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/if_else.html" class="external-link">if_else</a></span><span class="op">(</span><span class="va">competing_outcome_time</span> <span class="op">&lt;=</span> <span class="va">outcome_time</span>, <span class="fl">2</span> <span class="op">*</span> <span class="va">competing_outcome_status</span>, <span class="va">outcome_status</span><span class="op">)</span><span class="op">)</span></span>
+<span>    <span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
+<span>    <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="op">-</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"outcome_time"</span>, <span class="st">"outcome_status"</span>, <span class="st">"competing_outcome_time"</span>, <span class="st">"competing_outcome_status"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <p>We can use the package <code>cmprsk</code> to fit a Fine and Gray
 model to the competing risk data. We first change our <code>sex</code>
-covariate to numeric.</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+covariate to numeric, and then we can run the analysis:</p>
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">input_survival_cr</span> <span class="op">&lt;-</span> <span class="va">input_survival_cr</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>sex <span class="op">=</span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/if_else.html" class="external-link">if_else</a></span><span class="op">(</span><span class="va">sex</span> <span class="op">==</span> <span class="st">"M"</span>, <span class="fl">0</span>, <span class="fl">1</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
@@ -217,8 +276,9 @@ covariate to numeric.</p>
 <div class="section level2">
 <h2 id="disconnect-from-the-cdm-database-connection">Disconnect from the cdm database connection<a class="anchor" aria-label="anchor" href="#disconnect-from-the-cdm-database-connection"></a>
 </h2>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://darwin-eu.github.io/CDMConnector/reference/cdmDisconnect.html" class="external-link">cdmDisconnect</a></span><span class="op">(</span><span class="va">cdm</span><span class="op">)</span></span></code></pre></div>
+<p>We finish by disconnecting from the cdm database connection.</p>
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://darwin-eu.github.io/omopgenerics/reference/cdmDisconnect.html" class="external-link">cdmDisconnect</a></span><span class="op">(</span><span class="va">cdm</span><span class="op">)</span></span></code></pre></div>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>
@@ -227,7 +287,7 @@ covariate to numeric.</p>
 
 
     <footer><div class="pkgdown-footer-left">
-  <p>Developed by Edward Burn, Kim López-Güell, Marti Catala, Xintong Li, Danielle Newby, Nuria Mercade-Besora.</p>
+  <p>Developed by Kim López-Güell, Edward Burn, Marti Catala, Xintong Li, Danielle Newby, Nuria Mercade-Besora.</p>
 </div>
 
 <div class="pkgdown-footer-right">

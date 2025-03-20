@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">CohortSurvival</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.6.2</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -33,8 +33,111 @@
     </div>
 
     <div class="section level2">
-      <h2 id="all-functions">All functions<a class="anchor" aria-label="anchor" href="#all-functions"></a></h2>
 
+      <h3 id="estimate-survival">Estimate survival<a class="anchor" aria-label="anchor" href="#estimate-survival"></a></h3>
+
+
+
+    </div><div class="section level2">
+
+
+
+
+      <dl><dt>
+
+          <code><a href="estimateSingleEventSurvival.html">estimateSingleEventSurvival()</a></code>
+
+        </dt>
+        <dd>Estimate survival for a given event of interest using cohorts in the OMOP Common Data Model</dd>
+      </dl><dl><dt>
+
+          <code><a href="estimateCompetingRiskSurvival.html">estimateCompetingRiskSurvival()</a></code>
+
+        </dt>
+        <dd>Estimate survival for a given event and competing risk of interest using cohorts in the OMOP Common Data Model</dd>
+      </dl></div><div class="section level2">
+
+      <h3 id="tabulate-results">Tabulate results<a class="anchor" aria-label="anchor" href="#tabulate-results"></a></h3>
+
+
+
+    </div><div class="section level2">
+
+
+
+
+      <dl><dt>
+
+          <code><a href="tableSurvival.html">tableSurvival()</a></code>
+
+        </dt>
+        <dd>Table with survival summary</dd>
+      </dl><dl><dt>
+
+          <code><a href="riskTable.html">riskTable()</a></code>
+
+        </dt>
+        <dd>Table with survival events</dd>
+      </dl><dl><dt>
+
+          <code><a href="optionsTableSurvival.html">optionsTableSurvival()</a></code>
+
+        </dt>
+        <dd>Additional arguments for the function tableSurvival()</dd>
+      </dl></div><div class="section level2">
+
+      <h3 id="plot-results">Plot results<a class="anchor" aria-label="anchor" href="#plot-results"></a></h3>
+
+
+
+    </div><div class="section level2">
+
+
+
+
+      <dl><dt>
+
+          <code><a href="plotSurvival.html">plotSurvival()</a></code>
+
+        </dt>
+        <dd>Plot survival results</dd>
+      </dl></div><div class="section level2">
+
+      <h3 id="tidy-results">Tidy results<a class="anchor" aria-label="anchor" href="#tidy-results"></a></h3>
+
+
+
+    </div><div class="section level2">
+
+
+
+
+      <dl><dt>
+
+          <code><a href="asSurvivalResult.html">asSurvivalResult()</a></code>
+
+        </dt>
+        <dd>A tidy implementation of the summarised_characteristics object.</dd>
+      </dl></div><div class="section level2">
+
+      <h3 id="mock-data">Mock data<a class="anchor" aria-label="anchor" href="#mock-data"></a></h3>
+
+
+
+    </div><div class="section level2">
+
+
+
+
+      <dl><dt>
+
+          <code><a href="mockMGUS2cdm.html">mockMGUS2cdm()</a></code>
+
+        </dt>
+        <dd>Create mock CDM reference with survival::mgus2 dataset</dd>
+      </dl></div><div class="section level2">
+
+      <h3 id="add-survival-data-to-a-cohort">Add survival data to a cohort<a class="anchor" aria-label="anchor" href="#add-survival-data-to-a-cohort"></a></h3>
 
 
 
@@ -49,66 +152,13 @@
 
         </dt>
         <dd>Add survival information to a cohort table</dd>
-      </dl><dl><dt>
-
-          <code><a href="addCompetingRiskCohortSurvival.html">addCompetingRiskCohortSurvival()</a></code>
-
-        </dt>
-        <dd>Add competing risk survival information to a cohort table</dd>
-      </dl><dl><dt>
-
-          <code><a href="asSurvivalResult.html">asSurvivalResult()</a></code>
-
-        </dt>
-        <dd>A tidy implementation of the summarised_characteristics object.</dd>
-      </dl><dl><dt>
-
-          <code><a href="estimateCompetingRiskSurvival.html">estimateCompetingRiskSurvival()</a></code>
-
-        </dt>
-        <dd>Estimate survival for a given event and competing risk of interest using cohorts in the OMOP Common Data Model</dd>
-      </dl><dl><dt>
-
-          <code><a href="estimateSingleEventSurvival.html">estimateSingleEventSurvival()</a></code>
-
-        </dt>
-        <dd>Estimate survival for a given event of interest using cohorts in the OMOP Common Data Model</dd>
-      </dl><dl><dt>
-
-          <code><a href="generateDeathCohortSet.html">generateDeathCohortSet()</a></code>
-          <span class="badge lifecycle lifecycle-deprecated">deprecated</span>
-        </dt>
-        <dd>To create a death cohort</dd>
-      </dl><dl><dt>
-
-          <code><a href="mockMGUS2cdm.html">mockMGUS2cdm()</a></code>
-
-        </dt>
-        <dd>Create mock CDM reference with survival::mgus2 dataset</dd>
-      </dl><dl><dt>
-
-          <code><a href="optionsTableSurvival.html">optionsTableSurvival()</a></code>
-
-        </dt>
-        <dd>Additional arguments for the function tableSurvival()</dd>
-      </dl><dl><dt>
-
-          <code><a href="plotSurvival.html">plotSurvival()</a></code>
-
-        </dt>
-        <dd>Plot survival results</dd>
-      </dl><dl><dt>
-
-          <code><a href="tableSurvival.html">tableSurvival()</a></code>
-
-        </dt>
-        <dd>Table with survival summary</dd>
       </dl></div>
-  </main></div>
+  </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
+    </nav></aside></div>
 
 
     <footer><div class="pkgdown-footer-left">
-  <p>Developed by Edward Burn, Kim López-Güell, Marti Catala, Xintong Li, Danielle Newby, Nuria Mercade-Besora.</p>
+  <p>Developed by Kim López-Güell, Edward Burn, Marti Catala, Xintong Li, Danielle Newby, Nuria Mercade-Besora.</p>
 </div>
 
 <div class="pkgdown-footer-right">
