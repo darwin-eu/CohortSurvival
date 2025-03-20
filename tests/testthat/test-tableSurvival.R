@@ -68,7 +68,7 @@ test_that("survival summary", {
          '[header_name]Estimate name\n[header_level]Median survival (95% CI)',
          '[header_name]Estimate name\n[header_level]Restricted mean survival (SE)')))
 
-  gt3 <- tableSurvival(survsex, header = c("cdm_name", "group"), splitStrata = FALSE)
+  gt3 <- tableSurvival(survsex, header = c("cdm_name", "group"))
    expect_true(all(
     colnames(gt3$`_data`) ==
        c('Sex', 'Outcome name', 'Estimate name',

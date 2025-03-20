@@ -21,7 +21,7 @@ checkCohortId <- function(cohort, cohortId) {
   )
   checkmate::reportAssertions(collection = errorMessage)
 
-  nrow(omopgenerics::settings(cohort) |>
+  nrow(omopgenerics::settings(cohort) %>%
     dplyr::filter(.data$cohort_definition_id %in% .env$cohortId)) == length(cohortId)
 }
 

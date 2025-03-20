@@ -77,51 +77,57 @@ estimateSingleEventSurvival <- function(cdm,
                                         estimateGap = 1,
                                         restrictedMeanFollowUp = NULL,
                                         minimumSurvivalDays = 1) {
-  if (is.null(targetCohortId)) {
-    omopgenerics::assertTable(cdm[[targetCohortTable]])
-    targetCohortId <- omopgenerics::cohortCount(cdm[[targetCohortTable]]) %>%
-      dplyr::filter(.data$number_records > 0) %>%
-      dplyr::pull("cohort_definition_id")
+  # Get ids of interest
+    if (is.null(targetCohortId)) {
+    targetCohortId <- getCohortId(targetCohortTable, cdm)
   }
   if (is.null(outcomeCohortId)) {
-    omopgenerics::assertTable(cdm[[outcomeCohortTable]])
-    outcomeCohortId <- omopgenerics::cohortCount(cdm[[outcomeCohortTable]]) %>%
-      dplyr::pull("cohort_definition_id")
+    outcomeCohortId <- getCohortId(outcomeCohortTable, cdm)
   }
 
-  # make sure attrition is up to date for our outcome cohort
+  # Make sure attrition is up to date for our outcome cohort
   cdm[[outcomeCohortTable]] <- cdm[[outcomeCohortTable]] %>%
     omopgenerics::recordCohortAttrition("update attrition")
+
   emptyOutcomes <- omopgenerics::settings(cdm[[outcomeCohortTable]]) %>%
-    dplyr::filter(.data$cohort_definition_id %in% .env$outcomeCohortId) %>%
     dplyr::left_join(
       omopgenerics::cohortCount(cdm[[outcomeCohortTable]]),
       by = "cohort_definition_id") %>%
     dplyr::filter(.data$number_records == 0)
-
   if(nrow(emptyOutcomes) > 0){
     emptyOutcomenames <- emptyOutcomes %>% dplyr::pull("cohort_name")
     cli::cli_warn("Outcome cohort{?s} {emptyOutcomenames} {?is/are} empty")
   }
 
-  surv <- list()
-  events <- list()
-  attrition <- list()
-  summary <- list()
-  for (i in seq_along(targetCohortId)) {
-    working_target_id <- targetCohortId[i]
-    working_target <- omopgenerics::settings(cdm[[targetCohortTable]]) %>%
-      dplyr::filter(.data$cohort_definition_id == working_target_id) %>%
-      dplyr::pull("cohort_name")
-    for (j in seq_along(outcomeCohortId)) {
-      working_outcome_id <- outcomeCohortId[j]
+  emptyTargets <- omopgenerics::settings(cdm[[targetCohortTable]]) %>%
+    dplyr::left_join(
+      omopgenerics::cohortCount(cdm[[targetCohortTable]]),
+      by = "cohort_definition_id") %>%
+    dplyr::filter(.data$number_records == 0)
+  if(nrow(emptyTargets) > 0){
+    emptyTargetnames <- emptyTargets %>% dplyr::pull("cohort_name")
+    cli::cli_warn("Target cohort{?s} {emptyTargetnames} {?is/are} empty")
+  }
+
+  outcomeCohortId <- outcomeCohortId[!(outcomeCohortId %in% (emptyOutcomes %>% dplyr::pull("cohort_definition_id")))]
+
+  # Apply the survival estimation over all combinations of target and outcome cohorts
+  results <- expand.grid(target_idx = seq_along(targetCohortId), outcome_idx = seq_along(outcomeCohortId)) %>%
+    purrr::pmap(function(target_idx, outcome_idx) {
+
+      # Get the target and outcome cohort names
+      working_target_id <- targetCohortId[target_idx]
+      working_target <- omopgenerics::settings(cdm[[targetCohortTable]]) %>%
+        dplyr::filter(.data$cohort_definition_id == working_target_id) %>%
+        dplyr::pull("cohort_name")
+      working_outcome_id <- outcomeCohortId[outcome_idx]
       working_outcome <- omopgenerics::settings(cdm[[outcomeCohortTable]]) %>%
         dplyr::filter(.data$cohort_definition_id == working_outcome_id) %>%
         dplyr::pull("cohort_name")
-      cli::cli_inform("- Getting survival for target cohort '{working_target}'
-                    and outcome cohort '{working_outcome}'")
+      cli::cli_inform("- Getting survival for target cohort '{working_target}' and outcome cohort '{working_outcome}'")
 
-      surv[[paste0(i, "_", j)]] <- estimateSurvival(
+      # Estimate survival and collect results
+      surv <- estimateSurvival(
         cdm = cdm,
         targetCohortTable = targetCohortTable,
         targetCohortId = working_target_id,
@@ -141,165 +147,232 @@ estimateSingleEventSurvival <- function(cdm,
         restrictedMeanFollowUp = restrictedMeanFollowUp,
         minimumSurvivalDays = minimumSurvivalDays
       )
-      attrition[[paste0(i, "_", j)]] <- attr(surv[[paste0(i, "_", j)]], "cohort_attrition") %>%
-        dplyr::mutate(
-          target_cohort = working_target,
-          outcome = working_outcome
-        ) %>%
+
+      # Extract attrition, events, and summary
+      attrition <- attr(surv, "cohort_attrition") %>%
+        dplyr::mutate(target_cohort = working_target, outcome = working_outcome) %>%
         dplyr::collect() %>%
         dplyr::filter(.data$cohort_definition_id == working_target_id)
-      events[[paste0(i, "_", j)]] <- attr(surv[[paste0(i, "_", j)]], 'events')
-      summary[[paste0(i, "_", j)]] <- attr(surv[[paste0(i, "_", j)]], 'summary')
-    }
-  }
+      events <- attr(surv, 'events')
+      summary <- attr(surv, 'summary')
 
+      # Return the result as a list
+      return(list(surv = surv, attrition = attrition, events = events, summary = summary))
+    })
+
+  # Extract the results into separate lists
+  surv <- lapply(results, `[[`, "surv")
+  attrition <- lapply(results, `[[`, "attrition")
+  events <- lapply(results, `[[`, "events")
+  summary <- lapply(results, `[[`, "summary")
+
+  # Remove empty elements
+  surv[lengths(surv) == 0] <- NULL
+  events[lengths(events) == 0] <- NULL
+  attrition[lengths(attrition) == 0] <- NULL
+  summary[lengths(summary) == 0] <- NULL
+
+  # Bind rows for different components
   estimates <- dplyr::bind_rows(surv)
   events <- dplyr::bind_rows(events)
   attrition <- dplyr::bind_rows(attrition)
   summary <- dplyr::bind_rows(summary)
 
-  # Put all outputs in the general omopgenerics format
-  attrition <- attrition %>%
-    dplyr::distinct() %>%
-    dplyr::mutate(
-      cdm_name = attr(cdm, "cdm_name"),
-      package_name = "CohortSurvival",
-      package_version = as.character(utils::packageVersion("CohortSurvival")),
-      result_type = "survival_attrition",
-      group_name = "target_cohort",
-      group_level = .data$target_cohort,
-      variable_level = .data$outcome,
-      analysis_type = "single_event",
-      estimate_name = "count"
-    ) %>%
-    tidyr::pivot_longer(
-      cols = c(
-        "number_records", "number_subjects", "excluded_records",
-        "excluded_subjects"
-      ),
-      names_to = "variable_name",
-      values_to = "estimate_value"
-    ) %>%
-    dplyr::mutate(
-      "estimate_value" = as.character(.data$estimate_value),
-      "estimate_type" = "integer",
-      competing_outcome = "none"
-    ) %>%
-    omopgenerics::uniteStrata("reason") %>%
-    omopgenerics::uniteAdditional("reason_id")
-
-  if(attrition %>% dplyr::group_by("target_cohort") %>% dplyr::tally() %>% dplyr::pull("n") ==
-     attrition %>% dplyr::group_by("target_cohort", "cohort_definition_id") %>% dplyr::tally() %>% dplyr::pull("n")) {
+  if(nrow(attrition) > 0) {
+    # Clean attrition data
     attrition <- attrition %>%
-      dplyr::mutate(target_cohort = paste0(.data$target_cohort,"_",.data$cohort_definition_id),
-                    group_level = .data$target_cohort)
+      dplyr::distinct() %>%
+      dplyr::mutate(
+        cdm_name = attr(cdm, "cdm_name"),
+        package_name = "CohortSurvival",
+        package_version = as.character(utils::packageVersion("CohortSurvival")),
+        result_type = "survival_attrition",
+        group_name = "target_cohort",
+        group_level = .data$target_cohort,
+        variable_level = .data$outcome,
+        analysis_type = "single_event",
+        estimate_name = "count"
+      ) %>%
+      tidyr::pivot_longer(
+        cols = c(
+          "number_records", "number_subjects", "excluded_records",
+          "excluded_subjects"
+        ),
+        names_to = "variable_name",
+        values_to = "estimate_value"
+      ) %>%
+      dplyr::mutate(
+        "estimate_value" = as.character(.data$estimate_value),
+        "estimate_type" = "integer",
+        competing_outcome = "none"
+      ) %>%
+      omopgenerics::uniteStrata("reason") %>%
+      omopgenerics::uniteAdditional("reason_id")
+
+    if (attrition %>% dplyr::group_by("target_cohort") %>% dplyr::tally() %>% dplyr::pull("n") ==
+        attrition %>% dplyr::group_by("target_cohort", "cohort_definition_id") %>% dplyr::tally() %>% dplyr::pull("n")) {
+      attrition <- attrition %>%
+        dplyr::mutate(target_cohort = paste0(.data$target_cohort, "_", .data$cohort_definition_id),
+                      group_level = .data$target_cohort)
+    }
+
+    attrition <- attrition %>%
+      dplyr::select(-c("cohort_definition_id"))
   }
 
-  attrition <- attrition %>%
-    dplyr::select(-c("cohort_definition_id"))
+  # Check if estimates are not empty
+  if(nrow(estimates) > 0) {
+    settings <- estimates %>%
+      dplyr::select("result_type",
+                    "package_name",
+                    "package_version",
+                    "analysis_type",
+                    "group_level",
+                    "outcome",
+                    "competing_outcome") %>%
+      dplyr::distinct()
 
-  settings <- estimates %>%
-    dplyr::select("result_type",
-                  "package_name",
-                  "package_version",
-                  "analysis_type",
-                  "outcome",
-                  "competing_outcome") %>%
-    dplyr::distinct()
+    settings <- settings %>%
+      dplyr::mutate(eventgap = NA) %>%
+      dplyr::union_all(
+        events %>%
+          dplyr::select("result_type",
+                        "package_name",
+                        "package_version",
+                        "analysis_type",
+                        "group_level",
+                        "outcome",
+                        "competing_outcome",
+                        "eventgap") %>%
+          dplyr::distinct()
+      )
 
-  settings <- settings %>%
-    dplyr::mutate(eventgap = NA) %>%
-    dplyr::union_all(
-      events %>%
-        dplyr::select("result_type",
-                      "package_name",
-                      "package_version",
-                      "analysis_type",
-                      "outcome",
-                      "competing_outcome",
-                      "eventgap") %>%
-        dplyr::distinct()
-    )
+    settings <- settings %>%
+      dplyr::union_all(
+        summary %>%
+          dplyr::select("result_type",
+                        "package_name",
+                        "package_version",
+                        "analysis_type",
+                        "group_level",
+                        "outcome",
+                        "competing_outcome") %>%
+          dplyr::mutate(eventgap = NA) %>%
+          dplyr::distinct()
+      )
 
-  settings <- settings %>%
-    dplyr::union_all(
-      summary %>%
-        dplyr::select("result_type",
-                      "package_name",
-                      "package_version",
-                      "analysis_type",
-                      "outcome",
-                      "competing_outcome") %>%
-        dplyr::mutate(eventgap = NA) %>%
-        dplyr::distinct()
-    )
+    settings <- settings %>%
+      dplyr::union_all(
+        attrition %>%
+          dplyr::select("result_type",
+                        "analysis_type",
+                        "package_name",
+                        "package_version",
+                        "group_level",
+                        "outcome") %>%
+          dplyr::mutate(eventgap = NA,
+                        competing_outcome = "none") %>%
+          dplyr::distinct()
+      )
 
-  settings <- settings %>%
-    dplyr::union_all(
-      attrition %>%
-        dplyr::select("result_type",
-                      "analysis_type",
-                      "package_name",
-                      "package_version",
-                      "outcome") %>%
-        dplyr::mutate(eventgap = NA,
-                      competing_outcome = "none") %>%
-        dplyr::distinct()
-    )
+    settings <- settings %>%
+      dplyr::mutate(result_id = c(1:nrow(settings))) %>%
+      dplyr::relocate("result_id", .before = "result_type")
 
-  settings <- settings %>%
-    dplyr::mutate(result_id = c(1:nrow(settings))) %>%
-    dplyr::relocate(.data$result_id, .before = "result_type")
+    estimates <- estimates %>%
+      dplyr::mutate(additional_name = "time",
+                    time = as.character(.data$time)) %>%
+      dplyr::rename("additional_level" = "time")
 
-  estimates <- estimates %>%
-    dplyr::mutate(additional_name = "time",
-                  time = as.character(.data$time)) %>%
-    dplyr::rename("additional_level" = .data$time)
+    events <- events %>%
+      dplyr::mutate(additional_name = "time",
+                    time = as.character(.data$time)) %>%
+      dplyr::rename("additional_level" = "time")
 
-  events <- events %>%
-    dplyr::mutate(additional_name = "time",
-                  time = as.character(.data$time)) %>%
-    dplyr::rename("additional_level" = .data$time)
+    complete_results <- estimates %>%
+      dplyr::bind_rows(events) %>%
+      dplyr::bind_rows(summary) %>%
+      dplyr::mutate(estimate_value = as.character(.data$estimate_value)) %>%
+      dplyr::bind_rows(attrition) %>%
+      dplyr::left_join(settings,
+                       by = c("analysis_type", "package_name", "package_version", "result_type", "group_level", "outcome", "competing_outcome", "eventgap")) %>%
+      dplyr::mutate(
+        additional_name = dplyr::if_else(is.na(.data$additional_name), "overall", .data$additional_name),
+        additional_level = dplyr::if_else(is.na(.data$additional_level), "overall", .data$additional_level)
+      )
 
-  complete_results <- estimates %>%
-    dplyr::bind_rows(events) %>%
-    dplyr::bind_rows(summary) %>%
-    dplyr::mutate(estimate_value = as.character(.data$estimate_value)) %>%
-    dplyr::bind_rows(attrition) %>%
-    dplyr::left_join(settings,
-                     by = c("analysis_type", "package_name", "package_version", "result_type", "outcome", "competing_outcome", "eventgap")) %>%
-    dplyr::mutate(
-      additional_name = dplyr::if_else(is.na(.data$additional_name), "overall", .data$additional_name),
-      additional_level = dplyr::if_else(is.na(.data$additional_level), "overall", .data$additional_level)
-    )
+    complete_results <- complete_results %>%
+      dplyr::select(omopgenerics::resultColumns())
 
-  complete_results <- complete_results %>%
-    dplyr::select(omopgenerics::resultColumns())
+    settings <- settings %>%
+      dplyr::mutate(
+        outcome_date_variable = .env$outcomeDateVariable,
+        outcome_washout = .env$outcomeWashout,
+        censor_on_cohort_exit = .env$censorOnCohortExit,
+        censor_on_date = .env$censorOnDate,
+        follow_up_days = .env$followUpDays,
+        restricted_mean_follow_up = .env$restrictedMeanFollowUp,
+        minimum_survival_days = .env$minimumSurvivalDays
+      )
 
-  settings <- settings %>%
-    dplyr::mutate(
-      outcome_date_variable = .env$outcomeDateVariable,
-      outcome_washout = .env$outcomeWashout,
-      censor_on_cohort_exit = .env$censorOnCohortExit,
-      censor_on_date = .env$censorOnDate,
-      follow_up_days = .env$followUpDays,
-      restricted_mean_follow_up = .env$restrictedMeanFollowUp,
-      minimum_survival_days = .env$minimumSurvivalDays
-    )
+    surv_estimates <- omopgenerics::newSummarisedResult(complete_results,
+                                                        settings = settings)
 
-  surv_estimates <- omopgenerics::newSummarisedResult(complete_results,
-                                                      settings = settings)
+    attr(surv_estimates, "cohort_attrition") <- NULL
+    attr(surv_estimates, "summary") <- NULL
+    attr(surv_estimates, "events") <- NULL
 
-  attr(surv_estimates, "cohort_attrition") <- NULL
-  attr(surv_estimates, "summary") <- NULL
-  attr(surv_estimates, "events") <- NULL
+    # Suppress results with omopgenerics
+    surv_estimates <- surv_estimates %>%
+      dplyr::mutate(estimate_name = dplyr::if_else(
+        .data$estimate_name %in% c("n_risk", "n_events", "n_censor", "number_records"),
+        paste0(.data$estimate_name,"_count"), .data$estimate_name
+      ))
+  } else if (nrow(estimates) == 0 & nrow(attrition) > 0) {
+    settings <- attrition %>%
+      dplyr::select("result_type",
+                    "package_name",
+                    "package_version",
+                    "analysis_type",
+                    "group_level",
+                    "outcome",
+                    "competing_outcome") %>%
+      dplyr::distinct() %>%
+      dplyr::mutate(eventgap = NA,
+                    competing_outcome = "none")
+    settings <- settings %>%
+      dplyr::mutate(result_id = c(1:nrow(settings))) %>%
+      dplyr::relocate("result_id", .before = "result_type")
 
-  # Suppress results with omopgenerics
-  surv_estimates <- surv_estimates %>%
-    dplyr::mutate(estimate_name = dplyr::if_else(
-      .data$estimate_name %in% c("n_risk", "n_events", "n_censor", "number_records"),
-      paste0(.data$estimate_name,"_count"), .data$estimate_name
-    ))
+    complete_results <- attrition %>%
+      dplyr::mutate(eventgap = NA) %>%
+      dplyr::left_join(settings,
+                       by = c("analysis_type", "package_name", "package_version", "result_type", "group_level", "outcome", "competing_outcome", "eventgap")) %>%
+      dplyr::mutate(
+        additional_name = dplyr::if_else(is.na(.data$additional_name), "overall", .data$additional_name),
+        additional_level = dplyr::if_else(is.na(.data$additional_level), "overall", .data$additional_level)
+      )
+
+    complete_results <- complete_results %>%
+      dplyr::select(omopgenerics::resultColumns())
+
+    settings <- settings %>%
+      dplyr::mutate(
+        outcome_date_variable = .env$outcomeDateVariable,
+        outcome_washout = .env$outcomeWashout,
+        censor_on_cohort_exit = .env$censorOnCohortExit,
+        censor_on_date = .env$censorOnDate,
+        follow_up_days = .env$followUpDays,
+        restricted_mean_follow_up = .env$restrictedMeanFollowUp,
+        minimum_survival_days = .env$minimumSurvivalDays
+      )
+
+    surv_estimates <- omopgenerics::newSummarisedResult(complete_results,
+                                                        settings = settings)
+  } else {
+    complete_results <- omopgenerics::emptySummarisedResult()
+    surv_estimates <- omopgenerics::newSummarisedResult(complete_results)
+  }
 
   return(surv_estimates)
 }
@@ -378,33 +451,30 @@ estimateCompetingRiskSurvival <- function(cdm,
                                           estimateGap = 1,
                                           restrictedMeanFollowUp = NULL,
                                           minimumSurvivalDays = 1) {
+  # Get ids of interest
   if (is.null(targetCohortId)) {
-    omopgenerics::assertTable(cdm[[targetCohortTable]])
-    targetCohortId <- omopgenerics::cohortCount(cdm[[targetCohortTable]]) %>%
-      dplyr::filter(.data$number_records >0) %>%
-      dplyr::pull("cohort_definition_id")
+    targetCohortId <- getCohortId(targetCohortTable, cdm)
   }
   if (is.null(outcomeCohortId)) {
-    omopgenerics::assertTable(cdm[[outcomeCohortTable]])
-    outcomeCohortId <- omopgenerics::cohortCount(cdm[[outcomeCohortTable]]) %>%
-      dplyr::filter(.data$number_records >0) %>%
-      dplyr::pull("cohort_definition_id")
+    outcomeCohortId <- getCohortId(outcomeCohortTable, cdm)
   }
   if (is.null(competingOutcomeCohortId)) {
-    omopgenerics::assertTable(cdm[[competingOutcomeCohortTable]])
-    competingOutcomeCohortId <- omopgenerics::cohortCount(cdm[[competingOutcomeCohortTable]])  %>%
-      dplyr::filter(.data$number_records >0) %>%
-      dplyr::pull("cohort_definition_id")
+    competingOutcomeCohortId <- getCohortId(competingOutcomeCohortTable, cdm)
   }
 
+  # Make sure attrition is up to date for our outcome cohorts
+  cdm[[outcomeCohortTable]] <- cdm[[outcomeCohortTable]] %>%
+    omopgenerics::recordCohortAttrition("update attrition")
+  cdm[[competingOutcomeCohortTable]] <- cdm[[competingOutcomeCohortTable]] %>%
+    omopgenerics::recordCohortAttrition("update attrition")
+
+  # Handle empty cohorts
   emptyOutcomes <- omopgenerics::settings(cdm[[outcomeCohortTable]]) %>%
-    dplyr::filter(.data$cohort_definition_id %in% .env$outcomeCohortId) %>%
     dplyr::left_join(
       omopgenerics::cohortCount(cdm[[outcomeCohortTable]]),
       by = "cohort_definition_id") %>%
     dplyr::filter(.data$number_records == 0)
   emptyCompetingOutcomes <- omopgenerics::settings(cdm[[competingOutcomeCohortTable]]) %>%
-    dplyr::filter(.data$cohort_definition_id %in% .env$competingOutcomeCohortId) %>%
     dplyr::left_join(
       omopgenerics::cohortCount(cdm[[competingOutcomeCohortTable]]),
       by = "cohort_definition_id") %>%
@@ -418,217 +488,293 @@ estimateCompetingRiskSurvival <- function(cdm,
     cli::cli_warn("Competing outcome cohort{?s} {emptyCompetingOutcomenames} {?is/are} empty")
   }
 
-  surv <- list()
-  attrition <- list()
-  events <- list()
-  summary <- list()
-  for (i in seq_along(targetCohortId)) {
-    working_target_id <- targetCohortId[i]
-    working_target <- omopgenerics::settings(cdm[[targetCohortTable]]) %>%
-      dplyr::filter(.data$cohort_definition_id == working_target_id) %>%
-      dplyr::pull("cohort_name")
-    for (j in seq_along(outcomeCohortId)) {
-      working_outcome_id <- outcomeCohortId[j]
+  emptyTargets <- omopgenerics::settings(cdm[[targetCohortTable]]) %>%
+    dplyr::left_join(
+      omopgenerics::cohortCount(cdm[[targetCohortTable]]),
+      by = "cohort_definition_id") %>%
+    dplyr::filter(.data$number_records == 0)
+  if(nrow(emptyTargets) > 0){
+    emptyTargetnames <- emptyTargets %>% dplyr::pull("cohort_name")
+    cli::cli_warn("Target cohort{?s} {emptyTargetnames} {?is/are} empty")
+  }
+
+  outcomeCohortId <- outcomeCohortId[!(outcomeCohortId %in% (emptyOutcomes %>% dplyr::pull("cohort_definition_id")))]
+  competingOutcomeCohortId <- competingOutcomeCohortId[!(competingOutcomeCohortId %in% (emptyCompetingOutcomes %>% dplyr::pull("cohort_definition_id")))]
+
+  # Apply survival to all combinations of ids
+  results <- expand.grid(target_idx = seq_along(targetCohortId), outcome_idx = seq_along(outcomeCohortId),
+                         competing_outcome_idx = seq_along(competingOutcomeCohortId)) %>%
+    purrr::pmap(function(target_idx, outcome_idx, competing_outcome_idx) {
+
+      # Get the target and outcome cohorts names
+      working_target_id <- targetCohortId[target_idx]
+      working_target <- omopgenerics::settings(cdm[[targetCohortTable]]) %>%
+        dplyr::filter(.data$cohort_definition_id == working_target_id) %>%
+        dplyr::pull("cohort_name")
+      working_outcome_id <- outcomeCohortId[outcome_idx]
       working_outcome <- omopgenerics::settings(cdm[[outcomeCohortTable]]) %>%
         dplyr::filter(.data$cohort_definition_id == working_outcome_id) %>%
         dplyr::pull("cohort_name")
-      for (k in seq_along(competingOutcomeCohortId)) {
-        working_competing_outcome_id <- competingOutcomeCohortId[k]
-        working_competing_outcome <- omopgenerics::settings(cdm[[competingOutcomeCohortTable]]) %>%
-          dplyr::filter(.data$cohort_definition_id == working_competing_outcome_id) %>%
-          dplyr::pull("cohort_name")
+      working_competing_outcome_id <- competingOutcomeCohortId[competing_outcome_idx]
+      working_competing_outcome <- omopgenerics::settings(cdm[[competingOutcomeCohortTable]]) %>%
+        dplyr::filter(.data$cohort_definition_id == working_competing_outcome_id) %>%
+        dplyr::pull("cohort_name")
+      cli::cli_inform("- Getting survival for target cohort '{working_target}', outcome cohort '{working_outcome}' and
+                      competing outcome cohort '{working_competing_outcome}'")
 
-        cli::cli_inform("- Getting survival for target cohort '{working_target}'
-                    and outcome cohort '{working_outcome}' with
-                    competing outcome cohort '{working_competing_outcome}'")
-        surv[[paste0(i, "_", j, "_", k)]] <- estimateSurvival(
-          cdm = cdm,
-          targetCohortTable = targetCohortTable,
-          targetCohortId = working_target_id,
-          outcomeCohortTable = outcomeCohortTable,
-          outcomeCohortId = working_outcome_id,
-          outcomeDateVariable = outcomeDateVariable,
-          outcomeWashout = outcomeWashout,
-          competingOutcomeCohortTable = competingOutcomeCohortTable,
-          competingOutcomeCohortId = working_competing_outcome_id,
-          competingOutcomeDateVariable = competingOutcomeDateVariable,
-          competingOutcomeWashout = competingOutcomeWashout,
-          censorOnCohortExit = censorOnCohortExit,
-          censorOnDate = censorOnDate,
-          followUpDays = followUpDays,
-          strata = strata,
-          eventGap = eventGap,
-          estimateGap = estimateGap,
-          restrictedMeanFollowUp = restrictedMeanFollowUp,
-          minimumSurvivalDays = minimumSurvivalDays
-        )
-        if(length(surv[[paste0(i, "_", j, "_", k)]]) > 0) {
-          attrition[[paste0(i, "_", j, "_", k)]] <- attr(surv[[paste0(i, "_", j, "_", k)]], "cohort_attrition") %>%
-            dplyr::mutate(
-              target_cohort = working_target,
-              outcome = working_outcome,
-              competing_outcome = working_competing_outcome
-            ) %>%
-            dplyr::collect() %>%
-            dplyr::filter(.data$cohort_definition_id == working_target_id)
-          events[[paste0(i, "_", j, "_", k)]] <- attr(surv[[paste0(i, "_", j, "_", k)]], 'events')
-          summary[[paste0(i, "_", j, "_", k)]] <- attr(surv[[paste0(i, "_", j, "_", k)]], 'summary')
-        }
+      # Estimate survival and collect results
+      surv <- estimateSurvival(
+        cdm = cdm,
+        targetCohortTable = targetCohortTable,
+        targetCohortId = working_target_id,
+        outcomeCohortTable = outcomeCohortTable,
+        outcomeCohortId = working_outcome_id,
+        outcomeDateVariable = outcomeDateVariable,
+        outcomeWashout = outcomeWashout,
+        competingOutcomeCohortTable = competingOutcomeCohortTable,
+        competingOutcomeCohortId = working_competing_outcome_id,
+        competingOutcomeDateVariable = competingOutcomeDateVariable,
+        competingOutcomeWashout = competingOutcomeWashout,
+        censorOnCohortExit = censorOnCohortExit,
+        censorOnDate = censorOnDate,
+        followUpDays = followUpDays,
+        strata = strata,
+        eventGap = eventGap,
+        estimateGap = estimateGap,
+        restrictedMeanFollowUp = restrictedMeanFollowUp,
+        minimumSurvivalDays = minimumSurvivalDays
+      )
+
+      # Extract attrition, events, and summary
+      if(!is.null(attr(surv, "cohort_attrition"))) {
+        attrition <- attr(surv, "cohort_attrition") %>%
+          dplyr::mutate(target_cohort = working_target, outcome = working_outcome,
+                        competing_outcome = working_competing_outcome) %>%
+          dplyr::collect() %>%
+          dplyr::filter(.data$cohort_definition_id == working_target_id)
+      } else {
+        attrition <- attr(surv, "cohort_attrition")
       }
-    }
-  }
+      events <- attr(surv, 'events')
+      summary <- attr(surv, 'summary')
 
-  # Remove empty elements for analysis which have no output
+      # Return the result as a list
+      return(list(surv = surv, attrition = attrition, events = events, summary = summary))
+    })
+
+  # Extract the results into separate lists
+  surv <- lapply(results, `[[`, "surv")
+  attrition <- lapply(results, `[[`, "attrition")
+  events <- lapply(results, `[[`, "events")
+  summary <- lapply(results, `[[`, "summary")
+
+  # Remove empty elements
   surv[lengths(surv) == 0] <- NULL
+  events[lengths(events) == 0] <- NULL
+  attrition[lengths(attrition) == 0] <- NULL
+  summary[lengths(summary) == 0] <- NULL
 
+  # Bind rows for different components
   estimates <- dplyr::bind_rows(surv)
   events <- dplyr::bind_rows(events)
   attrition <- dplyr::bind_rows(attrition)
   summary <- dplyr::bind_rows(summary)
 
-  # Put all outputs in the general omopgenerics format
-  attrition <- attrition %>%
-    dplyr::distinct() %>%
-    dplyr::mutate(
-      cdm_name = attr(cdm, "cdm_name"),
-      package_name = "CohortSurvival",
-      package_version = as.character(utils::packageVersion("CohortSurvival")),
-      result_type = "survival_attrition",
-      group_name = "target_cohort",
-      group_level = .data$target_cohort,
-      variable_level = paste0(.data$outcome, " &&& ",.data$competing_outcome),
-      analysis_type = "competing_risk",
-      estimate_name = "count"
-    ) %>%
-    tidyr::pivot_longer(
-      cols = c(
-        "number_records", "number_subjects", "excluded_records",
-        "excluded_subjects"
-      ),
-      names_to = "variable_name",
-      values_to = "estimate_value"
-    ) %>%
-    dplyr::mutate(
-      "estimate_value" = as.character(.data$estimate_value),
-      "estimate_type" = "integer"
-    ) %>%
-    omopgenerics::uniteStrata("reason") %>%
-    omopgenerics::uniteAdditional("reason_id")
-
-  if(attrition %>% dplyr::group_by("target_cohort") %>% dplyr::tally() %>% dplyr::pull("n") ==
-     attrition %>% dplyr::group_by("target_cohort", "cohort_definition_id") %>% dplyr::tally() %>% dplyr::pull("n")) {
+  if(nrow(attrition) > 0) {
+    # Clean attrition data
     attrition <- attrition %>%
-      dplyr::mutate(target_cohort = paste0(.data$target_cohort,"_",.data$cohort_definition_id),
-                    group_level = .data$target_cohort)
+      dplyr::distinct() %>%
+      dplyr::mutate(
+        cdm_name = attr(cdm, "cdm_name"),
+        package_name = "CohortSurvival",
+        package_version = as.character(utils::packageVersion("CohortSurvival")),
+        result_type = "survival_attrition",
+        group_name = "target_cohort",
+        group_level = .data$target_cohort,
+        variable_level = .data$outcome,
+        analysis_type = "single_event",
+        estimate_name = "count"
+      ) %>%
+      tidyr::pivot_longer(
+        cols = c(
+          "number_records", "number_subjects", "excluded_records",
+          "excluded_subjects"
+        ),
+        names_to = "variable_name",
+        values_to = "estimate_value"
+      ) %>%
+      dplyr::mutate(
+        "estimate_value" = as.character(.data$estimate_value),
+        "estimate_type" = "integer",
+        competing_outcome = "none"
+      ) %>%
+      omopgenerics::uniteStrata("reason") %>%
+      omopgenerics::uniteAdditional("reason_id")
+
+    if (attrition %>% dplyr::group_by("target_cohort") %>% dplyr::tally() %>% dplyr::pull("n") ==
+        attrition %>% dplyr::group_by("target_cohort", "cohort_definition_id") %>% dplyr::tally() %>% dplyr::pull("n")) {
+      attrition <- attrition %>%
+        dplyr::mutate(target_cohort = paste0(.data$target_cohort, "_", .data$cohort_definition_id),
+                      group_level = .data$target_cohort)
+    }
+
+    attrition <- attrition %>%
+      dplyr::select(-c("cohort_definition_id"))
   }
 
-  attrition <- attrition %>%
-    dplyr::select(-c("cohort_definition_id"))
+  # Check if estimates are not empty
+  if(nrow(estimates) > 0) {
+    settings <- estimates %>%
+      dplyr::select("result_type",
+                    "package_name",
+                    "package_version",
+                    "analysis_type",
+                    "group_level",
+                    "outcome",
+                    "competing_outcome") %>%
+      dplyr::distinct()
 
-  settings <- estimates %>%
-    dplyr::select("result_type",
-                  "package_name",
-                  "package_version",
-                  "analysis_type",
-                  "outcome",
-                  "competing_outcome") %>%
-    dplyr::distinct()
+    settings <- settings %>%
+      dplyr::mutate(eventgap = NA) %>%
+      dplyr::union_all(
+        events %>%
+          dplyr::select("result_type",
+                        "package_name",
+                        "package_version",
+                        "analysis_type",
+                        "group_level",
+                        "outcome",
+                        "competing_outcome",
+                        "eventgap") %>%
+          dplyr::distinct()
+      )
 
-  settings <- settings %>%
-    dplyr::mutate(eventgap = NA) %>%
-    dplyr::union_all(
-      events %>%
-        dplyr::select("result_type",
-                      "package_name",
-                      "package_version",
-                      "analysis_type",
-                      "outcome",
-                      "competing_outcome",
-                      "eventgap") %>%
-        dplyr::distinct()
-    )
+    settings <- settings %>%
+      dplyr::union_all(
+        summary %>%
+          dplyr::select("result_type",
+                        "package_name",
+                        "package_version",
+                        "analysis_type",
+                        "group_level",
+                        "outcome",
+                        "competing_outcome") %>%
+          dplyr::mutate(eventgap = NA) %>%
+          dplyr::distinct()
+      )
 
-  settings <- settings %>%
-    dplyr::union_all(
-      summary %>%
-        dplyr::select("result_type",
-                      "package_name",
-                      "package_version",
-                      "analysis_type",
-                      "outcome",
-                      "competing_outcome") %>%
-        dplyr::mutate(eventgap = NA) %>%
-        dplyr::distinct()
-    )
+    settings <- settings %>%
+      dplyr::union_all(
+        attrition %>%
+          dplyr::select("result_type",
+                        "analysis_type",
+                        "package_name",
+                        "package_version",
+                        "group_level",
+                        "outcome") %>%
+          dplyr::mutate(eventgap = NA,
+                        competing_outcome = "none") %>%
+          dplyr::distinct()
+      )
 
-  settings <- settings %>%
-    dplyr::union_all(
-      attrition %>%
-        dplyr::select("result_type",
-                      "analysis_type",
-                      "package_name",
-                      "package_version",
-                      "outcome",
-                      "competing_outcome") %>%
-        dplyr::mutate(eventgap = NA) %>%
-        dplyr::distinct()
-    )
+    settings <- settings %>%
+      dplyr::mutate(result_id = c(1:nrow(settings))) %>%
+      dplyr::relocate("result_id", .before = "result_type")
 
-  settings <- settings %>%
-    dplyr::mutate(result_id = c(1:nrow(settings))) %>%
-    dplyr::relocate(.data$result_id, .before = "result_type")
+    estimates <- estimates %>%
+      dplyr::mutate(additional_name = "time",
+                    time = as.character(.data$time)) %>%
+      dplyr::rename("additional_level" = "time")
 
-  estimates <- estimates %>%
-    dplyr::mutate(additional_name = "time",
-                  time = as.character(.data$time)) %>%
-    dplyr::rename("additional_level" = .data$time)
+    events <- events %>%
+      dplyr::mutate(additional_name = "time",
+                    time = as.character(.data$time)) %>%
+      dplyr::rename("additional_level" = "time")
 
-  events <- events %>%
-    dplyr::mutate(additional_name = "time",
-                  time = as.character(.data$time)) %>%
-    dplyr::rename("additional_level" = .data$time)
+    complete_results <- estimates %>%
+      dplyr::bind_rows(events) %>%
+      dplyr::bind_rows(summary) %>%
+      dplyr::mutate(estimate_value = as.character(.data$estimate_value)) %>%
+      dplyr::bind_rows(attrition) %>%
+      dplyr::left_join(settings,
+                       by = c("analysis_type", "package_name", "package_version", "result_type", "group_level", "outcome", "competing_outcome", "eventgap")) %>%
+      dplyr::mutate(
+        additional_name = dplyr::if_else(is.na(.data$additional_name), "overall", .data$additional_name),
+        additional_level = dplyr::if_else(is.na(.data$additional_level), "overall", .data$additional_level)
+      )
 
-  complete_results <- estimates %>%
-    dplyr::bind_rows(events) %>%
-    dplyr::bind_rows(summary) %>%
-    dplyr::mutate(estimate_value = as.character(.data$estimate_value)) %>%
-    dplyr::bind_rows(attrition) %>%
-    dplyr::left_join(settings,
-                     by = c("analysis_type", "package_name", "package_version", "result_type", "outcome", "competing_outcome", "eventgap")) %>%
-    dplyr::mutate(
-      additional_name = dplyr::if_else(is.na(.data$additional_name), "overall", .data$additional_name),
-      additional_level = dplyr::if_else(is.na(.data$additional_level), "overall", .data$additional_level)
-    )
+    complete_results <- complete_results %>%
+      dplyr::select(omopgenerics::resultColumns())
 
-  complete_results <- complete_results %>%
-    dplyr::select(omopgenerics::resultColumns())
+    settings <- settings %>%
+      dplyr::mutate(
+        outcome_date_variable = .env$outcomeDateVariable,
+        outcome_washout = .env$outcomeWashout,
+        censor_on_cohort_exit = .env$censorOnCohortExit,
+        censor_on_date = .env$censorOnDate,
+        follow_up_days = .env$followUpDays,
+        restricted_mean_follow_up = .env$restrictedMeanFollowUp,
+        minimum_survival_days = .env$minimumSurvivalDays
+      )
 
-  settings <- settings %>%
-    dplyr::mutate(
-      outcome_date_variable = .env$outcomeDateVariable,
-      outcome_washout = .env$outcomeWashout,
-      competing_outcome_date_variable = .env$competingOutcomeDateVariable,
-      competing_outcome_washout = .env$competingOutcomeWashout,
-      censor_on_cohort_exit = .env$censorOnCohortExit,
-      censor_on_date = .env$censorOnDate,
-      follow_up_days = .env$followUpDays,
-      restricted_mean_follow_up = .env$restrictedMeanFollowUp,
-      minimum_survival_days = .env$minimumSurvivalDays
-    )
+    surv_estimates <- omopgenerics::newSummarisedResult(complete_results,
+                                                        settings = settings)
 
-  surv_estimates <- omopgenerics::newSummarisedResult(complete_results,
-                                                      settings = settings)
+    attr(surv_estimates, "cohort_attrition") <- NULL
+    attr(surv_estimates, "summary") <- NULL
+    attr(surv_estimates, "events") <- NULL
 
-  attr(surv_estimates, "cohort_attrition") <- NULL
-  attr(surv_estimates, "summary") <- NULL
-  attr(surv_estimates, "events") <- NULL
+    # Suppress results with omopgenerics
+    surv_estimates <- surv_estimates %>%
+      dplyr::mutate(estimate_name = dplyr::if_else(
+        .data$estimate_name %in% c("n_risk", "n_events", "n_censor", "number_records"),
+        paste0(.data$estimate_name,"_count"), .data$estimate_name
+      ))
+  } else if (nrow(estimates) == 0 & nrow(attrition) > 0) {
+    settings <- attrition %>%
+      dplyr::select("result_type",
+                    "package_name",
+                    "package_version",
+                    "analysis_type",
+                    "group_level",
+                    "outcome",
+                    "competing_outcome") %>%
+      dplyr::distinct() %>%
+      dplyr::mutate(eventgap = NA,
+                    competing_outcome = "none")
+    settings <- settings %>%
+      dplyr::mutate(result_id = c(1:nrow(settings))) %>%
+      dplyr::relocate("result_id", .before = "result_type")
 
-  # Suppress results with omopgenerics
-  surv_estimates <- surv_estimates %>%
-    dplyr::mutate(estimate_name = dplyr::if_else(
-      .data$estimate_name %in% c("n_risk", "n_events", "n_censor", "number_records"),
-      paste0(.data$estimate_name,"_count"), .data$estimate_name
-    ))
+    complete_results <- attrition %>%
+      dplyr::mutate(eventgap = NA) %>%
+      dplyr::left_join(settings,
+                       by = c("analysis_type", "package_name", "package_version", "result_type", "group_level", "outcome", "competing_outcome", "eventgap")) %>%
+      dplyr::mutate(
+        additional_name = dplyr::if_else(is.na(.data$additional_name), "overall", .data$additional_name),
+        additional_level = dplyr::if_else(is.na(.data$additional_level), "overall", .data$additional_level)
+      )
+
+    complete_results <- complete_results %>%
+      dplyr::select(omopgenerics::resultColumns())
+
+    settings <- settings %>%
+      dplyr::mutate(
+        outcome_date_variable = .env$outcomeDateVariable,
+        outcome_washout = .env$outcomeWashout,
+        censor_on_cohort_exit = .env$censorOnCohortExit,
+        censor_on_date = .env$censorOnDate,
+        follow_up_days = .env$followUpDays,
+        restricted_mean_follow_up = .env$restrictedMeanFollowUp,
+        minimum_survival_days = .env$minimumSurvivalDays
+      )
+
+    surv_estimates <- omopgenerics::newSummarisedResult(complete_results,
+                                                        settings = settings)
+  } else {
+    complete_results <- omopgenerics::emptySummarisedResult()
+    surv_estimates <- omopgenerics::newSummarisedResult(complete_results)
+  }
 
   return(surv_estimates)
 }
@@ -712,8 +858,29 @@ estimateSurvival <- function(cdm,
   if(survData %>% dplyr::tally() %>% dplyr::pull() != 0) {
     timepoints <- seq(0, if (followUpDays == "Inf") max(survData$outcome_time) else followUpDays, by = estimateGap)
   } else {
-    timepoints <- c(0)
-  }
+    working_target <- omopgenerics::settings(cdm[[targetCohortTable]]) %>%
+      dplyr::filter(.data$cohort_definition_id == targetCohortId) %>%
+      dplyr::pull("cohort_name")
+    working_outcome <- omopgenerics::settings(cdm[[outcomeCohortTable]]) %>%
+      dplyr::filter(.data$cohort_definition_id == outcomeCohortId) %>%
+      dplyr::pull("cohort_name")
+    if(!is.null(competingOutcomeCohortTable)) {
+    working_competing_outcome <- omopgenerics::settings(cdm[[competingOutcomeCohortTable]]) %>%
+      dplyr::filter(.data$cohort_definition_id == competingOutcomeCohortId) %>%
+      dplyr::pull("cohort_name")
+      cli::cli_warn("Survival estimation is not possible as there are no individuals
+                  available for target {working_target}, outcome
+                  {working_outcome} and competing outcome {working_competing_outcome}.
+                    Only attrition returned.")
+    } else {
+      cli::cli_warn("Survival estimation is not possible as there are no individuals
+                  available for target {working_target} and outcome
+                  {working_outcome}. Only attrition returned.")
+    }
+    surv <- empty_estimates()
+    attr(surv, "cohort_attrition") <- attr(workingExposureTable, "cohort_attrition")
+    return(surv)
+    }
 
   # fit survival, with strata
   if (is.null(competingOutcomeCohortTable)) {
@@ -834,6 +1001,41 @@ estimateSurvival <- function(cdm,
     } else {
       summary <- summary %>%
         dplyr::mutate(competing_outcome = "none")
+    }
+
+    # median_survival and its two confidence intervals must be all num or all NA
+    summary <- summary %>%
+      dplyr::group_by(.data$group_level, .data$variable_level, .data$strata_name, .data$strata_level) %>%
+      dplyr::mutate(
+        has_na = any(is.na(.data$estimate_value) & .data$estimate_name %in% c("median_survival", "median_survival_95CI_higher", "median_survival_95CI_lower")),
+        estimate_value = dplyr::if_else(.data$has_na & .data$estimate_name %in% c("median_survival", "median_survival_95CI_higher", "median_survival_95CI_lower"), NA, .data$estimate_value)
+      ) %>%
+      dplyr::select(-"has_na") %>%
+      dplyr::ungroup()
+
+    # change restrictedMeanSurvival to NA if follow-up for the specific group is shorter than input asked
+    if(!is.null(restrictedMeanFollowUp)) {
+      summary <- summary %>%
+        dplyr::left_join(
+          survivalEstimates %>% dplyr::group_by(.data$variable_level,
+                                               .data$strata_name,
+                                               .data$strata_level) %>%
+            dplyr::filter(.data$time == max(.data$time)) %>%
+            dplyr::select("variable_level",
+                          "strata_name",
+                          "strata_level",
+                          "time") %>%
+            dplyr::distinct() %>%
+            dplyr::filter(.data$time < .env$restrictedMeanFollowUp) %>%
+            dplyr::mutate(to_na = 1),
+          by = c("variable_level", "strata_name", "strata_level")) %>%
+        dplyr::mutate(estimate_value = dplyr::if_else(
+          .data$estimate_name %in% c("restricted_mean_survival", "restricted_mean_survival_se") &
+            !is.na(.data$to_na),
+          NA_real_,
+          .data$estimate_value
+        )) %>%
+        dplyr::select(-"to_na")
     }
 
     attr(survivalEstimates, "summary") <- summary
@@ -1236,7 +1438,7 @@ competingRiskSurvival <- function(survData, times, variables, eventGap,
           ) %>%
           dplyr::mutate(analysis_type = "competing_risk") %>%
           tibble::rownames_to_column(var = "rowname") %>%
-          tidyr::separate_wider_delim(.data$rowname,
+          tidyr::separate_wider_delim("rowname",
                                       delim = ", ",
                                       names = c(variables[[i]], "state")) %>%
           tidyr::unite(col = "strata", variables[[i]], sep = ", ") %>%
@@ -1460,4 +1662,13 @@ validateInputSurvival <- function(cdm,
   omopgenerics::assertNumeric(restrictedMeanFollowUp, integerish = TRUE, min = 1, length = 1, null = TRUE)
   omopgenerics::assertNumeric(minimumSurvivalDays, integerish = TRUE, min = 0, length = 1)
 
+}
+
+# Helper function to get cohort id
+getCohortId <- function(cohortTable, cdm) {
+  omopgenerics::assertTable(cdm[[cohortTable]])
+  cohortId <- omopgenerics::cohortCount(cdm[[cohortTable]]) %>%
+    dplyr::filter(.data$number_records > 0) %>%
+    dplyr::pull("cohort_definition_id")
+  return(cohortId)
 }

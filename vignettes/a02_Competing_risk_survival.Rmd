@@ -15,10 +15,9 @@ knitr::opts_chunk$set(
 )
 ```
 
-
 ## Set up
 
-Let's first load the packages required.
+Let us first load the packages required.
 
 ```{r}
 library(CDMConnector)
@@ -27,7 +26,7 @@ library(dplyr)
 library(ggplot2)
 ```
 
-We'll create a cdm reference to use our example MGUS2 survival dataset. In practice you would use the CDMConnector package to connect to your data mapped to the OMOP CDM.
+We will create a cdm reference to use our example MGUS2 survival dataset again. In practice you would use the CDMConnector package to connect to your data mapped to the OMOP CDM.
 
 ```{r}
 cdm <- CohortSurvival::mockMGUS2cdm()
@@ -35,7 +34,9 @@ cdm <- CohortSurvival::mockMGUS2cdm()
 
 We will proceed as we did with the single event survival, but this time we are considering an event of interest (progression of disease) with a competing risk (mortality).
 
-We would typically need to define study cohorts ourselves, but in the case of our example data we already have these cohorts available. You can see for our diagnosis cohort we also have a number of additional features recorded for individuals which we'll use for stratification.
+All the details provided in the single event survival vignette are also valid in this study case: the potential input changes for the estimation, the different output formats available or the options for the table and plot functions. Everything discussed previously is also applicable when adding a competing outcome, as we will show in this vignette. Therefore we will not provide as much detail in all the possible combinations of inputs here, but rather focus in the particularities of estimating survival with an outcome and a competing outcome.
+
+Let us take a glimpse at the three cohorts we will use this time: the mgus diagnosis as a target, and both the death cohort and the progression to multiple myeloma as outcomes.
 
 ```{r}
 cdm$mgus_diagnosis %>% 
@@ -50,7 +51,7 @@ cdm$progression %>%
 
 ## Estimating survival with competing risk
 
-The package allows to estimate survival of both an outcome and competing risk outcome. We can then stratify, see information on events, summarise the estimates and check the contributing participants in the same way we did for the single event survival analysis.
+This package allows to estimate survival of both an outcome and competing risk outcome. We can then stratify, see information on events or summarise the estimates, among others, in the same way we did for the single event survival analysis. The only additional requirement here is to specify the `competingOutcomeCohortTable` argument.
 
 ```{r, fig.width=5}
 MGUS_death_prog <- estimateCompetingRiskSurvival(cdm,
@@ -63,25 +64,24 @@ MGUS_death_prog %>%
   asSurvivalResult() %>% 
   glimpse()
 ```
- 
-As we can see above our results have been outputted in long format. We can plot these results like so.
+
+As we can see above our results have been outputted in long format, once transformed into the survival format. We can plot these results as we did in the previous vignette:
 
 ```{r, out.width = "75%"}
 plotSurvival(MGUS_death_prog, cumulativeFailure = TRUE,
-             colour = "variable_level") + 
+             colour = "variable") + 
   theme(legend.position = "top")
 ```
 
-Our returned results also have attributes containing information that summarises survival. 
+The summary table of survival now has a row for each of the outcomes:
 
 ```{r}
 tableSurvival(MGUS_death_prog) 
 ```
 
-
 ## With stratification
 
-To estimate survival for particular strata of interest we need these features to have been added to the target cohort table. Once we have them defined, and as seen above we already have a number of example characteristics added to our diagnosis cohort, we can add stratifications like so.
+Again, to estimate survival for particular strata of interest we need these features to have been added to the target cohort table. We can them give the names of these strata columns to the estimating function like so:
 
 ```{r}
 MGUS_death_prog <-  estimateCompetingRiskSurvival(cdm,
@@ -93,13 +93,13 @@ MGUS_death_prog <-  estimateCompetingRiskSurvival(cdm,
 
 ```
 
-As we can see as well as results for each strata, we'll always also have overall results returned. We can filter the output table to plot only the results for the different strata levels. We can also ask for the cumulative failure probability to be plotted instead of the survival probability.
+As well as results for each strata, we will always also have overall results returned. We can filter the output table to plot only the results for the different strata levels, if we do not wish to add the overall cohort in the plot. We can also ask for the cumulative failure probability to be plotted instead of the survival probability, which makes more sense in the competing outcome case.
 
 ```{r, fig.height=6, fig.width=8}
 plotSurvival(MGUS_death_prog %>% 
                dplyr::filter(strata_name != "Overall"), 
-             facet = "strata_level",
-             colour = "variable_level",
+             facet = "sex",
+             colour = "variable",
              cumulativeFailure = TRUE)
 ```
 
@@ -110,6 +110,8 @@ tableSurvival(MGUS_death_prog)
 ```
 
 ## Disconnect from the cdm database connection
+
+As always, we finish by disconnecting from the cdm.
 
 ```{r}
 cdmDisconnect(cdm)

@@ -6,3 +6,25 @@ navbar:
   structure:
     right: [github]
 
+reference:
+- subtitle: Estimate survival
+- contents:
+  - matches("estimateSingleEventSurvival")
+  - matches("estimateCompetingRiskSurvival")
+- subtitle: Tabulate results
+- contents:
+  - matches("tableSurvival")
+  - matches("riskTable")
+  - matches("optionsTableSurvival")
+- subtitle: Plot results
+- contents:
+  - matches("plotSurvival")
+- subtitle: Tidy results
+- contents:
+  - matches("asSurvivalResult")
+- subtitle: Mock data
+- contents:
+  - matches("mockMGUS2cdm")
+- subtitle: Add survival data to a cohort
+- contents:
+  - matches("addCohortSurvival")

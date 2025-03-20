@@ -45,7 +45,7 @@ asSurvivalResult <- function(result) {
   result <- result %>%
      omopgenerics::addSettings(
        settingsColumn = c("result_type",omopgenerics::settingsColumns(result))) %>%
-     dplyr::select(c("cdm_name", "group_name", "group_level", "strata_name",
+     dplyr::select(c("result_id","cdm_name", "group_name", "group_level", "strata_name",
                      "strata_level", "variable_name", "variable_level",
                      "estimate_name", "estimate_type", "estimate_value",
                      "additional_name", "additional_level", "result_type",
@@ -53,40 +53,57 @@ asSurvivalResult <- function(result) {
                      "eventgap")) %>%
     omopgenerics::splitAdditional() %>%
     omopgenerics::splitGroup() %>%
-    dplyr::mutate(estimate_value = as.numeric(.data$estimate_value))
+    omopgenerics::splitStrata()
 
   estimates <- result %>%
     dplyr::filter(.data$result_type %in%
                     c("survival_probability",
                       "cumulative_failure_probability")) %>%
-    dplyr::select(-dplyr::any_of(c("eventgap", "reason_id"))) %>%
+    dplyr::select(-dplyr::any_of(c("eventgap", "reason_id", "reason", "result_id"))) %>%
     dplyr::mutate(time = as.numeric(.data$time)) %>%
       dplyr::relocate("outcome", .after = "target_cohort") %>%
-      dplyr::relocate("competing_outcome", .after = "outcome")
+      dplyr::relocate("competing_outcome", .after = "outcome") %>%
+    omopgenerics::pivotEstimates() %>%
+    dplyr::select(-dplyr::starts_with("variable_name")) %>%
+    dplyr::rename("variable" = "variable_level")
 
   summary <- result %>%
     dplyr::filter(.data$result_type == "survival_summary") %>%
-    dplyr::select(-dplyr::any_of(c("variable_name", "time", "eventgap", "result_type", "reason_id"))) %>%
+    dplyr::select(-dplyr::any_of(c("variable_name", "time", "eventgap", "result_type", "reason_id", "result_id", "reason"))) %>%
     dplyr::mutate(estimate_name = dplyr::if_else(
       grepl("count", .data$estimate_name),
       gsub("_count","",.data$estimate_name),
       .data$estimate_name
-    ))
+    )) %>%
+    dplyr::select(-dplyr::starts_with("variable_name")) %>%
+    dplyr::rename("variable" = "variable_level") %>%
+    dplyr::relocate("outcome", .after = "target_cohort") %>%
+    dplyr::relocate("competing_outcome", .after = "outcome") %>%
+    omopgenerics::pivotEstimates()
 
   events <- result %>%
     dplyr::filter(.data$result_type == "survival_events") %>%
-    dplyr::select(-dplyr::any_of(c("reason_id", "result_type"))) %>%
+    dplyr::select(-dplyr::any_of(c("reason_id", "result_type", "result_id", "reason"))) %>%
     dplyr::distinct() %>%
     dplyr::mutate(time = as.numeric(.data$time)) %>%
     dplyr::mutate(estimate_name = dplyr::if_else(
       grepl("count", .data$estimate_name),
       gsub("_count","",.data$estimate_name),
       .data$estimate_name
-    ))
+    )) %>%
+    dplyr::select(-dplyr::starts_with("variable_name")) %>%
+    dplyr::rename("variable" = "variable_level") %>%
+    dplyr::relocate("outcome", .after = "target_cohort") %>%
+    dplyr::relocate("competing_outcome", .after = "outcome") %>%
+    omopgenerics::pivotEstimates()
 
   attrition <- result %>%
     dplyr::filter(.data$result_type == "survival_attrition") %>%
-    dplyr::select(-c("result_type", "time", "eventgap"))
+    dplyr::select(-c("result_type", "time", "eventgap", "result_id", "reason_id")) %>%
+    dplyr::select(-dplyr::starts_with("variable_level")) %>%
+    dplyr::relocate("outcome", .after = "target_cohort") %>%
+    dplyr::relocate("competing_outcome", .after = "outcome") %>%
+    omopgenerics::pivotEstimates()
 
   result_final <- estimates
   attr(result_final, "events") <- events

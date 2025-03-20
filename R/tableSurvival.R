@@ -20,8 +20,6 @@
 #' @param x Result from estimateSingleEventSurvival or estimateCompetingRiskSurvival
 #' @param times Times at which to report survival in the summary table
 #' @param timeScale Time unit to report survival in: days, months or years
-#' @param splitStrata If TRUE strata will be split into columns, otherwise
-#' "strata_name" and "strata_level" columns will be kept.
 #' @param header A vector containing which elements should go into the header.
 #' Allowed are: cdm_name, group, strata, additional, variable, estimate,
 #' and settings.
@@ -46,7 +44,6 @@
 tableSurvival <- function(x,
                           times = NULL,
                           timeScale = "days",
-                          splitStrata = TRUE,
                           header = c("estimate"),
                           type = "gt",
                           groupColumn = NULL,
@@ -201,12 +198,6 @@ tableSurvival <- function(x,
       dplyr::bind_rows(summary_times %>% dplyr::select(!c("name","time")))
   }
 
-
-  split <- c("group", "additional")
-  if (splitStrata) {
-    split <- c(split, "strata")
-  }
-
   excludeCols <- c("result_id", "estimate_type")
 
   if ((summary_table %>% dplyr::pull("competing_outcome") %>% unique()) != "none") {
@@ -276,4 +267,142 @@ optionsTableSurvival <- function() {
   default <- visOmopResults::tableOptions()
   default <- default[!names(default) %in% c("useFormatOrder", "keepNotFormatted")]
   return(default)
+}
+
+#' Table with survival events
+#'
+#' @param x Result from estimateSingleEventSurvival or estimateCompetingRiskSurvival.
+#' @param eventGap Event gap defining the times at which to report the risk table
+#' information. Must be one of the eventGap inputs used for the estimation function.
+#' If NULL, all available are reported.
+#' @param header A vector containing which elements should go into the header.
+#' Allowed are: cdm_name, group, strata, additional, variable, estimate,
+#' and settings.
+#' @param type Type of desired formatted table, possibilities: "gt",
+#' "flextable",  and "tibble".
+#' @param groupColumn Columns to use as group labels.
+#' @param .options Named list with additional formatting options.
+#' CohortSurvival::optionsTableSurvival() shows allowed arguments and their
+#' default values.
+#'
+#' @return A tibble containing the risk table information (n_risk, n_events, n_censor)
+#' for all times within the event gap specified.
+#' @export
+#'
+#' @examples
+#' \donttest{
+#' cdm <- mockMGUS2cdm()
+#' surv <- estimateSingleEventSurvival(cdm,
+#'                                     targetCohortTable = "mgus_diagnosis",
+#'                                     outcomeCohortTable = "death_cohort")
+#' riskTable(surv)
+#'}
+riskTable <- function(x,
+                      eventGap = NULL,
+                      header = c("estimate"),
+                      type = "gt",
+                      groupColumn = NULL,
+                      .options = list()){
+
+  rlang::check_installed("visOmopResults", version = "0.5.0")
+
+  # Initial checks
+  x <- omopgenerics::newSummarisedResult(x)
+  omopgenerics::assertNumeric(eventGap, min = 0, null = TRUE)
+
+  # .options:
+  userOptions <- .options
+  .options <- optionsTableSurvival()
+  for (opt in names(userOptions)) {
+    .options[[opt]] <- userOptions[[opt]]
+  }
+
+  # get table of events
+  x_clean <- x %>%
+    dplyr::filter(.data$result_id %in% (omopgenerics::settings(x) %>%
+                                          dplyr::filter(grepl("events", .data$result_type)) %>%
+                                          dplyr::pull("result_id"))) %>%
+    omopgenerics::splitAdditional() %>%
+    dplyr::select(-"reason_id") %>%
+    dplyr::left_join(settings(x) %>%
+                       dplyr::select(c("result_id","eventgap")),
+                     by = "result_id")
+
+  if(!is.null(eventGap)) {
+    x_clean <- x_clean %>%
+      dplyr::filter(.data$eventgap %in% eventGap)
+
+    if(x_clean %>% dplyr::tally() %>% dplyr::pull() == 0) {
+      cli::cli_abort("No events for the specified eventGap {eventGap}")
+    }
+  }
+
+  events_table <- x_clean %>%
+    dplyr::mutate(
+      "estimate_name" = dplyr::case_when(
+        .data$estimate_name == "n_risk_count" ~ "Number at risk",
+        .data$estimate_name == "n_events_count" ~ "Number events",
+        .data$estimate_name == "n_censor_count" ~ "Number censored",
+        .default = .data$estimate_name
+      ),
+      "estimate_type" = dplyr::if_else(
+        grepl("Number", .data$estimate_name), "integer", .data$estimate_type
+      )
+    ) %>%
+    dplyr::mutate(
+      "estimate_name" = factor(
+        .data$estimate_name,
+        levels = c("Number at risk", "Number events", "Number censored"))
+    ) %>%
+    dplyr::arrange(.data$estimate_name) %>%
+    dplyr::mutate("estimate_name" = as.character(.data$estimate_name))
+
+  events_table <- events_table %>%
+    dplyr::left_join(
+      omopgenerics::settings(x) %>%
+        dplyr::select("result_id", "result_type", "outcome", "competing_outcome"),
+      by = "result_id"
+    )
+
+  excludeCols <- c("result_id", "estimate_type")
+
+  if ((events_table %>% dplyr::pull("competing_outcome") %>% unique()) != "none") {
+    events_table <- events_table %>%
+      dplyr::mutate(
+        "variable_name" = dplyr::if_else(
+          .data$variable_level == .data$outcome, "outcome", "competing_outcome"
+        )
+      )
+    renameCols <- c(
+      "Outcome type" = "variable_name",
+      "Outcome name" = "variable_level",
+      "Time" = "time",
+      "Event gap" = "eventgap"
+    )
+    excludeCols <- c("reason_id", "reason")
+  } else {
+    excludeCols <- c(excludeCols, "variable_name", "reason_id", "reason")
+    renameCols <- c("Outcome name" = "variable_level",
+                    "Time" = "time",
+                    "Event gap" = "eventgap")
+  }
+
+  # to SR
+  events_table <- events_table %>%
+    dplyr::mutate(additional_level = paste0(.data$time, " &&& ", .data$eventgap)) %>%
+    dplyr::mutate(additional_name = "time &&& eventgap") %>%
+    dplyr::select(c(omopgenerics::resultColumns()))
+
+  events_table <- visOmopResults::visOmopTable(
+    events_table,
+    header = header,
+    groupColumn = groupColumn,
+    settingsColumn = "eventgap",
+    type = type,
+    rename = renameCols,
+    hide = excludeCols,
+    .options = c(.options, list(useFormatOrder = FALSE)) # to keep order set when factoring
+  )
+
+  return(events_table)
 }

@@ -24,9 +24,9 @@ test_that("working example", {
   )
   person <- dplyr::tibble(
     person_id = c(1, 2, 3, 4, 5),
-    year_of_birth = c(rep("1990", 5)),
-    month_of_birth = c(rep("02", 5)),
-    day_of_birth = c(rep("11", 5)),
+    year_of_birth = c(rep(1990, 5)),
+    month_of_birth = c(rep(2, 5)),
+    day_of_birth = c(rep(11, 5)),
     gender_concept_id = c(rep(0,5)),
     ethnicity_concept_id = c(rep(0,5)),
     race_concept_id = c(rep(0,5))
@@ -44,12 +44,21 @@ test_that("working example", {
   )
 
   cdm2 = CDMConnector::copyCdmTo(db,
-                                   cdm,
-                                   schema = "main",
-                                   overwrite = TRUE)
+                                 cdm,
+                                 schema = "main",
+                                 overwrite = TRUE)
 
   attr(cdm2, "cdm_schema") <- "main"
   attr(cdm2, "write_schema") <- "main"
+
+  # test name argument works
+  cdm2$cohort2 <- cdm2$cohort1 %>%
+    addCohortSurvival(
+      cdm = cdm2,
+      outcomeCohortTable = "cohort1",
+      outcomeCohortId = 1,
+      name = "cohort2"
+    )
 
   cdm2$cohort1 <- cdm2$cohort1 %>%
     addCohortSurvival(
@@ -58,13 +67,13 @@ test_that("working example", {
       outcomeCohortId = 1
     )
   expect_true(all(colnames(cdm2$cohort1) %in%
-    c(
-      "cohort_definition_id", "subject_id",
-      "cohort_start_date", "cohort_end_date",
-      "days_to_exit", "status", "time"
-    )))
+                    c(
+                      "cohort_definition_id", "subject_id",
+                      "cohort_start_date", "cohort_end_date",
+                      "days_to_exit", "status", "time"
+                    )))
 
-CDMConnector::cdmDisconnect(cdm2)
+  CDMConnector::cdmDisconnect(cdm2)
 })
 
 test_that("another working example", {
@@ -76,8 +85,8 @@ test_that("another working example", {
   }
   skip_if_not(CDMConnector::eunomiaIsAvailable())
 
-  con <- DBI::dbConnect(duckdb::duckdb(), dbdir = CDMConnector::eunomia_dir())
-  cdm <- CDMConnector::cdm_from_con(con, cdm_schema = "main", write_schema = "main")
+  con <- DBI::dbConnect(duckdb::duckdb(), dbdir = CDMConnector::eunomiaDir())
+  cdm <- CDMConnector::cdmFromCon(con, cdmSchema = "main", writeSchema = "main")
 
   celecoxibCodes <- CodelistGenerator::getDescendants(cdm, conceptId = 1118084)
   cdm$celecoxib <- cdm$drug_exposure %>%
@@ -158,7 +167,7 @@ test_that("censorOnCohortExit", {
   skip_on_cran()
   db <- DBI::dbConnect(duckdb::duckdb(), ":memory:")
 
-   cohort <- dplyr::tibble(
+  cohort <- dplyr::tibble(
     cohort_definition_id = c(1,1,1),
     subject_id = c(1,2,3),
     cohort_start_date = c(as.Date("2020-01-01"),
@@ -191,9 +200,9 @@ test_that("censorOnCohortExit", {
   )
   person <- dplyr::tibble(
     person_id = c(1, 2, 3, 4, 5),
-    year_of_birth = c(rep("1990", 5)),
-    month_of_birth = c(rep("02", 5)),
-    day_of_birth = c(rep("11", 5)),
+    year_of_birth = c(rep(1990, 5)),
+    month_of_birth = c(rep(2, 5)),
+    day_of_birth = c(rep(11, 5)),
     gender_concept_id = c(rep(0,5)),
     ethnicity_concept_id = c(rep(0,5)),
     race_concept_id = c(rep(0,5))
@@ -212,9 +221,9 @@ test_that("censorOnCohortExit", {
   )
 
   cdm2 = CDMConnector::copyCdmTo(db,
-                                   cdm,
-                                   schema = "main",
-                                   overwrite = TRUE)
+                                 cdm,
+                                 schema = "main",
+                                 overwrite = TRUE)
 
   attr(cdm2, "cdm_schema") <- "main"
   attr(cdm2, "write_schema") <- "main"
@@ -242,27 +251,27 @@ test_that("censorOnCohortExit", {
   }
 
   expect_true(all(compareNA(cohortNoCensorExit %>%
-                    dplyr::select(status) %>%
-                    dplyr::pull(),
-                    cohortCensorExit %>%
-                    dplyr::select(status) %>%
-                    dplyr::pull())))
+                              dplyr::select(status) %>%
+                              dplyr::pull(),
+                            cohortCensorExit %>%
+                              dplyr::select(status) %>%
+                              dplyr::pull())))
   expect_true(all(compareNA(sort(cohortNoCensorExit %>%
-                dplyr::select(time) %>%
-                dplyr::pull()),
-                sort(c(NA, 3, 1155)))))
+                                   dplyr::select(time) %>%
+                                   dplyr::pull()),
+                            sort(c(NA, 3, 1155)))))
   expect_true(all(compareNA(sort(cohortNoCensorExit %>%
-                          dplyr::select(days_to_exit) %>%
-                          dplyr::pull()),
-                          sort(c(1186, 1216, 1155)))))
+                                   dplyr::select(days_to_exit) %>%
+                                   dplyr::pull()),
+                            sort(c(1186, 1216, 1155)))))
   expect_true(all(compareNA(sort(cohortCensorExit %>%
-                          dplyr::select(time) %>%
-                          dplyr::pull()),
-                          sort(c(NA, 3, 60)))))
+                                   dplyr::select(time) %>%
+                                   dplyr::pull()),
+                            sort(c(NA, 3, 60)))))
   expect_true(all(compareNA(sort(cohortCensorExit %>%
-                          dplyr::select(days_to_exit) %>%
-                          dplyr::pull()),
-                          sort(c(91, 213, 60)))))
+                                   dplyr::select(days_to_exit) %>%
+                                   dplyr::pull()),
+                            sort(c(91, 213, 60)))))
 
   CDMConnector::cdmDisconnect(cdm2)
 })
@@ -304,9 +313,9 @@ test_that("censorOnDate", {
   )
   person <- dplyr::tibble(
     person_id = c(1, 2, 3, 4, 5),
-    year_of_birth = c(rep("1990", 5)),
-    month_of_birth = c(rep("02", 5)),
-    day_of_birth = c(rep("11", 5)),
+    year_of_birth = c(rep(1990, 5)),
+    month_of_birth = c(rep(2, 5)),
+    day_of_birth = c(rep(11, 5)),
     gender_concept_id = c(rep(0,5)),
     ethnicity_concept_id = c(rep(0,5)),
     race_concept_id = c(rep(0,5))
@@ -325,9 +334,9 @@ test_that("censorOnDate", {
   )
 
   cdm2 = CDMConnector::copyCdmTo(db,
-                                   cdm,
-                                   schema = "main",
-                                   overwrite = TRUE)
+                                 cdm,
+                                 schema = "main",
+                                 overwrite = TRUE)
 
   attr(cdm2, "cdm_schema") <- "main"
   attr(cdm2, "write_schema") <- "main"
@@ -348,16 +357,16 @@ test_that("censorOnDate", {
   }
 
   expect_true(all(compareNA(sort(cohortCensorDate %>%
-                              dplyr::select(status) %>%
-                              dplyr::pull()),
+                                   dplyr::select(status) %>%
+                                   dplyr::pull()),
                             sort(c(NA, 1, 0)))))
   expect_true(all(compareNA(sort(cohortCensorDate %>%
-                              dplyr::select(days_to_exit) %>%
-                              dplyr::pull()),
+                                   dplyr::select(days_to_exit) %>%
+                                   dplyr::pull()),
                             sort(c(369, 368, 3)))))
   expect_true(all(compareNA(sort(cohortCensorDate %>%
-                              dplyr::select(time) %>%
-                              dplyr::pull()),
+                                   dplyr::select(time) %>%
+                                   dplyr::pull()),
                             sort(c(NA, 3, 3)))))
 
   expect_error(
@@ -410,9 +419,9 @@ test_that("followUpDays", {
   )
   person <- dplyr::tibble(
     person_id = c(1, 2, 3, 4, 5),
-    year_of_birth = c(rep("1990", 5)),
-    month_of_birth = c(rep("02", 5)),
-    day_of_birth = c(rep("11", 5)),
+    year_of_birth = c(rep(1990, 5)),
+    month_of_birth = c(rep(2, 5)),
+    day_of_birth = c(rep(11, 5)),
     gender_concept_id = c(rep(0,5)),
     ethnicity_concept_id = c(rep(0,5)),
     race_concept_id = c(rep(0,5))
@@ -431,9 +440,9 @@ test_that("followUpDays", {
   )
 
   cdm2 = CDMConnector::copyCdmTo(db,
-                                   cdm,
-                                   schema = "main",
-                                   overwrite = TRUE)
+                                 cdm,
+                                 schema = "main",
+                                 overwrite = TRUE)
 
   attr(cdm2, "cdm_schema") <- "main"
   attr(cdm2, "write_schema") <- "main"
@@ -446,44 +455,44 @@ test_that("followUpDays", {
       followUp = 20
     ) %>%
     dplyr::arrange(subject_id)
- cohortFUandCE <- cdm2$cohort1 %>%
-   addCohortSurvival(
-     cdm = cdm2,
-     outcomeCohortTable = "cohort2",
-     outcomeCohortId = 1,
-     followUp = 20,
-     censorOnCohortExit = TRUE
-   ) %>%
-   dplyr::arrange(subject_id)
+  cohortFUandCE <- cdm2$cohort1 %>%
+    addCohortSurvival(
+      cdm = cdm2,
+      outcomeCohortTable = "cohort2",
+      outcomeCohortId = 1,
+      followUp = 20,
+      censorOnCohortExit = TRUE
+    ) %>%
+    dplyr::arrange(subject_id)
 
- expect_true(all(cohortFollowUp %>%
-                   dplyr::select(days_to_exit) %>%
-                   dplyr::pull() ==
-                   c(20,20,20)))
- expect_true(all(cohortFollowUp %>%
-                   dplyr::select(status) %>%
-                   dplyr::pull() ==
-                   c(0,1,1)))
- expect_true(all(cohortFollowUp %>%
-                   dplyr::select(time) %>%
-                   dplyr::pull() ==
-                   c(20,3,10)))
+  expect_true(all(cohortFollowUp %>%
+                    dplyr::select(days_to_exit) %>%
+                    dplyr::pull() ==
+                    c(20,20,20)))
+  expect_true(all(cohortFollowUp %>%
+                    dplyr::select(status) %>%
+                    dplyr::pull() ==
+                    c(0,1,1)))
+  expect_true(all(cohortFollowUp %>%
+                    dplyr::select(time) %>%
+                    dplyr::pull() ==
+                    c(20,3,10)))
 
- expect_true(all(cohortFUandCE %>%
-                   dplyr::select(days_to_exit) %>%
-                   dplyr::pull() ==
-                   c(20,20,5)))
- expect_true(all(cohortFUandCE %>%
-                   dplyr::select(status) %>%
-                   dplyr::pull() ==
-                   c(0,1,0)))
- expect_true(all(cohortFUandCE %>%
-                   dplyr::select(time) %>%
-                   dplyr::pull() ==
-                   c(20,3,5)))
+  expect_true(all(cohortFUandCE %>%
+                    dplyr::select(days_to_exit) %>%
+                    dplyr::pull() ==
+                    c(20,20,5)))
+  expect_true(all(cohortFUandCE %>%
+                    dplyr::select(status) %>%
+                    dplyr::pull() ==
+                    c(0,1,0)))
+  expect_true(all(cohortFUandCE %>%
+                    dplyr::select(time) %>%
+                    dplyr::pull() ==
+                    c(20,3,5)))
 
   CDMConnector::cdmDisconnect(cdm2)
-  })
+})
 
 test_that("expected errors", {
   skip_on_cran()
@@ -492,60 +501,60 @@ test_that("expected errors", {
   # check outcome cohort
   # id that is not in the table
   expect_error(cdm$mgus_diagnosis %>%
-    addCohortSurvival(
-      cdm = cdm,
-      outcomeCohortTable = "death_cohort",
-      outcomeCohortId = 2
-    ))
+                 addCohortSurvival(
+                   cdm = cdm,
+                   outcomeCohortTable = "death_cohort",
+                   outcomeCohortId = 2
+                 ))
   # should only work for one cohort
   expect_error(cdm$mgus_diagnosis %>%
-    addCohortSurvival(
-      cdm = cdm,
-      outcomeCohortTable = "death_cohort",
-      outcomeCohortId = c(1, 2)
-    ))
+                 addCohortSurvival(
+                   cdm = cdm,
+                   outcomeCohortTable = "death_cohort",
+                   outcomeCohortId = c(1, 2)
+                 ))
   # user must provide a cohort id
   expect_error(cdm$mgus_diagnosis %>%
-    addCohortSurvival(
-      cdm = cdm,
-      outcomeCohortTable = "death_cohort",
-      outcomeCohortId = NULL
-    ))
+                 addCohortSurvival(
+                   cdm = cdm,
+                   outcomeCohortTable = "death_cohort",
+                   outcomeCohortId = NULL
+                 ))
 
   # censorOnCohortExit must be logical
   expect_error(cdm$mgus_diagnosis %>%
-    addCohortSurvival(
-      cdm = cdm,
-      outcomeCohortTable = "death_cohort",
-      outcomeCohortId = 1,
-      censorOnCohortExit = 1
-    ))
+                 addCohortSurvival(
+                   cdm = cdm,
+                   outcomeCohortTable = "death_cohort",
+                   outcomeCohortId = 1,
+                   censorOnCohortExit = 1
+                 ))
 
   # followUpDays must be 1 or higher
   expect_error(cdm$mgus_diagnosis %>%
-    addCohortSurvival(
-      cdm = cdm,
-      outcomeCohortTable = "death_cohort",
-      outcomeCohortId = 1,
-      followUpDays = -1
-    ))
+                 addCohortSurvival(
+                   cdm = cdm,
+                   outcomeCohortTable = "death_cohort",
+                   outcomeCohortId = 1,
+                   followUpDays = -1
+                 ))
 
   expect_error(cdm$mgus_diagnosis %>%
-    addCohortSurvival(
-      cdm = cdm,
-      outcomeCohortTable = "death_cohort",
-      outcomeCohortId = 1,
-      followUpDays = 0
-    ))
+                 addCohortSurvival(
+                   cdm = cdm,
+                   outcomeCohortTable = "death_cohort",
+                   outcomeCohortId = 1,
+                   followUpDays = 0
+                 ))
 
   # temporary must be logical
   expect_error(cdm$mgus_diagnosis %>%
-    addCohortSurvival(
-      cdm = cdm,
-      outcomeCohortTable = "death_cohort",
-      outcomeCohortId = 1,
-      temporary = "maybe"
-    ))
+                 addCohortSurvival(
+                   cdm = cdm,
+                   outcomeCohortTable = "death_cohort",
+                   outcomeCohortId = 1,
+                   temporary = "maybe"
+                 ))
 
   expect_error(cdm$mgus_diagnosis %>%
                  addCohortSurvival(
@@ -555,18 +564,18 @@ test_that("expected errors", {
                    outcomeWashout = c(0,1)
                  ))
 
-#  cdm <- PatientProfiles::mockPatientProfiles()
-#  cdm[["cohort1"]] <- cdm[["cohort1"]] %>%
-#    dplyr::group_by(subject_id) %>%
-#    dplyr::filter(dplyr::row_number() == 1)
+  #  cdm <- PatientProfiles::mockPatientProfiles()
+  #  cdm[["cohort1"]] <- cdm[["cohort1"]] %>%
+  #    dplyr::group_by(subject_id) %>%
+  #    dplyr::filter(dplyr::row_number() == 1)
 
   # multiple cohort definition ids in exposure table
-#  expect_error(cdm$cohort1 %>%
-#                 addCohortSurvival(
-#                   cdm = cdm,
-#                   outcomeCohortTable = "cohort1",
-#                   outcomeCohortId = 1
-#                 ))
+  #  expect_error(cdm$cohort1 %>%
+  #                 addCohortSurvival(
+  #                   cdm = cdm,
+  #                   outcomeCohortTable = "cohort1",
+  #                   outcomeCohortId = 1
+  #                 ))
 
   CDMConnector::cdmDisconnect(cdm)
 })
@@ -598,9 +607,9 @@ test_that("within cohort survival", {
   )
   person <- dplyr::tibble(
     person_id = c(1, 2, 3, 4, 5),
-    year_of_birth = c(rep("1990", 5)),
-    month_of_birth = c(rep("02", 5)),
-    day_of_birth = c(rep("11", 5)),
+    year_of_birth = c(rep(1990, 5)),
+    month_of_birth = c(rep(2, 5)),
+    day_of_birth = c(rep(11, 5)),
     gender_concept_id = c(rep(0,5)),
     ethnicity_concept_id = c(rep(0,5)),
     race_concept_id = c(rep(0,5))
@@ -618,9 +627,9 @@ test_that("within cohort survival", {
   )
 
   cdm2 = CDMConnector::copyCdmTo(db,
-                                   cdm,
-                                   schema = "main",
-                                   overwrite = TRUE)
+                                 cdm,
+                                 schema = "main",
+                                 overwrite = TRUE)
 
   attr(cdm2, "cdm_schema") <- "main"
   attr(cdm2, "write_schema") <- "main"
@@ -635,7 +644,7 @@ test_that("within cohort survival", {
       outcomeDateVariable = "cohort_start_date"
     )
   expect_true(all(cdm2$cohort1_start %>%
-    dplyr::pull("time") == 0))
+                    dplyr::pull("time") == 0))
   expect_true(all(cdm2$cohort1_start %>%
                     dplyr::pull("status") == 1))
 
@@ -648,11 +657,11 @@ test_that("within cohort survival", {
     )
 
   expect_true(all(cdm2$cohort1_end %>%
-    dplyr::collect() %>%
-    dplyr::mutate(dtime = as.numeric(difftime(cohort_end_date,
-                                   cohort_start_date)),
-                  equal = (dtime == time)) %>%
-    dplyr::pull("equal")))
+                    dplyr::collect() %>%
+                    dplyr::mutate(dtime = as.numeric(difftime(cohort_end_date,
+                                                              cohort_start_date)),
+                                  equal = (dtime == time)) %>%
+                    dplyr::pull("equal")))
 
   # limit follow up
   cdm2$cohort1_b <- cdm2$cohort1 %>%
@@ -698,9 +707,9 @@ test_that("allow overwrite of time and status", {
   )
   person <- dplyr::tibble(
     person_id = c(1, 2, 3, 4, 5),
-    year_of_birth = c(rep("1990", 5)),
-    month_of_birth = c(rep("02", 5)),
-    day_of_birth = c(rep("11", 5)),
+    year_of_birth = c(rep(1990, 5)),
+    month_of_birth = c(rep(2, 5)),
+    day_of_birth = c(rep(11, 5)),
     gender_concept_id = c(rep(0,5)),
     ethnicity_concept_id = c(rep(0,5)),
     race_concept_id = c(rep(0,5))
@@ -718,9 +727,9 @@ test_that("allow overwrite of time and status", {
   )
 
   cdm2 = CDMConnector::copyCdmTo(db,
-                                   cdm,
-                                   schema = "main",
-                                   overwrite = TRUE)
+                                 cdm,
+                                 schema = "main",
+                                 overwrite = TRUE)
 
   attr(cdm2, "cdm_schema") <- "main"
   attr(cdm2, "write_schema") <- "main"
@@ -753,7 +762,7 @@ test_that("allow overwrite of time and status", {
       cdm = cdm2,
       outcomeCohortTable = "cohort1",
     )
- expect_true(!is.null(cdm2$cohort1))
+  expect_true(!is.null(cdm2$cohort1))
 
   CDMConnector::cdmDisconnect(cdm2)
 })
@@ -810,9 +819,9 @@ test_that("multiple records per person", {
   )
   person <- dplyr::tibble(
     person_id = c(1, 2, 3, 4, 5),
-    year_of_birth = c(rep("1990", 5)),
-    month_of_birth = c(rep("02", 5)),
-    day_of_birth = c(rep("11", 5)),
+    year_of_birth = c(rep(1990, 5)),
+    month_of_birth = c(rep(2, 5)),
+    day_of_birth = c(rep(11, 5)),
     gender_concept_id = c(rep(0,5)),
     ethnicity_concept_id = c(rep(0,5)),
     race_concept_id = c(rep(0,5))
@@ -831,9 +840,9 @@ test_that("multiple records per person", {
   )
 
   cdm2 = CDMConnector::copyCdmTo(db,
-                                   cdm,
-                                   schema = "main",
-                                   overwrite = TRUE)
+                                 cdm,
+                                 schema = "main",
+                                 overwrite = TRUE)
 
   attr(cdm2, "cdm_schema") <- "main"
   attr(cdm2, "write_schema") <- "main"
@@ -848,22 +857,22 @@ test_that("multiple records per person", {
   expect_equal(start_rows, end_rows)
 
   expect_true(cdm2$exposure_cohort %>%
-    dplyr::filter(subject_id == 1,
-                    cohort_start_date == as.Date("2010-01-01")) %>%
-    dplyr::pull("status") == 1)
+                dplyr::filter(subject_id == 1,
+                              cohort_start_date == as.Date("2010-01-01")) %>%
+                dplyr::pull("status") == 1)
   # NA for the second as their cohort start was after their event
   expect_true(is.na(cdm2$exposure_cohort %>%
-                dplyr::filter(subject_id == 1,
-                              cohort_start_date == as.Date("2015-01-01")) %>%
-                dplyr::pull("status")))
+                      dplyr::filter(subject_id == 1,
+                                    cohort_start_date == as.Date("2015-01-01")) %>%
+                      dplyr::pull("status")))
   # Both will be status == 1 as event came after second cohort entry
   expect_true(all(cdm2$exposure_cohort %>%
-                dplyr::filter(subject_id == 2) %>%
-                dplyr::pull("status") == 1))
+                    dplyr::filter(subject_id == 2) %>%
+                    dplyr::pull("status") == 1))
   # no event for subject 3
   expect_true(cdm2$exposure_cohort %>%
-                    dplyr::filter(subject_id == 3) %>%
-                    dplyr::pull("status") == 0)
+                dplyr::filter(subject_id == 3) %>%
+                dplyr::pull("status") == 0)
 
   CDMConnector::cdmDisconnect(cdm2)
-  })
+})

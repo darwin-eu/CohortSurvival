@@ -14,12 +14,9 @@ knitr::opts_chunk$set(
 )
 ```
 
-# CohortSurvival <a href="https://darwin-eu-dev.github.io/CohortSurvival/"><img src="man/figures/logo.png" align="right" height="138" alt="CohortSurvival website" /></a>
+# CohortSurvival <a href="https://darwin-eu-dev.github.io/CohortSurvival/"><img src="man/figures/logo.png" alt="CohortSurvival website" align="right" height="138"/></a>
 
-[![CRANstatus](https://www.r-pkg.org/badges/version/CohortSurvival)](https://CRAN.R-project.org/package=CohortSurvival)
-[![codecov.io](https://codecov.io/github/darwin-eu/CohortSurvival/coverage.svg?branch=main)](https://app.codecov.io/github/darwin-eu/CohortSurvival?branch=main) 
-[![R-CMD-check](https://github.com/darwin-eu/CohortSurvival/workflows/R-CMD-check/badge.svg)](https://github.com/darwin-eu/CohortSurvival/actions) 
-[![Lifecycle:Experimental](https://img.shields.io/badge/Lifecycle-Experimental-339999)](https://lifecycle.r-lib.org/articles/stages.html)
+[![CRANstatus](https://www.r-pkg.org/badges/version/CohortSurvival)](https://CRAN.R-project.org/package=CohortSurvival) [![codecov.io](https://codecov.io/github/darwin-eu/CohortSurvival/coverage.svg?branch=main)](https://app.codecov.io/github/darwin-eu/CohortSurvival?branch=main) [![R-CMD-check](https://github.com/darwin-eu/CohortSurvival/workflows/R-CMD-check/badge.svg)](https://github.com/darwin-eu/CohortSurvival/actions) [![Lifecycle:Experimental](https://img.shields.io/badge/Lifecycle-Experimental-339999)](https://lifecycle.r-lib.org/articles/stages.html)
 
 CohortSurvival contains functions for extracting and summarising survival data using the OMOP common data model.
 
@@ -37,7 +34,7 @@ install.packages("CohortSurvival")
 
 The CohortSurvival package is designed to work with data in the OMOP CDM format, so our first step is to create a reference to the data using the CDMConnector package.
 
-For this example we´ll use a cdm reference containing the MGUS2 dataset from the survival package (which we transformed into a set of OMOP CDM style cohort tables). The mgus2 dataset contains survival data of 1341 sequential patients with monoclonal gammopathy of undetermined significance (MGUS). For more information see `?survival::mgus2`
+For this example we´ll use a cdm reference containing the MGUS2 dataset from the survival package (which we transformed into a set of OMOP CDM style cohort tables). The MGUS2 dataset contains survival data of 1341 sequential patients with monoclonal gammopathy of undetermined significance (MGUS). For more information see `?survival::mgus2`.
 
 ```{r}
 library(CDMConnector)
@@ -48,14 +45,16 @@ library(ggplot2)
 cdm <- CohortSurvival::mockMGUS2cdm()
 ```
 
-In our cdm reference we have three cohort tables of interest: 1) MGUS diagnosis cohort
+In our cdm reference we have three cohort tables of interest:
+
+1) MGUS diagnosis cohort
 
 ```{r}
 cdm$mgus_diagnosis %>%
   glimpse()
 ```
 
-2)  MGUS progression cohort
+2)  MGUS progression to multiple myeloma cohort
 
 ```{r}
 cdm$progression %>%
@@ -78,17 +77,17 @@ MGUS_death <- estimateSingleEventSurvival(cdm,
   targetCohortTable = "mgus_diagnosis",
   outcomeCohortTable = "death_cohort"
 )
-MGUS_death |> 
+MGUS_death %>% 
   glimpse()
 ```
 
-Now we have our results, we can quickly create a plot summarising survival over time.
+Now that we have our results, we can quickly create a plot summarising survival over time.
 
 ```{r}
 plotSurvival(MGUS_death)
 ```
 
-As well as estimating survival for our cohort as overall, we can also estimate survival by strata. These strata are based on variables that have been added to our target cohort.
+As well as estimating survival for our cohort overall, we can also estimate survival by strata. These strata are based on variables that have been added to our target cohort previously as columns.
 
 ```{r}
 MGUS_death <- estimateSingleEventSurvival(cdm,
@@ -106,7 +105,7 @@ plotSurvival(MGUS_death,
 
 ## Estimating survival accounting for a competing risk
 
-The package also allows to estimate survival of both an outcome and competing risk outcome. We can then stratify, see information on events, summarise the estimates and check the contributing participants in the same way we did for the single event survival analysis.
+The package also allows to estimate survival of both an outcome and competing risk outcome together. We can then stratify, see information on events or summarise the estimates in the same way we did for the single event survival analysis.
 
 ```{r, fig.width=5}
 MGUS_death_prog <- estimateCompetingRiskSurvival(cdm,
@@ -141,3 +140,7 @@ plotSurvival(MGUS_death_prog  %>%
 ```{r}
 cdmDisconnect(cdm)
 ```
+
+### Additional information
+
+You can check additional functionality of the package on its [website](https://darwin-eu-dev.github.io/CohortSurvival/).

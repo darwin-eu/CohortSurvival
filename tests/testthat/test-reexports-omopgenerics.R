@@ -1,5 +1,6 @@
 
 test_that("omopgenerics reexports work", {
+  skip_on_cran()
   cdm <- mockMGUS2cdm()
   surv <- estimateSingleEventSurvival(cdm,
                                       "mgus_diagnosis",
@@ -13,7 +14,7 @@ test_that("omopgenerics reexports work", {
 
   # importing and exporting
   result_path <- tempdir("result")
-  omopgenerics::exportSummarisedResult(surv, path = result_path)
+  expect_warning(omopgenerics::exportSummarisedResult(surv, path = result_path))
   surv_imported <-  omopgenerics::importSummarisedResult(result_path)
   expect_no_error(tableSurvival(surv_imported, type = "tibble"))
   expect_no_error(dplyr::is.tbl(omopgenerics::settings(surv_imported)))

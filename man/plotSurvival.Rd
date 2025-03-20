@@ -6,14 +6,10 @@
 \usage{
 plotSurvival(
   result,
-  x = "time",
-  xscale = "days",
-  ylim = c(0, NA),
-  xlim = NULL,
-  cumulativeFailure = FALSE,
   ribbon = TRUE,
   facet = NULL,
   colour = NULL,
+  cumulativeFailure = FALSE,
   riskTable = FALSE,
   riskInterval = 30
 )
@@ -21,22 +17,14 @@ plotSurvival(
 \arguments{
 \item{result}{Survival results}
 
-\item{x}{Variable to plot on x axis}
-
-\item{xscale}{X axis scale. Can be "days" or "years".}
-
-\item{ylim}{Limits for the Y axis}
-
-\item{xlim}{Limits for the X axis}
-
-\item{cumulativeFailure}{whether to plot the cumulative failure probability
-instead of the survival probability}
-
 \item{ribbon}{If TRUE, the plot will join points using a ribbon}
 
 \item{facet}{Variables to use for facets}
 
 \item{colour}{Variables to use for colours}
+
+\item{cumulativeFailure}{whether to plot the cumulative failure probability
+instead of the survival probability}
 
 \item{riskTable}{Whether to print risk table below the plot}
 

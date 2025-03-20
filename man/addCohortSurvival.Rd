@@ -13,7 +13,8 @@ addCohortSurvival(
   outcomeWashout = Inf,
   censorOnCohortExit = FALSE,
   censorOnDate = NULL,
-  followUpDays = Inf
+  followUpDays = Inf,
+  name = NULL
 )
 }
 \arguments{
@@ -38,6 +39,8 @@ at the given date}
 
 \item{followUpDays}{Number of days to follow up individuals (lower bound 1,
 upper bound Inf)}
+
+\item{name}{Name of the new table, if NULL a temporary table is returned.}
 }
 \value{
 Two additional columns will be added to x. The "time" column will

@@ -14,10 +14,9 @@ knitr::opts_chunk$set(
 )
 ```
 
-
 ## Set up
 
-Let's first load the packages required.
+Let us first load the packages required.
 
 ```{r}
 library(CDMConnector)
@@ -27,21 +26,17 @@ library(cmprsk)
 library(survival)
 ```
 
-We'll create a cdm reference to use our example MGUS2 survival dataset. In practice you would use the CDMConnector package to connect to your data mapped to the OMOP CDM.
+We will create a cdm reference to use our example MGUS2 survival dataset.
 
 ```{r}
 cdm <- CohortSurvival::mockMGUS2cdm()
 ```
 
-The CohortSurvival package does not have implemented functionality to do more complex survival analyses than Kaplar Meier
-curves, like Cox Proportional Hazards modelling. However, the format the data has to be in to be inputted to well-known 
-modelling functions from packages like `survival` or `cmprsk`can be retrieved from OMOP data with some in-built functions in
-this package. Let's see how to do it in both single event and competing risk survival settings.
+The CohortSurvival package does not have implemented functionality to do more complex survival analyses than Kaplar Meier curves, like Cox Proportional Hazards modelling. However, the format the data has to be in to be inputted to well-known modelling functions from packages like `survival` or `cmprsk`can be retrieved from OMOP data with some in-built functions in this package. Let us see how to do it in both single event and competing risk survival settings.
 
 ## Further analysis with single event survival
 
-To get the `time` and `status` information we need for the `coxph` function in the package `survival`, for instance, we only
-need to call `addCohortSurvival`. The stratification variables need to be columns previously added to the cohort by the user.
+To get the `time` and `status` information we need for the `coxph` function in the package `survival`, for instance, we only need to call `addCohortSurvival`. The stratification variables need to be columns previously added to the cohort by the user.
 
 ```{r, fig.width=5}
 input_survival_single <- cdm$mgus_diagnosis %>%
@@ -54,28 +49,69 @@ input_survival_single <- cdm$mgus_diagnosis %>%
 input_survival_single %>% 
   glimpse()
 ```
-This information should be enough to call any advanced function, like:
+
+We can decide to change some of the default parameters in this function. Information on all these can be found `?addCohortSurvival`. For instance, we can choose to exclude people with an outcome only 180 days before index date, instead of anytime, and follow them up for only one year. We can also decide to use `cohort_end_date` as their outcome variable and censor them at a particular date, for instance, the 1st of January of 1994. We see how that gives us different results:
+
+```{r}
+cdm$mgus_diagnosis %>%
+       addCohortSurvival(
+       cdm = cdm,
+       outcomeCohortTable = "death_cohort",
+       outcomeWashout = 180,
+       followUpDays = 365
+       ) %>%
+  filter(cohort_start_date > "1993-01-01") %>%
+  glimpse()
+cdm$mgus_diagnosis %>%
+       addCohortSurvival(
+       cdm = cdm,
+       outcomeCohortTable = "death_cohort",
+       outcomeDateVariable = "cohort_end_date",
+       censorOnDate = as.Date("1994-01-01")
+       ) %>%
+    filter(cohort_start_date > "1993-01-01") %>%
+  glimpse()
+```
+
+This table with the added `time` and `status` information should be enough to call any advanced function, like the aforementioned Cox Proportional Hazards model:
 
 ```{r}
 survival::coxph(survival::Surv(time, status) ~ age + sex, data = input_survival_single)
 survival::survdiff(survival::Surv(time, status) ~ sex, data = input_survival_single)
 ```
+
 ## Further analysis with competing risk survival
 
-For competing risk, there is a similar function that adds `time` and `status` information to the cohort of interest. We only need to specify which are the outcome and competing outcome of interest. We can also choose other options such as follow up time, censoring on a specific date, washout periods, or others. 
+For competing risk settings, we need to use the same function that adds `time` and `status` information, but twice. We first need to add time and status information for the outcome, then for the competing outcome. Then we leverage all those variables to get what outcome (if any) to count per individual so that we can feed the result to subsequent models.
 
 ```{r}
-input_survival_cr <- cdm$mgus_diagnosis %>%
-  addCompetingRiskCohortSurvival(
-    cdm = cdm,
-    outcomeCohortTable = "progression",
-    outcomeCohortId = 1,
-    competingOutcomeCohortTable = "death_cohort",
-    competingOutcomeCohortId = 1
-  ) %>% 
-  glimpse()
+
+# Add all status and time information for both outcomes
+  input_survival_cr <- cdm$mgus_diagnosis %>%
+    addCohortSurvival(cdm, "progression") %>%
+    dplyr::rename(
+      "outcome_time" = "time",
+      "outcome_status" = "status"
+    ) %>%
+     addCohortSurvival(cdm, "death_cohort") %>%
+    dplyr::rename(
+      "competing_outcome_time" = "time",
+      "competing_outcome_status" = "status"
+    )
+  
+  # Collect and 
+  input_survival_cr <- input_survival_cr %>%
+    dplyr::collect() %>%
+    dplyr::mutate(
+      time = pmin(outcome_time, competing_outcome_time),
+      status = factor(
+        dplyr::if_else(competing_outcome_time <= outcome_time, 2 * competing_outcome_status, outcome_status))
+    ) %>%
+    dplyr::select(-c("outcome_time", "outcome_status", "competing_outcome_time", "competing_outcome_status"))
+
 ```
-We can use the package `cmprsk` to fit a Fine and Gray model to the competing risk data. We first change our `sex` covariate to numeric.
+
+We can use the package `cmprsk` to fit a Fine and Gray model to the competing risk data. We first change our `sex` covariate to numeric, and then we can run the analysis:
 
 ```{r, fig.height=6, fig.width=8}
 input_survival_cr <- input_survival_cr %>%
@@ -90,7 +126,10 @@ summary(cmprsk::crr(ftime = input_survival_cr$time,
             failcode = 1,
             cencode = 0))
 ```
+
 ## Disconnect from the cdm database connection
+
+We finish by disconnecting from the cdm database connection.
 
 ```{r}
 cdmDisconnect(cdm)
