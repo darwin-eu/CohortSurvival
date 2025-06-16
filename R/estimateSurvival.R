@@ -87,7 +87,7 @@ estimateSingleEventSurvival <- function(cdm,
 
   # Make sure attrition is up to date for our outcome cohort
   cdm[[outcomeCohortTable]] <- cdm[[outcomeCohortTable]] %>%
-    omopgenerics::recordCohortAttrition("update attrition")
+    omopgenerics::recordCohortAttrition("Update attrition")
 
   emptyOutcomes <- omopgenerics::settings(cdm[[outcomeCohortTable]]) %>%
     dplyr::left_join(
@@ -188,7 +188,6 @@ estimateSingleEventSurvival <- function(cdm,
         package_version = as.character(utils::packageVersion("CohortSurvival")),
         result_type = "survival_attrition",
         group_name = "target_cohort",
-        group_level = .data$target_cohort,
         variable_level = .data$outcome,
         analysis_type = "single_event",
         estimate_name = "count"
@@ -227,7 +226,6 @@ estimateSingleEventSurvival <- function(cdm,
                     "package_name",
                     "package_version",
                     "analysis_type",
-                    "group_level",
                     "outcome",
                     "competing_outcome") %>%
       dplyr::distinct()
@@ -240,7 +238,6 @@ estimateSingleEventSurvival <- function(cdm,
                         "package_name",
                         "package_version",
                         "analysis_type",
-                        "group_level",
                         "outcome",
                         "competing_outcome",
                         "eventgap") %>%
@@ -254,7 +251,6 @@ estimateSingleEventSurvival <- function(cdm,
                         "package_name",
                         "package_version",
                         "analysis_type",
-                        "group_level",
                         "outcome",
                         "competing_outcome") %>%
           dplyr::mutate(eventgap = NA) %>%
@@ -268,7 +264,6 @@ estimateSingleEventSurvival <- function(cdm,
                         "analysis_type",
                         "package_name",
                         "package_version",
-                        "group_level",
                         "outcome") %>%
           dplyr::mutate(eventgap = NA,
                         competing_outcome = "none") %>%
@@ -295,7 +290,7 @@ estimateSingleEventSurvival <- function(cdm,
       dplyr::mutate(estimate_value = as.character(.data$estimate_value)) %>%
       dplyr::bind_rows(attrition) %>%
       dplyr::left_join(settings,
-                       by = c("analysis_type", "package_name", "package_version", "result_type", "group_level", "outcome", "competing_outcome", "eventgap")) %>%
+                       by = c("analysis_type", "package_name", "package_version", "result_type", "outcome", "competing_outcome", "eventgap")) %>%
       dplyr::mutate(
         additional_name = dplyr::if_else(is.na(.data$additional_name), "overall", .data$additional_name),
         additional_level = dplyr::if_else(is.na(.data$additional_level), "overall", .data$additional_level)
@@ -334,7 +329,6 @@ estimateSingleEventSurvival <- function(cdm,
                     "package_name",
                     "package_version",
                     "analysis_type",
-                    "group_level",
                     "outcome",
                     "competing_outcome") %>%
       dplyr::distinct() %>%
@@ -347,7 +341,7 @@ estimateSingleEventSurvival <- function(cdm,
     complete_results <- attrition %>%
       dplyr::mutate(eventgap = NA) %>%
       dplyr::left_join(settings,
-                       by = c("analysis_type", "package_name", "package_version", "result_type", "group_level", "outcome", "competing_outcome", "eventgap")) %>%
+                       by = c("analysis_type", "package_name", "package_version", "result_type", "outcome", "competing_outcome", "eventgap")) %>%
       dplyr::mutate(
         additional_name = dplyr::if_else(is.na(.data$additional_name), "overall", .data$additional_name),
         additional_level = dplyr::if_else(is.na(.data$additional_level), "overall", .data$additional_level)
@@ -590,9 +584,8 @@ estimateCompetingRiskSurvival <- function(cdm,
         package_version = as.character(utils::packageVersion("CohortSurvival")),
         result_type = "survival_attrition",
         group_name = "target_cohort",
-        group_level = .data$target_cohort,
         variable_level = .data$outcome,
-        analysis_type = "single_event",
+        analysis_type = "competing_risk",
         estimate_name = "count"
       ) %>%
       tidyr::pivot_longer(
@@ -629,7 +622,6 @@ estimateCompetingRiskSurvival <- function(cdm,
                     "package_name",
                     "package_version",
                     "analysis_type",
-                    "group_level",
                     "outcome",
                     "competing_outcome") %>%
       dplyr::distinct()
@@ -642,7 +634,6 @@ estimateCompetingRiskSurvival <- function(cdm,
                         "package_name",
                         "package_version",
                         "analysis_type",
-                        "group_level",
                         "outcome",
                         "competing_outcome",
                         "eventgap") %>%
@@ -656,7 +647,6 @@ estimateCompetingRiskSurvival <- function(cdm,
                         "package_name",
                         "package_version",
                         "analysis_type",
-                        "group_level",
                         "outcome",
                         "competing_outcome") %>%
           dplyr::mutate(eventgap = NA) %>%
@@ -670,7 +660,6 @@ estimateCompetingRiskSurvival <- function(cdm,
                         "analysis_type",
                         "package_name",
                         "package_version",
-                        "group_level",
                         "outcome") %>%
           dplyr::mutate(eventgap = NA,
                         competing_outcome = "none") %>%
@@ -697,7 +686,7 @@ estimateCompetingRiskSurvival <- function(cdm,
       dplyr::mutate(estimate_value = as.character(.data$estimate_value)) %>%
       dplyr::bind_rows(attrition) %>%
       dplyr::left_join(settings,
-                       by = c("analysis_type", "package_name", "package_version", "result_type", "group_level", "outcome", "competing_outcome", "eventgap")) %>%
+                       by = c("analysis_type", "package_name", "package_version", "result_type", "outcome", "competing_outcome", "eventgap")) %>%
       dplyr::mutate(
         additional_name = dplyr::if_else(is.na(.data$additional_name), "overall", .data$additional_name),
         additional_level = dplyr::if_else(is.na(.data$additional_level), "overall", .data$additional_level)
@@ -736,7 +725,6 @@ estimateCompetingRiskSurvival <- function(cdm,
                     "package_name",
                     "package_version",
                     "analysis_type",
-                    "group_level",
                     "outcome",
                     "competing_outcome") %>%
       dplyr::distinct() %>%
@@ -749,7 +737,7 @@ estimateCompetingRiskSurvival <- function(cdm,
     complete_results <- attrition %>%
       dplyr::mutate(eventgap = NA) %>%
       dplyr::left_join(settings,
-                       by = c("analysis_type", "package_name", "package_version", "result_type", "group_level", "outcome", "competing_outcome", "eventgap")) %>%
+                       by = c("analysis_type", "package_name", "package_version", "result_type", "outcome", "competing_outcome", "eventgap")) %>%
       dplyr::mutate(
         additional_name = dplyr::if_else(is.na(.data$additional_name), "overall", .data$additional_name),
         additional_level = dplyr::if_else(is.na(.data$additional_level), "overall", .data$additional_level)
@@ -974,6 +962,14 @@ estimateSurvival <- function(cdm,
         dplyr::mutate(analysis_type = "competing_risk")
     }
 
+    if(is.null(competingOutcomeCohortTable)) {
+      summary <- summary %>%
+        dplyr::mutate(
+          restricted_mean_survival_95CI_upper = .data$restricted_mean_survival + stats::qnorm(0.975) * .data$restricted_mean_survival_se,
+          restricted_mean_survival_95CI_lower = .data$restricted_mean_survival - stats::qnorm(0.975) * .data$restricted_mean_survival_se
+        ) %>%
+        dplyr::select(-"restricted_mean_survival_se")
+    }
     summary <- summary %>%
       dplyr::filter(.data$outcome != "none") %>%
       dplyr::mutate(
@@ -1277,7 +1273,10 @@ singleEventSurvival <- function(survData, times, variables, eventGap,
     cli::cli_progress_done()
   }
 
-  estimates <- dplyr::bind_rows(estimates)
+  estimates <- dplyr::bind_rows(estimates) %>%
+    dplyr::mutate(
+      strata_level = stringr::str_trim(.data$strata_level)
+    )
 
   # Helper function to calculate events for a given eventGap
   calculate_events <- function(data, gap) {

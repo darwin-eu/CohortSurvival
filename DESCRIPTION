@@ -1,6 +1,6 @@
 Package: CohortSurvival
 Title: Estimate Survival from Common Data Model Cohorts
-Version: 1.0.0
+Version: 1.0.2
 Authors@R: c(
     person("Kim", "López-Güell", email = "kim.lopez@spc.ox.ac.uk", 
     role = c("aut", "cre"),
@@ -26,22 +26,24 @@ Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.2
 Imports: 
+    broom,
     CDMConnector (>= 2.0.0),
-    omopgenerics (>= 1.1.0),
     checkmate,
     cli,
     clock,
     DBI,
     dplyr,
+    glue,
     magrittr,
-    broom,
+    omopgenerics (>= 1.1.0),
     PatientProfiles (>= 1.3.1),
+    purrr,
     rlang (>= 0.4.11),
     survival (>= 3.7.0),
+    stats,
     stringr,
     tibble,
-    tidyr,
-    purrr
+    tidyr
 Suggests: 
     testthat (>= 3.0.0),
     CodelistGenerator,

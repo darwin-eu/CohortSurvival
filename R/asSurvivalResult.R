@@ -42,15 +42,30 @@ asSurvivalResult <- function(result) {
   if (!inherits(result, "summarised_result")) {
     cli::cli_abort("result is not a valid `summarised_result` object.")
   }
-  result <- result %>%
-     omopgenerics::addSettings(
-       settingsColumn = c("result_type",omopgenerics::settingsColumns(result))) %>%
-     dplyr::select(c("result_id","cdm_name", "group_name", "group_level", "strata_name",
+
+  required_cols <- c("result_id","cdm_name", "group_name", "group_level", "strata_name",
                      "strata_level", "variable_name", "variable_level",
                      "estimate_name", "estimate_type", "estimate_value",
                      "additional_name", "additional_level", "result_type",
-                     "outcome", "competing_outcome",
-                     "eventgap")) %>%
+                     "outcome", "competing_outcome", "eventgap")
+
+  result <- result %>%
+     omopgenerics::addSettings(
+       settingsColumn = c("result_type",omopgenerics::settingsColumns(result)))
+
+  non_constant_cols <- result %>%
+    dplyr::summarise(dplyr::across(dplyr::everything(), ~ dplyr::n_distinct(.))) %>%
+    purrr::keep(~ .x > 1) %>%
+    names()
+
+  if (length(non_constant_cols[!(non_constant_cols %in% required_cols)]) > 0) {
+    cli::cli_warn("{.strong {non_constant_cols[!(non_constant_cols %in% required_cols)]}} column{?s} will be added to the survival result object to include all relevant information")
+  }
+
+  final_cols <- dplyr::union(required_cols, non_constant_cols)
+
+  result <- result %>%
+    dplyr::select(dplyr::all_of(final_cols)) %>%
     omopgenerics::splitAdditional() %>%
     omopgenerics::splitGroup() %>%
     omopgenerics::splitStrata()
@@ -103,6 +118,7 @@ asSurvivalResult <- function(result) {
     dplyr::select(-dplyr::starts_with("variable_level")) %>%
     dplyr::relocate("outcome", .after = "target_cohort") %>%
     dplyr::relocate("competing_outcome", .after = "outcome") %>%
+    dplyr::distinct() %>%
     omopgenerics::pivotEstimates()
 
   result_final <- estimates

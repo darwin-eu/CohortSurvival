@@ -121,3 +121,56 @@ test_that("empty plot", {
   CDMConnector::cdmDisconnect(cdm)
 })
 
+# Add test for timeScale parameter in plotSurvival
+test_that("timeScale parameter in plotSurvival", {
+  skip_on_cran()
+
+  cdm <- mockMGUS2cdm()
+  surv <- estimateSingleEventSurvival(cdm,
+                                      targetCohortTable = "mgus_diagnosis",
+                                      outcomeCohortTable = "death_cohort"
+  )
+
+  # Test for days
+  plot_days <- plotSurvival(surv, timeScale = "days")
+  expect_true(ggplot2::is.ggplot(plot_days))
+
+  # Test for months
+  plot_months <- plotSurvival(surv, timeScale = "months")
+  expect_true(ggplot2::is.ggplot(plot_months))
+
+  # Test for years
+  plot_years <- plotSurvival(surv, timeScale = "years")
+  expect_true(ggplot2::is.ggplot(plot_years))
+  CDMConnector::cdmDisconnect(cdm)
+})
+
+# Add test for logLog parameter in plotSurvival
+test_that("log-log survival plot", {
+  skip_on_cran()
+
+  cdm <- mockMGUS2cdm()
+
+  surv <- estimateCompetingRiskSurvival(cdm,
+                                      targetCohortTable = "mgus_diagnosis",
+                                      outcomeCohortTable = "progression",
+                                      competingOutcomeCohortTable = "death_cohort"
+  )
+
+  plot <- plotSurvival(surv, logLog = TRUE, cumulativeFailure = TRUE, colour = "variable")
+  expect_true(ggplot2::is.ggplot(plot))
+  CDMConnector::cdmDisconnect(cdm)
+})
+
+test_that("plot with bound results with different hidden inputs", {
+  cdm <- mockMGUS2cdm()
+  surv <- estimateSingleEventSurvival(cdm, "mgus_diagnosis", "death_cohort")
+  surv_c <- estimateSingleEventSurvival(cdm, "mgus_diagnosis", "death_cohort", followUpDays = 100)
+  surv_all <- omopgenerics::bind(
+    surv, surv_c
+  )
+  expect_warning(plotSurvival(surv_all, colour = "follow_up_days"))
+  expect_warning(surv_all_tidy <- asSurvivalResult(surv_all))
+  expect_true("follow_up_days" %in% colnames(surv_all_tidy))
+  CDMConnector::cdmDisconnect(cdm)
+})

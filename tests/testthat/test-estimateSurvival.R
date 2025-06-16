@@ -2494,11 +2494,33 @@ test_that("empty input cohort after input filtering", {
 
   expect_true(all(omopgenerics::settings(surv) %>%
                 dplyr::pull(result_type) == c("survival_probability", "survival_events",
-                "survival_summary", "survival_attrition", "survival_attrition")))
+                "survival_summary", "survival_attrition")))
 
   expect_true(all(omopgenerics::settings(survcr) %>%
                     dplyr::pull(result_type) == c("cumulative_failure_probability", "survival_events",
-                                                  "survival_summary", "survival_attrition", "survival_attrition")))
+                                                  "survival_summary", "survival_attrition")))
+
+  expect_true(all(omopgenerics::filterSettings(surv, result_id == 4) %>%
+                    dplyr::pull(group_level) %>% unique() == c("mgus_diagnosis_1", "mgus_diagnosis_2020_2")))
 
   CDMConnector::cdmDisconnect(cdm)
 })
+
+test_that("multiple strata names", {
+  cdm <- mockMGUS2cdm()
+  cdm$mgus_diagnosis <- cdm$mgus_diagnosis %>%
+    dplyr::mutate(
+      sex = dplyr::if_else(
+        sex == "M", "Male", "Female"
+      )
+    )
+  surv <- estimateSingleEventSurvival(cdm, "mgus_diagnosis", "death_cohort",
+                                      strata = list("age_group", "sex", c("age_group", "sex")))
+
+  expect_true(
+    surv %>% asSurvivalResult() %>% dplyr::select( sex) %>% dplyr::distinct() %>% dplyr::tally() == 3
+  )
+
+  CDMConnector::cdmDisconnect(cdm)
+})
+

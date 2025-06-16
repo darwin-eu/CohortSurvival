@@ -6,7 +6,7 @@
 [![CRANstatus](https://www.r-pkg.org/badges/version/CohortSurvival)](https://CRAN.R-project.org/package=CohortSurvival)
 [![codecov.io](https://codecov.io/github/darwin-eu/CohortSurvival/coverage.svg?branch=main)](https://app.codecov.io/github/darwin-eu/CohortSurvival?branch=main)
 [![R-CMD-check](https://github.com/darwin-eu/CohortSurvival/workflows/R-CMD-check/badge.svg)](https://github.com/darwin-eu/CohortSurvival/actions)
-[![Lifecycle:Experimental](https://img.shields.io/badge/Lifecycle-Experimental-339999)](https://lifecycle.r-lib.org/articles/stages.html)
+[![Lifecycle:Stable](https://img.shields.io/badge/Lifecycle-Stable-339999)](https://lifecycle.r-lib.org/articles/stages.html)
 
 CohortSurvival contains functions for extracting and summarising
 survival data using the OMOP common data model.

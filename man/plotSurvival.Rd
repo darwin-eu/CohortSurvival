@@ -11,7 +11,9 @@ plotSurvival(
   colour = NULL,
   cumulativeFailure = FALSE,
   riskTable = FALSE,
-  riskInterval = 30
+  riskInterval = 30,
+  logLog = FALSE,
+  timeScale = "days"
 )
 }
 \arguments{
@@ -29,6 +31,10 @@ instead of the survival probability}
 \item{riskTable}{Whether to print risk table below the plot}
 
 \item{riskInterval}{Interval of time to print risk table below the plot}
+
+\item{logLog}{If TRUE, the survival probabilities are transformed using the log-log formula}
+
+\item{timeScale}{The scale of time in the x-axis. Can be "days", "months", or "years"}
 }
 \value{
 A plot of survival probabilities over time

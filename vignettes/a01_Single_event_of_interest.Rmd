@@ -102,6 +102,15 @@ Because the output of the function `plotSurvival` is a ggplot, the user can also
 plotSurvival(MGUS_death) + theme_bw() + ggtitle("Plot survival") + coord_flip()
 ```
 
+If we want the time in the x axis in another unit (years or months), you can use the parameter `timeScale` from the function:
+
+```{r}
+plotSurvival(MGUS_death, timeScale = "years")
+plotSurvival(MGUS_death, timeScale = "months")
+```
+
+We could clearly do the same for any other time scaling. For months, we would typically divide the estimates by 30.4375.
+
 Apart from the survival estimates retrieved, our main output also contains information on the survival events, summary and attrition. There are different functions in the package which we can use to present that information in a tidy way.
 
 The function `tableSurvival()` provides a survival summary. This includes the number of records (people in the target cohort), the number of events (people who experience the outcome event in the target cohort), and the median survival and restricted mean survival if available. This is provided for all combinations of target and outcome cohorts and stratifications available in the result.
@@ -199,6 +208,33 @@ MGUS_death_gap7 <- estimateSingleEventSurvival(cdm, "mgus_diagnosis", "death_coh
 plotSurvival(MGUS_death_gap7, riskTable = TRUE, riskInterval = 14)
 ```
 
+For all of these tweaks we need to run a separate analysis of survival, i.e. each run allows for only one distinct input parameter, except for the target and outcome cohorts. However, we can bind the results together and both plotting and table functions will automatically display all results with the required variables. Let us see that by estimating survival with a specific date censoring.
+
+```{r}
+MGUS_death_fu <- estimateSingleEventSurvival(
+  cdm,
+  targetCohortTable = "mgus_diagnosis",
+  outcomeCohortTable = "death_cohort",
+  followUpDays = 100
+)
+
+MGUS_death_all <- omopgenerics::bind(
+  MGUS_death,
+  MGUS_death_fu
+)
+
+MGUS_death_all %>%
+  asSurvivalResult() %>%
+  glimpse()
+```
+Note that the survival result has an additional column `follow_up_days`, as we would expect. Let us now see that both the `tableSurvival` and `plotSurvival` functions display all required information.
+
+```{r}
+plotSurvival(MGUS_death_all, facet = "follow_up_days")
+
+tableSurvival(MGUS_death_all)
+```
+
 ## With stratification
 
 One of the most important parameters that we might be interested in using is the `strata` one. To estimate survival for particular strata of interest we need these features to have been added to the target cohort table, as columns. Therefore, for instance, if we want to stratify our estimation by sex, we need a column named `sex` with the necessary information in the target cohort of interest.
@@ -284,6 +320,13 @@ Now we can use the new `outcome_cohorts` table as our outcome table and we will 
 MGUS_death_prog <- estimateSingleEventSurvival(cdm, "mgus_diagnosis", "outcome_cohorts")
 tableSurvival(MGUS_death_prog)
 plotSurvival(MGUS_death_prog, colour = "outcome")
+```
+
+## Checking the assumption of proportionality between outcomes
+If you want to test the proportional hazards assumption between outcomes or across strata, you can use the `logLog` parameter in the survival plot to visually assess the proportionality. With the aforementioned new `outcome_cohorts` table of the two outcomes we can check this as such, for `death` and `progression`:
+
+```{r}
+plotSurvival(MGUS_death_prog, colour = "outcome", logLog = TRUE)
 ```
 
 ## Export and import a survival output

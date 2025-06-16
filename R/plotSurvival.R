@@ -24,6 +24,8 @@
 #' instead of the survival probability
 #' @param riskTable Whether to print risk table below the plot
 #' @param riskInterval Interval of time to print risk table below the plot
+#' @param logLog If TRUE, the survival probabilities are transformed using the log-log formula
+#' @param timeScale The scale of time in the x-axis. Can be "days", "months", or "years"
 #'
 #' @return A plot of survival probabilities over time
 #' @export
@@ -43,7 +45,9 @@ plotSurvival <- function(result,
                          colour = NULL,
                          cumulativeFailure = FALSE,
                          riskTable = FALSE,
-                         riskInterval = 30) {
+                         riskInterval = 30,
+                         logLog = FALSE,
+                         timeScale = "days") {
 
   rlang::check_installed("visOmopResults")
   rlang::check_installed("ggplot2")
@@ -56,6 +60,19 @@ plotSurvival <- function(result,
   }
 
   result <- result %>% asSurvivalResult()
+
+  # Adjust time scale
+  if (timeScale == "years") {
+    result <- result %>%
+      dplyr::mutate(time = .data$time / 365.25)
+    xlab <- "Time in years"
+  } else if (timeScale == "months") {
+    result <- result %>%
+      dplyr::mutate(time = .data$time / 30.4375)
+    xlab <- "Time in months"
+  } else {
+    xlab <- "Time in days"
+  }
 
   if (isFALSE(cumulativeFailure) && "cumulative_failure_probability" %in% unique(result$result_type)) {
     cli::cli_abort("cumulativeFailure must be TRUE if result comes from a competing risk analysis")
@@ -81,6 +98,16 @@ plotSurvival <- function(result,
 
   plot_name <- stringr::str_to_sentence(gsub("_", " ", unique(result$result_type)))
 
+  if (logLog) {
+    result <- result %>%
+      dplyr::mutate(estimate = log(-log(.data$estimate)),
+                    estimate_95CI_lower = log(-log(.data$estimate_95CI_lower)),
+                    estimate_95CI_upper = log(-log(.data$estimate_95CI_upper)),
+                    time = log(.data$time))
+
+    plot_name <- paste0("Log-log ",plot_name)
+  }
+
   labels <- c("estimate", "estimate_95CI_lower", "estimate_95CI_upper", "target_cohort", "outcome", "competing_outcome")
 
   plot <- visOmopResults::scatterPlot(
@@ -96,7 +123,7 @@ plotSurvival <- function(result,
     colour = colour,
     label = labels
   ) +
-    ggplot2::xlab("Time in days") +
+    ggplot2::xlab(xlab) +
     ggplot2::ylab(plot_name) +
     ggplot2::scale_y_continuous(labels = scales::comma) +
     visOmopResults::themeVisOmop()
