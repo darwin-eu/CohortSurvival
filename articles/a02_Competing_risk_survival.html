@@ -6,12 +6,11 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <title>Competing risk survival • CohortSurvival</title>
-<!-- favicons --><link rel="icon" type="image/png" sizes="16x16" href="../favicon-16x16.png">
-<link rel="icon" type="image/png" sizes="32x32" href="../favicon-32x32.png">
-<link rel="apple-touch-icon" type="image/png" sizes="180x180" href="../apple-touch-icon.png">
-<link rel="apple-touch-icon" type="image/png" sizes="120x120" href="../apple-touch-icon-120x120.png">
-<link rel="apple-touch-icon" type="image/png" sizes="76x76" href="../apple-touch-icon-76x76.png">
-<link rel="apple-touch-icon" type="image/png" sizes="60x60" href="../apple-touch-icon-60x60.png">
+<!-- favicons --><link rel="icon" type="image/png" sizes="96x96" href="../favicon-96x96.png">
+<link rel="icon" type="”image/svg+xml”" href="../favicon.svg">
+<link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png">
+<link rel="icon" sizes="any" href="../favicon.ico">
+<link rel="manifest" href="../site.webmanifest">
 <script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
 <script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
@@ -26,7 +25,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">CohortSurvival</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.2</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -44,6 +43,7 @@
     <li><a class="dropdown-item" href="../articles/a03_Further_survival_analyses.html">Further survival analyses</a></li>
   </ul>
 </li>
+<li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
       </ul>
 <ul class="navbar-nav"></ul>
 </div>
@@ -100,37 +100,37 @@ progression to multiple myeloma as outcomes.</p>
 <span>  <span class="fu"><a href="https://pillar.r-lib.org/reference/glimpse.html" class="external-link">glimpse</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Rows: ??</span></span>
 <span><span class="co">#&gt; Columns: 10</span></span>
-<span><span class="co">#&gt; Database: DuckDB v1.2.1 [unknown@Linux 6.8.0-1021-azure:R 4.4.3/:memory:]</span></span>
-<span><span class="co">#&gt; $ cohort_definition_id <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1…</span></span>
-<span><span class="co">#&gt; $ subject_id           <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15…</span></span>
-<span><span class="co">#&gt; $ cohort_start_date    <span style="color: #949494; font-style: italic;">&lt;date&gt;</span> 1981-01-01, 1968-01-01, 1980-01-01, 1977-01-01, …</span></span>
-<span><span class="co">#&gt; $ cohort_end_date      <span style="color: #949494; font-style: italic;">&lt;date&gt;</span> 1981-01-01, 1968-01-01, 1980-01-01, 1977-01-01, …</span></span>
-<span><span class="co">#&gt; $ age                  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> 88, 78, 94, 68, 90, 90, 89, 87, 86, 79, 86, 89, 8…</span></span>
-<span><span class="co">#&gt; $ sex                  <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span> F, F, M, M, F, M, F, F, F, F, M, F, M, F, M, F, F…</span></span>
-<span><span class="co">#&gt; $ hgb                  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> 13.1, 11.5, 10.5, 15.2, 10.7, 12.9, 10.5, 12.3, 1…</span></span>
-<span><span class="co">#&gt; $ creat                <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> 1.30, 1.20, 1.50, 1.20, 0.80, 1.00, 0.90, 1.20, 0…</span></span>
-<span><span class="co">#&gt; $ mspike               <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> 0.5, 2.0, 2.6, 1.2, 1.0, 0.5, 1.3, 1.6, 2.4, 2.3,…</span></span>
-<span><span class="co">#&gt; $ age_group            <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "&gt;=70", "&gt;=70", "&gt;=70", "&lt;70", "&gt;=70", "&gt;=70", "&gt;…</span></span>
+<span><span class="co">#&gt; Database: DuckDB v1.3.0 [unknown@Linux 6.11.0-1015-azure:R 4.5.1/:memory:]</span></span>
+<span><span class="co">#&gt; $ cohort_definition_id <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> 1<span style="color: #949494;">, </span>1<span style="color: #949494;">, </span>1<span style="color: #949494;">, </span>1<span style="color: #949494;">, </span>1<span style="color: #949494;">, </span>1<span style="color: #949494;">, </span>1<span style="color: #949494;">, </span>1<span style="color: #949494;">, </span>1<span style="color: #949494;">, </span>1<span style="color: #949494;">, </span>1<span style="color: #949494;">, </span>1<span style="color: #949494;">, </span>1<span style="color: #949494;">, </span>1<span style="color: #949494;">, </span>1<span style="color: #949494;">, </span>1<span style="color: #949494;">, </span>1…</span></span>
+<span><span class="co">#&gt; $ subject_id           <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> 1<span style="color: #949494;">, </span>2<span style="color: #949494;">, </span>3<span style="color: #949494;">, </span>4<span style="color: #949494;">, </span>5<span style="color: #949494;">, </span>6<span style="color: #949494;">, </span>7<span style="color: #949494;">, </span>8<span style="color: #949494;">, </span>9<span style="color: #949494;">, </span>10<span style="color: #949494;">, </span>11<span style="color: #949494;">, </span>12<span style="color: #949494;">, </span>13<span style="color: #949494;">, </span>14<span style="color: #949494;">, </span>15…</span></span>
+<span><span class="co">#&gt; $ cohort_start_date    <span style="color: #949494; font-style: italic;">&lt;date&gt;</span> 1981-01-01<span style="color: #949494;">, </span>1968-01-01<span style="color: #949494;">, </span>1980-01-01<span style="color: #949494;">, </span>1977-01-01<span style="color: #949494;">, </span>…</span></span>
+<span><span class="co">#&gt; $ cohort_end_date      <span style="color: #949494; font-style: italic;">&lt;date&gt;</span> 1981-01-01<span style="color: #949494;">, </span>1968-01-01<span style="color: #949494;">, </span>1980-01-01<span style="color: #949494;">, </span>1977-01-01<span style="color: #949494;">, </span>…</span></span>
+<span><span class="co">#&gt; $ age                  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> 88<span style="color: #949494;">, </span>78<span style="color: #949494;">, </span>94<span style="color: #949494;">, </span>68<span style="color: #949494;">, </span>90<span style="color: #949494;">, </span>90<span style="color: #949494;">, </span>89<span style="color: #949494;">, </span>87<span style="color: #949494;">, </span>86<span style="color: #949494;">, </span>79<span style="color: #949494;">, </span>86<span style="color: #949494;">, </span>89<span style="color: #949494;">, </span>8…</span></span>
+<span><span class="co">#&gt; $ sex                  <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span> F<span style="color: #949494;">, </span>F<span style="color: #949494;">, </span>M<span style="color: #949494;">, </span>M<span style="color: #949494;">, </span>F<span style="color: #949494;">, </span>M<span style="color: #949494;">, </span>F<span style="color: #949494;">, </span>F<span style="color: #949494;">, </span>F<span style="color: #949494;">, </span>F<span style="color: #949494;">, </span>M<span style="color: #949494;">, </span>F<span style="color: #949494;">, </span>M<span style="color: #949494;">, </span>F<span style="color: #949494;">, </span>M<span style="color: #949494;">, </span>F<span style="color: #949494;">, </span>F…</span></span>
+<span><span class="co">#&gt; $ hgb                  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> 13.1<span style="color: #949494;">, </span>11.5<span style="color: #949494;">, </span>10.5<span style="color: #949494;">, </span>15.2<span style="color: #949494;">, </span>10.7<span style="color: #949494;">, </span>12.9<span style="color: #949494;">, </span>10.5<span style="color: #949494;">, </span>12.3<span style="color: #949494;">, </span>1…</span></span>
+<span><span class="co">#&gt; $ creat                <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> 1.30<span style="color: #949494;">, </span>1.20<span style="color: #949494;">, </span>1.50<span style="color: #949494;">, </span>1.20<span style="color: #949494;">, </span>0.80<span style="color: #949494;">, </span>1.00<span style="color: #949494;">, </span>0.90<span style="color: #949494;">, </span>1.20<span style="color: #949494;">, </span>0…</span></span>
+<span><span class="co">#&gt; $ mspike               <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> 0.5<span style="color: #949494;">, </span>2.0<span style="color: #949494;">, </span>2.6<span style="color: #949494;">, </span>1.2<span style="color: #949494;">, </span>1.0<span style="color: #949494;">, </span>0.5<span style="color: #949494;">, </span>1.3<span style="color: #949494;">, </span>1.6<span style="color: #949494;">, </span>2.4<span style="color: #949494;">, </span>2.3<span style="color: #949494;">,</span>…</span></span>
+<span><span class="co">#&gt; $ age_group            <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "&gt;=70"<span style="color: #949494;">, </span>"&gt;=70"<span style="color: #949494;">, </span>"&gt;=70"<span style="color: #949494;">, </span>"&lt;70"<span style="color: #949494;">, </span>"&gt;=70"<span style="color: #949494;">, </span>"&gt;=70"<span style="color: #949494;">, </span>"&gt;…</span></span>
 <span></span>
 <span><span class="va">cdm</span><span class="op">$</span><span class="va">death_cohort</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> </span>
 <span>  <span class="fu"><a href="https://pillar.r-lib.org/reference/glimpse.html" class="external-link">glimpse</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Rows: ??</span></span>
 <span><span class="co">#&gt; Columns: 4</span></span>
-<span><span class="co">#&gt; Database: DuckDB v1.2.1 [unknown@Linux 6.8.0-1021-azure:R 4.4.3/:memory:]</span></span>
-<span><span class="co">#&gt; $ cohort_definition_id <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1…</span></span>
-<span><span class="co">#&gt; $ subject_id           <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> 1, 2, 3, 4, 5, 6, 7, 8, 10, 11, 12, 13, 14, 15, 1…</span></span>
-<span><span class="co">#&gt; $ cohort_start_date    <span style="color: #949494; font-style: italic;">&lt;date&gt;</span> 1981-01-31, 1968-01-26, 1980-02-16, 1977-04-03, …</span></span>
-<span><span class="co">#&gt; $ cohort_end_date      <span style="color: #949494; font-style: italic;">&lt;date&gt;</span> 1981-01-31, 1968-01-26, 1980-02-16, 1977-04-03, …</span></span>
+<span><span class="co">#&gt; Database: DuckDB v1.3.0 [unknown@Linux 6.11.0-1015-azure:R 4.5.1/:memory:]</span></span>
+<span><span class="co">#&gt; $ cohort_definition_id <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> 1<span style="color: #949494;">, </span>1<span style="color: #949494;">, </span>1<span style="color: #949494;">, </span>1<span style="color: #949494;">, </span>1<span style="color: #949494;">, </span>1<span style="color: #949494;">, </span>1<span style="color: #949494;">, </span>1<span style="color: #949494;">, </span>1<span style="color: #949494;">, </span>1<span style="color: #949494;">, </span>1<span style="color: #949494;">, </span>1<span style="color: #949494;">, </span>1<span style="color: #949494;">, </span>1<span style="color: #949494;">, </span>1<span style="color: #949494;">, </span>1<span style="color: #949494;">, </span>1…</span></span>
+<span><span class="co">#&gt; $ subject_id           <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> 1<span style="color: #949494;">, </span>2<span style="color: #949494;">, </span>3<span style="color: #949494;">, </span>4<span style="color: #949494;">, </span>5<span style="color: #949494;">, </span>6<span style="color: #949494;">, </span>7<span style="color: #949494;">, </span>8<span style="color: #949494;">, </span>10<span style="color: #949494;">, </span>11<span style="color: #949494;">, </span>12<span style="color: #949494;">, </span>13<span style="color: #949494;">, </span>14<span style="color: #949494;">, </span>15<span style="color: #949494;">, </span>1…</span></span>
+<span><span class="co">#&gt; $ cohort_start_date    <span style="color: #949494; font-style: italic;">&lt;date&gt;</span> 1981-01-31<span style="color: #949494;">, </span>1968-01-26<span style="color: #949494;">, </span>1980-02-16<span style="color: #949494;">, </span>1977-04-03<span style="color: #949494;">, </span>…</span></span>
+<span><span class="co">#&gt; $ cohort_end_date      <span style="color: #949494; font-style: italic;">&lt;date&gt;</span> 1981-01-31<span style="color: #949494;">, </span>1968-01-26<span style="color: #949494;">, </span>1980-02-16<span style="color: #949494;">, </span>1977-04-03<span style="color: #949494;">, </span>…</span></span>
 <span></span>
 <span><span class="va">cdm</span><span class="op">$</span><span class="va">progression</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="https://pillar.r-lib.org/reference/glimpse.html" class="external-link">glimpse</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Rows: ??</span></span>
 <span><span class="co">#&gt; Columns: 4</span></span>
-<span><span class="co">#&gt; Database: DuckDB v1.2.1 [unknown@Linux 6.8.0-1021-azure:R 4.4.3/:memory:]</span></span>
-<span><span class="co">#&gt; $ cohort_definition_id <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1…</span></span>
-<span><span class="co">#&gt; $ subject_id           <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> 56, 81, 83, 111, 124, 127, 147, 163, 165, 167, 18…</span></span>
-<span><span class="co">#&gt; $ cohort_start_date    <span style="color: #949494; font-style: italic;">&lt;date&gt;</span> 1978-01-30, 1985-01-15, 1974-08-17, 1993-01-14, …</span></span>
-<span><span class="co">#&gt; $ cohort_end_date      <span style="color: #949494; font-style: italic;">&lt;date&gt;</span> 1978-01-30, 1985-01-15, 1974-08-17, 1993-01-14, …</span></span></code></pre></div>
+<span><span class="co">#&gt; Database: DuckDB v1.3.0 [unknown@Linux 6.11.0-1015-azure:R 4.5.1/:memory:]</span></span>
+<span><span class="co">#&gt; $ cohort_definition_id <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> 1<span style="color: #949494;">, </span>1<span style="color: #949494;">, </span>1<span style="color: #949494;">, </span>1<span style="color: #949494;">, </span>1<span style="color: #949494;">, </span>1<span style="color: #949494;">, </span>1<span style="color: #949494;">, </span>1<span style="color: #949494;">, </span>1<span style="color: #949494;">, </span>1<span style="color: #949494;">, </span>1<span style="color: #949494;">, </span>1<span style="color: #949494;">, </span>1<span style="color: #949494;">, </span>1<span style="color: #949494;">, </span>1<span style="color: #949494;">, </span>1<span style="color: #949494;">, </span>1…</span></span>
+<span><span class="co">#&gt; $ subject_id           <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> 56<span style="color: #949494;">, </span>81<span style="color: #949494;">, </span>83<span style="color: #949494;">, </span>111<span style="color: #949494;">, </span>124<span style="color: #949494;">, </span>127<span style="color: #949494;">, </span>147<span style="color: #949494;">, </span>163<span style="color: #949494;">, </span>165<span style="color: #949494;">, </span>167<span style="color: #949494;">, </span>18…</span></span>
+<span><span class="co">#&gt; $ cohort_start_date    <span style="color: #949494; font-style: italic;">&lt;date&gt;</span> 1978-01-30<span style="color: #949494;">, </span>1985-01-15<span style="color: #949494;">, </span>1974-08-17<span style="color: #949494;">, </span>1993-01-14<span style="color: #949494;">, </span>…</span></span>
+<span><span class="co">#&gt; $ cohort_end_date      <span style="color: #949494; font-style: italic;">&lt;date&gt;</span> 1978-01-30<span style="color: #949494;">, </span>1985-01-15<span style="color: #949494;">, </span>1974-08-17<span style="color: #949494;">, </span>1993-01-14<span style="color: #949494;">, </span>…</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="estimating-survival-with-competing-risk">Estimating survival with competing risk<a class="anchor" aria-label="anchor" href="#estimating-survival-with-competing-risk"></a>
@@ -152,16 +152,16 @@ to specify the <code>competingOutcomeCohortTable</code> argument.</p>
 <span>  <span class="fu"><a href="https://pillar.r-lib.org/reference/glimpse.html" class="external-link">glimpse</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Rows: 850</span></span>
 <span><span class="co">#&gt; Columns: 10</span></span>
-<span><span class="co">#&gt; $ cdm_name            <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "mock", "mock", "mock", "mock", "mock", "mock", "m…</span></span>
-<span><span class="co">#&gt; $ target_cohort       <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "mgus_diagnosis", "mgus_diagnosis", "mgus_diagnosi…</span></span>
-<span><span class="co">#&gt; $ outcome             <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "progression", "progression", "progression", "prog…</span></span>
-<span><span class="co">#&gt; $ competing_outcome   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "death_cohort", "death_cohort", "death_cohort", "d…</span></span>
-<span><span class="co">#&gt; $ variable            <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "progression", "progression", "progression", "prog…</span></span>
-<span><span class="co">#&gt; $ time                <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, …</span></span>
-<span><span class="co">#&gt; $ result_type         <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "cumulative_failure_probability", "cumulative_fail…</span></span>
-<span><span class="co">#&gt; $ estimate            <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> 0.0000, 0.0000, 0.0014, 0.0014, 0.0022, 0.0029, 0.…</span></span>
-<span><span class="co">#&gt; $ estimate_95CI_lower <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> 0.0000, <span style="color: #BB0000;">NA</span>, 0.0004, 0.0004, 0.0007, 0.0011, 0.0015…</span></span>
-<span><span class="co">#&gt; $ estimate_95CI_upper <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> 0.0000, <span style="color: #BB0000;">NA</span>, 0.0058, 0.0058, 0.0067, 0.0077, 0.0087…</span></span></code></pre></div>
+<span><span class="co">#&gt; $ cdm_name            <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "mock"<span style="color: #949494;">, </span>"mock"<span style="color: #949494;">, </span>"mock"<span style="color: #949494;">, </span>"mock"<span style="color: #949494;">, </span>"mock"<span style="color: #949494;">, </span>"mock"<span style="color: #949494;">, </span>"m…</span></span>
+<span><span class="co">#&gt; $ target_cohort       <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "mgus_diagnosis"<span style="color: #949494;">, </span>"mgus_diagnosis"<span style="color: #949494;">, </span>"mgus_diagnosi…</span></span>
+<span><span class="co">#&gt; $ outcome             <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "progression"<span style="color: #949494;">, </span>"progression"<span style="color: #949494;">, </span>"progression"<span style="color: #949494;">, </span>"prog…</span></span>
+<span><span class="co">#&gt; $ competing_outcome   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "death_cohort"<span style="color: #949494;">, </span>"death_cohort"<span style="color: #949494;">, </span>"death_cohort"<span style="color: #949494;">, </span>"d…</span></span>
+<span><span class="co">#&gt; $ variable            <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "progression"<span style="color: #949494;">, </span>"progression"<span style="color: #949494;">, </span>"progression"<span style="color: #949494;">, </span>"prog…</span></span>
+<span><span class="co">#&gt; $ time                <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> 0<span style="color: #949494;">, </span>1<span style="color: #949494;">, </span>2<span style="color: #949494;">, </span>3<span style="color: #949494;">, </span>4<span style="color: #949494;">, </span>5<span style="color: #949494;">, </span>6<span style="color: #949494;">, </span>7<span style="color: #949494;">, </span>8<span style="color: #949494;">, </span>9<span style="color: #949494;">, </span>10<span style="color: #949494;">, </span>11<span style="color: #949494;">, </span>12<span style="color: #949494;">, </span>13<span style="color: #949494;">, </span>14<span style="color: #949494;">, </span>…</span></span>
+<span><span class="co">#&gt; $ result_type         <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "cumulative_failure_probability"<span style="color: #949494;">, </span>"cumulative_fail…</span></span>
+<span><span class="co">#&gt; $ estimate            <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> 0.0000<span style="color: #949494;">, </span>0.0000<span style="color: #949494;">, </span>0.0014<span style="color: #949494;">, </span>0.0014<span style="color: #949494;">, </span>0.0022<span style="color: #949494;">, </span>0.0029<span style="color: #949494;">, </span>0.…</span></span>
+<span><span class="co">#&gt; $ estimate_95CI_lower <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> 0.0000<span style="color: #949494;">, </span><span style="color: #BB0000;">NA</span><span style="color: #949494;">, </span>0.0004<span style="color: #949494;">, </span>0.0004<span style="color: #949494;">, </span>0.0007<span style="color: #949494;">, </span>0.0011<span style="color: #949494;">, </span>0.0015…</span></span>
+<span><span class="co">#&gt; $ estimate_95CI_upper <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> 0.0000<span style="color: #949494;">, </span><span style="color: #BB0000;">NA</span><span style="color: #949494;">, </span>0.0058<span style="color: #949494;">, </span>0.0058<span style="color: #949494;">, </span>0.0067<span style="color: #949494;">, </span>0.0077<span style="color: #949494;">, </span>0.0087…</span></span></code></pre></div>
 <p>As we can see above our results have been outputted in long format,
 once transformed into the survival format. We can plot these results as
 we did in the previous vignette:</p>
@@ -203,17 +203,17 @@ outcomes:</p>
   background-color: #FFFFFF;
   width: auto;
   border-top-style: solid;
-  border-top-width: 2px;
-  border-top-color: #A8A8A8;
-  border-right-style: none;
-  border-right-width: 2px;
-  border-right-color: #D3D3D3;
+  border-top-width: 3px;
+  border-top-color: #D9D9D9;
+  border-right-style: solid;
+  border-right-width: 3px;
+  border-right-color: #D9D9D9;
   border-bottom-style: solid;
-  border-bottom-width: 2px;
-  border-bottom-color: #A8A8A8;
-  border-left-style: none;
-  border-left-width: 2px;
-  border-left-color: #D3D3D3;
+  border-bottom-width: 3px;
+  border-bottom-color: #D9D9D9;
+  border-left-style: solid;
+  border-left-width: 3px;
+  border-left-color: #D9D9D9;
 }
 
 #hmvrgwuvwx .gt_caption {
@@ -502,8 +502,8 @@ outcomes:</p>
 
 #hmvrgwuvwx .gt_table_body {
   border-top-style: solid;
-  border-top-width: 2px;
-  border-top-color: #D3D3D3;
+  border-top-width: 3px;
+  border-top-color: #D9D9D9;
   border-bottom-style: solid;
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
@@ -626,19 +626,19 @@ outcomes:</p>
 <table class="table gt_table" data-quarto-disable-processing="false" data-quarto-bootstrap="false">
 <thead>
 <tr class="gt_col_headings gt_spanner_row">
-<th class="gt_col_heading gt_columns_bottom_border gt_left" rowspan="2" colspan="1" style="text-align: center; font-weight: bold;" scope="col" id="CDM-name">CDM name</th>
-      <th class="gt_col_heading gt_columns_bottom_border gt_left" rowspan="2" colspan="1" style="text-align: center; font-weight: bold;" scope="col" id="Target-cohort">Target cohort</th>
-      <th class="gt_col_heading gt_columns_bottom_border gt_left" rowspan="2" colspan="1" style="text-align: center; font-weight: bold;" scope="col" id="Outcome-type">Outcome type</th>
-      <th class="gt_col_heading gt_columns_bottom_border gt_left" rowspan="2" colspan="1" style="text-align: center; font-weight: bold;" scope="col" id="Outcome-name">Outcome name</th>
-      <th class="gt_center gt_columns_top_border gt_column_spanner_outer" rowspan="1" colspan="3" style="background-color: #D9D9D9; text-align: center; font-weight: bold;" scope="colgroup" id="spanner-[header_name]Estimate name
+<th class="gt_col_heading gt_columns_bottom_border gt_left" rowspan="2" colspan="1" style="text-align: center; font-weight: bold; border-left-width: 1px; border-left-style: solid; border-left-color: White; border-right-width: 1px; border-right-style: solid; border-right-color: White; border-top-width: 1px; border-top-style: solid; border-top-color: White; border-bottom-width: 1px; border-bottom-style: solid; border-bottom-color: White;" scope="col" id="CDM-name">CDM name</th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_left" rowspan="2" colspan="1" style="text-align: center; font-weight: bold; border-left-width: 1px; border-left-style: solid; border-left-color: White; border-right-width: 1px; border-right-style: solid; border-right-color: White; border-top-width: 1px; border-top-style: solid; border-top-color: White; border-bottom-width: 1px; border-bottom-style: solid; border-bottom-color: White;" scope="col" id="Target-cohort">Target cohort</th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_left" rowspan="2" colspan="1" style="text-align: center; font-weight: bold; border-left-width: 1px; border-left-style: solid; border-left-color: White; border-right-width: 1px; border-right-style: solid; border-right-color: White; border-top-width: 1px; border-top-style: solid; border-top-color: White; border-bottom-width: 1px; border-bottom-style: solid; border-bottom-color: White;" scope="col" id="Outcome-type">Outcome type</th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_left" rowspan="2" colspan="1" style="text-align: center; font-weight: bold; border-left-width: 1px; border-left-style: solid; border-left-color: White; border-right-width: 1px; border-right-style: solid; border-right-color: White; border-top-width: 1px; border-top-style: solid; border-top-color: White; border-bottom-width: 1px; border-bottom-style: solid; border-bottom-color: White;" scope="col" id="Outcome-name">Outcome name</th>
+      <th class="gt_center gt_columns_top_border gt_column_spanner_outer" rowspan="1" colspan="3" style="background-color: #D9D9D9; text-align: center; font-weight: bold; border-left-width: 1px; border-left-style: solid; border-left-color: White; border-right-width: 1px; border-right-style: solid; border-right-color: White; border-top-width: 1px; border-top-style: solid; border-top-color: White; border-bottom-width: 1px; border-bottom-style: solid; border-bottom-color: White;" scope="colgroup" id="spanner-[header_name]Estimate name
 [header_level]Number records">
         <div class="gt_column_spanner">Estimate name</div>
       </th>
     </tr>
 <tr class="gt_col_headings">
-<th class="gt_col_heading gt_columns_bottom_border gt_right" rowspan="1" colspan="1" style="background-color: #E1E1E1; text-align: center; font-weight: bold;" scope="col" id="[header_name]Estimate-name-[header_level]Number-records">Number records</th>
-      <th class="gt_col_heading gt_columns_bottom_border gt_right" rowspan="1" colspan="1" style="background-color: #E1E1E1; text-align: center; font-weight: bold;" scope="col" id="[header_name]Estimate-name-[header_level]Number-events">Number events</th>
-      <th class="gt_col_heading gt_columns_bottom_border gt_right" rowspan="1" colspan="1" style="background-color: #E1E1E1; text-align: center; font-weight: bold;" scope="col" id="[header_name]Estimate-name-[header_level]Restricted-mean-survival">Restricted mean survival</th>
+<th class="gt_col_heading gt_columns_bottom_border gt_right" rowspan="1" colspan="1" style="background-color: #E1E1E1; text-align: center; font-weight: bold; border-left-width: 1px; border-left-style: solid; border-left-color: White; border-right-width: 1px; border-right-style: solid; border-right-color: White; border-top-width: 1px; border-top-style: solid; border-top-color: White; border-bottom-width: 1px; border-bottom-style: solid; border-bottom-color: White;" scope="col" id="[header_name]Estimate-name-[header_level]Number-records">Number records</th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_right" rowspan="1" colspan="1" style="background-color: #E1E1E1; text-align: center; font-weight: bold; border-left-width: 1px; border-left-style: solid; border-left-color: White; border-right-width: 1px; border-right-style: solid; border-right-color: White; border-top-width: 1px; border-top-style: solid; border-top-color: White; border-bottom-width: 1px; border-bottom-style: solid; border-bottom-color: White;" scope="col" id="[header_name]Estimate-name-[header_level]Number-events">Number events</th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_right" rowspan="1" colspan="1" style="background-color: #E1E1E1; text-align: center; font-weight: bold; border-left-width: 1px; border-left-style: solid; border-left-color: White; border-right-width: 1px; border-right-style: solid; border-right-color: White; border-top-width: 1px; border-top-style: solid; border-top-color: White; border-bottom-width: 1px; border-bottom-style: solid; border-bottom-color: White;" scope="col" id="[header_name]Estimate-name-[header_level]Restricted-mean-survival">Restricted mean survival</th>
     </tr>
 </thead>
 <tbody class="gt_table_body">
@@ -730,17 +730,17 @@ well as overall.</p>
   background-color: #FFFFFF;
   width: auto;
   border-top-style: solid;
-  border-top-width: 2px;
-  border-top-color: #A8A8A8;
-  border-right-style: none;
-  border-right-width: 2px;
-  border-right-color: #D3D3D3;
+  border-top-width: 3px;
+  border-top-color: #D9D9D9;
+  border-right-style: solid;
+  border-right-width: 3px;
+  border-right-color: #D9D9D9;
   border-bottom-style: solid;
-  border-bottom-width: 2px;
-  border-bottom-color: #A8A8A8;
-  border-left-style: none;
-  border-left-width: 2px;
-  border-left-color: #D3D3D3;
+  border-bottom-width: 3px;
+  border-bottom-color: #D9D9D9;
+  border-left-style: solid;
+  border-left-width: 3px;
+  border-left-color: #D9D9D9;
 }
 
 #jbfixkfcki .gt_caption {
@@ -1029,8 +1029,8 @@ well as overall.</p>
 
 #jbfixkfcki .gt_table_body {
   border-top-style: solid;
-  border-top-width: 2px;
-  border-top-color: #D3D3D3;
+  border-top-width: 3px;
+  border-top-color: #D9D9D9;
   border-bottom-style: solid;
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
@@ -1153,20 +1153,20 @@ well as overall.</p>
 <table class="table gt_table" data-quarto-disable-processing="false" data-quarto-bootstrap="false">
 <thead>
 <tr class="gt_col_headings gt_spanner_row">
-<th class="gt_col_heading gt_columns_bottom_border gt_left" rowspan="2" colspan="1" style="text-align: center; font-weight: bold;" scope="col" id="CDM-name">CDM name</th>
-      <th class="gt_col_heading gt_columns_bottom_border gt_left" rowspan="2" colspan="1" style="text-align: center; font-weight: bold;" scope="col" id="Target-cohort">Target cohort</th>
-      <th class="gt_col_heading gt_columns_bottom_border gt_left" rowspan="2" colspan="1" style="text-align: center; font-weight: bold;" scope="col" id="Sex">Sex</th>
-      <th class="gt_col_heading gt_columns_bottom_border gt_left" rowspan="2" colspan="1" style="text-align: center; font-weight: bold;" scope="col" id="Outcome-type">Outcome type</th>
-      <th class="gt_col_heading gt_columns_bottom_border gt_left" rowspan="2" colspan="1" style="text-align: center; font-weight: bold;" scope="col" id="Outcome-name">Outcome name</th>
-      <th class="gt_center gt_columns_top_border gt_column_spanner_outer" rowspan="1" colspan="3" style="background-color: #D9D9D9; text-align: center; font-weight: bold;" scope="colgroup" id="spanner-[header_name]Estimate name
+<th class="gt_col_heading gt_columns_bottom_border gt_left" rowspan="2" colspan="1" style="text-align: center; font-weight: bold; border-left-width: 1px; border-left-style: solid; border-left-color: White; border-right-width: 1px; border-right-style: solid; border-right-color: White; border-top-width: 1px; border-top-style: solid; border-top-color: White; border-bottom-width: 1px; border-bottom-style: solid; border-bottom-color: White;" scope="col" id="CDM-name">CDM name</th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_left" rowspan="2" colspan="1" style="text-align: center; font-weight: bold; border-left-width: 1px; border-left-style: solid; border-left-color: White; border-right-width: 1px; border-right-style: solid; border-right-color: White; border-top-width: 1px; border-top-style: solid; border-top-color: White; border-bottom-width: 1px; border-bottom-style: solid; border-bottom-color: White;" scope="col" id="Target-cohort">Target cohort</th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_left" rowspan="2" colspan="1" style="text-align: center; font-weight: bold; border-left-width: 1px; border-left-style: solid; border-left-color: White; border-right-width: 1px; border-right-style: solid; border-right-color: White; border-top-width: 1px; border-top-style: solid; border-top-color: White; border-bottom-width: 1px; border-bottom-style: solid; border-bottom-color: White;" scope="col" id="Sex">Sex</th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_left" rowspan="2" colspan="1" style="text-align: center; font-weight: bold; border-left-width: 1px; border-left-style: solid; border-left-color: White; border-right-width: 1px; border-right-style: solid; border-right-color: White; border-top-width: 1px; border-top-style: solid; border-top-color: White; border-bottom-width: 1px; border-bottom-style: solid; border-bottom-color: White;" scope="col" id="Outcome-type">Outcome type</th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_left" rowspan="2" colspan="1" style="text-align: center; font-weight: bold; border-left-width: 1px; border-left-style: solid; border-left-color: White; border-right-width: 1px; border-right-style: solid; border-right-color: White; border-top-width: 1px; border-top-style: solid; border-top-color: White; border-bottom-width: 1px; border-bottom-style: solid; border-bottom-color: White;" scope="col" id="Outcome-name">Outcome name</th>
+      <th class="gt_center gt_columns_top_border gt_column_spanner_outer" rowspan="1" colspan="3" style="background-color: #D9D9D9; text-align: center; font-weight: bold; border-left-width: 1px; border-left-style: solid; border-left-color: White; border-right-width: 1px; border-right-style: solid; border-right-color: White; border-top-width: 1px; border-top-style: solid; border-top-color: White; border-bottom-width: 1px; border-bottom-style: solid; border-bottom-color: White;" scope="colgroup" id="spanner-[header_name]Estimate name
 [header_level]Number records">
         <div class="gt_column_spanner">Estimate name</div>
       </th>
     </tr>
 <tr class="gt_col_headings">
-<th class="gt_col_heading gt_columns_bottom_border gt_right" rowspan="1" colspan="1" style="background-color: #E1E1E1; text-align: center; font-weight: bold;" scope="col" id="[header_name]Estimate-name-[header_level]Number-records">Number records</th>
-      <th class="gt_col_heading gt_columns_bottom_border gt_right" rowspan="1" colspan="1" style="background-color: #E1E1E1; text-align: center; font-weight: bold;" scope="col" id="[header_name]Estimate-name-[header_level]Number-events">Number events</th>
-      <th class="gt_col_heading gt_columns_bottom_border gt_right" rowspan="1" colspan="1" style="background-color: #E1E1E1; text-align: center; font-weight: bold;" scope="col" id="[header_name]Estimate-name-[header_level]Restricted-mean-survival">Restricted mean survival</th>
+<th class="gt_col_heading gt_columns_bottom_border gt_right" rowspan="1" colspan="1" style="background-color: #E1E1E1; text-align: center; font-weight: bold; border-left-width: 1px; border-left-style: solid; border-left-color: White; border-right-width: 1px; border-right-style: solid; border-right-color: White; border-top-width: 1px; border-top-style: solid; border-top-color: White; border-bottom-width: 1px; border-bottom-style: solid; border-bottom-color: White;" scope="col" id="[header_name]Estimate-name-[header_level]Number-records">Number records</th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_right" rowspan="1" colspan="1" style="background-color: #E1E1E1; text-align: center; font-weight: bold; border-left-width: 1px; border-left-style: solid; border-left-color: White; border-right-width: 1px; border-right-style: solid; border-right-color: White; border-top-width: 1px; border-top-style: solid; border-top-color: White; border-bottom-width: 1px; border-bottom-style: solid; border-bottom-color: White;" scope="col" id="[header_name]Estimate-name-[header_level]Number-events">Number events</th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_right" rowspan="1" colspan="1" style="background-color: #E1E1E1; text-align: center; font-weight: bold; border-left-width: 1px; border-left-style: solid; border-left-color: White; border-right-width: 1px; border-right-style: solid; border-right-color: White; border-top-width: 1px; border-top-style: solid; border-top-color: White; border-bottom-width: 1px; border-bottom-style: solid; border-bottom-color: White;" scope="col" id="[header_name]Estimate-name-[header_level]Restricted-mean-survival">Restricted mean survival</th>
     </tr>
 </thead>
 <tbody class="gt_table_body">
@@ -1270,7 +1270,7 @@ well as overall.</p>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.1.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.3.</p>
 </div>
 
     </footer>
