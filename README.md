@@ -1,7 +1,7 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-# CohortSurvival <a href="https://darwin-eu-dev.github.io/CohortSurvival/"><img src="man/figures/logo.png" alt="CohortSurvival website" align="right" height="138"/></a>
+# CohortSurvival <a href="https://darwin-eu.github.io/CohortSurvival/"><img src="man/figures/logo.png" alt="CohortSurvival website" align="right" height="138"/></a>
 
 [![CRANstatus](https://www.r-pkg.org/badges/version/CohortSurvival)](https://CRAN.R-project.org/package=CohortSurvival)
 [![codecov.io](https://codecov.io/github/darwin-eu/CohortSurvival/coverage.svg?branch=main)](https://app.codecov.io/github/darwin-eu/CohortSurvival?branch=main)
@@ -644,4 +644,4 @@ cdmDisconnect(cdm)
 ### Additional information
 
 You can check additional functionality of the package on its
-[website](https://darwin-eu-dev.github.io/CohortSurvival/).
+[website](https://darwin-eu.github.io/CohortSurvival/).

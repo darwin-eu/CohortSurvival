@@ -14,7 +14,7 @@ knitr::opts_chunk$set(
 )
 ```
 
-# CohortSurvival <a href="https://darwin-eu-dev.github.io/CohortSurvival/"><img src="man/figures/logo.png" alt="CohortSurvival website" align="right" height="138"/></a>
+# CohortSurvival <a href="https://darwin-eu.github.io/CohortSurvival/"><img src="man/figures/logo.png" alt="CohortSurvival website" align="right" height="138"/></a>
 
 [![CRANstatus](https://www.r-pkg.org/badges/version/CohortSurvival)](https://CRAN.R-project.org/package=CohortSurvival) [![codecov.io](https://codecov.io/github/darwin-eu/CohortSurvival/coverage.svg?branch=main)](https://app.codecov.io/github/darwin-eu/CohortSurvival?branch=main) [![R-CMD-check](https://github.com/darwin-eu/CohortSurvival/workflows/R-CMD-check/badge.svg)](https://github.com/darwin-eu/CohortSurvival/actions) [![Lifecycle:Stable](https://img.shields.io/badge/Lifecycle-Stable-339999)](https://lifecycle.r-lib.org/articles/stages.html)
 
@@ -143,4 +143,4 @@ cdmDisconnect(cdm)
 
 ### Additional information
 
-You can check additional functionality of the package on its [website](https://darwin-eu-dev.github.io/CohortSurvival/).
+You can check additional functionality of the package on its [website](https://darwin-eu.github.io/CohortSurvival/).
