@@ -2290,7 +2290,7 @@ test_that("restrictedMeanFollowUp", {
   )
 
   tsurvrmeanbig <- tableSurvival(survCR_rmean_big, type = "tibble", .options = list(includeHeaderKey = FALSE))
-  expect_true(all(compareNA(tsurvrmeanbig %>% dplyr::pull(dplyr::contains("Restricted mean survival")), c(NA,NA))))
+  expect_true(all(compareNA(tsurvrmeanbig %>% dplyr::pull(dplyr::contains("Restricted mean survival")), c("\U2013","\U2013"))))
 
   # different follow ups for different strata
   survCR_rmean_big_strata <- estimateCompetingRiskSurvival(cdm,
@@ -2305,7 +2305,7 @@ test_that("restrictedMeanFollowUp", {
   )
 
   tsurvrmeanbigs <- tableSurvival(survCR_rmean_big_strata, type = "tibble", .options = list(includeHeaderKey = FALSE))
-  expect_true(all(compareNA(tsurvrmeanbigs %>% dplyr::pull(dplyr::contains("Restricted mean survival")), c("31.00","241.00",NA,"27.00",NA,"252.00"))))
+  expect_true(all(compareNA(tsurvrmeanbigs %>% dplyr::pull(dplyr::contains("Restricted mean survival")), c("31.00","241.00","\U2013","27.00","\U2013","252.00"))))
 
   CDMConnector::cdmDisconnect(cdm)
 })
