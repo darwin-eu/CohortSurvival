@@ -205,4 +205,4 @@ cdmDisconnect(cdm)
 ### Additional information
 
 You can check additional functionality of the package on its
-[website](https://darwin-eu-dev.github.io/CohortSurvival/).
+[website](https://darwin-eu.github.io/CohortSurvival/).

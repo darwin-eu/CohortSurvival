@@ -67,7 +67,6 @@ A plot of survival probabilities over time
 ``` r
 # \donttest{
 cdm <- mockMGUS2cdm()
-#> ■■■■■■■■■■■■■■■■■■■■■■■■■         80% | ETA:  1s
 surv <- estimateSingleEventSurvival(cdm,
                                     targetCohortTable = "mgus_diagnosis",
                                     outcomeCohortTable = "death_cohort")

@@ -8,7 +8,7 @@ on user-defined study cohorts.
 
 Useful links:
 
-- <https://darwin-eu-dev.github.io/CohortSurvival/>
+- <https://darwin-eu.github.io/CohortSurvival/>
 
 ## Author
 

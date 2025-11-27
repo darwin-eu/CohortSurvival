@@ -107,6 +107,7 @@ an attribute of the output
 ``` r
 # \donttest{
 cdm <- mockMGUS2cdm()
+#> ■■■■■■■■■■■■■■■■■■■■■■■■■         80% | ETA:  1s
 surv <- estimateSingleEventSurvival(
   cdm = cdm,
   targetCohortTable = "mgus_diagnosis",

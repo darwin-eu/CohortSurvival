@@ -78,6 +78,7 @@ whether the patient had the event (value: 1), or did not have the event
 # \donttest{
 
 cdm <- mockMGUS2cdm()
+#> ■■■■■■■■■■■■■■■■■■■■■■■■■         80% | ETA:  1s
 cdm$mgus_diagnosis <- cdm$mgus_diagnosis %>%
   addCohortSurvival(
     cdm = cdm,
