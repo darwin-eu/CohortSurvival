@@ -28,6 +28,7 @@ BugReports: https://github.com/darwin-eu/CohortSurvival/issues
 Imports: 
     broom,
     CDMConnector (>= 2.0.0),
+    checkmate,
     cli,
     clock,
     DBI,
