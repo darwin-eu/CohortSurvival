@@ -1,6 +1,6 @@
 Package: CohortSurvival
 Title: Estimate Survival from OMOP Cohorts
-Version: 1.0.3
+Version: 1.0.2
 Authors@R: c(
     person("Kim", "López-Güell", email = "kim.lopez@spc.ox.ac.uk", 
     role = c("aut", "cre"),
