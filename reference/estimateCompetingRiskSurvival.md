@@ -128,7 +128,6 @@ an attribute of the output
 ``` r
 # \donttest{
 cdm <- mockMGUS2cdm()
-#> ■■■■■■■■■■■■■■■■■■■               60% | ETA:  1s
 surv <- estimateCompetingRiskSurvival(
   cdm = cdm,
   targetCohortTable = "mgus_diagnosis",

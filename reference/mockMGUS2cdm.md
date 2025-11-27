@@ -17,6 +17,7 @@ CDM reference containing data from the survival::mgus2 dataset
 ``` r
  # \donttest{
 cdm <- mockMGUS2cdm()
+#> ■■■■■■■■■■■■■■■■■■■■■■■■■         80% | ETA:  1s
 cdm$person
 #> # Source:   table<person> [?? x 7]
 #> # Database: DuckDB 1.4.2 [unknown@Linux 6.11.0-1018-azure:R 4.5.2/:memory:]
