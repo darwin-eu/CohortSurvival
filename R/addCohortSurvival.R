@@ -19,9 +19,11 @@
 #' @param cdm CDM reference
 #' @param outcomeCohortTable The outcome cohort table of interest.
 #' @param outcomeCohortId ID of event cohorts to include. Only one outcome
-#' (and so one ID) can be considered.
+#' (and so one ID) can be considered. It can either be a
+#' cohort_definition_id value or a cohort_name.
 #' @param outcomeDateVariable Variable containing date of outcome event
-#' @param outcomeWashout Washout time in days for the outcome
+#' @param outcomeWashout Washout time in days for the outcome. If an individual has
+#' an outcome during the washout period, status and time will be set to NA
 #' @param censorOnCohortExit If TRUE, an individual's follow up will be
 #' censored at their cohort exit
 #' @param censorOnDate if not NULL, an individual's follow up will be censored
@@ -40,7 +42,7 @@
 #' \donttest{
 #'
 #' cdm <- mockMGUS2cdm()
-#' cdm$mgus_diagnosis <- cdm$mgus_diagnosis %>%
+#' cdm$mgus_diagnosis <- cdm$mgus_diagnosis |>
 #'   addCohortSurvival(
 #'     cdm = cdm,
 #'     outcomeCohortTable = "death_cohort",
@@ -73,13 +75,13 @@ addCohortSurvival <- function(x,
   comp <- newTable(name)
 
   # drop columns if they already exist
-  x <- x %>%
+  x <- x |>
     dplyr::select(!dplyr::any_of(c("days_to_exit",
                                    "time",
                                    "status")))
 
   # get time to end of observation period
-  x <- x %>%
+  x <- x |>
     PatientProfiles::addFutureObservation(
       indexDate = "cohort_start_date",
       futureObservationName = "days_to_exit"
@@ -87,33 +89,41 @@ addCohortSurvival <- function(x,
 
   if(outcomeWashout == 0) {
     # get any events before or after index date
-    x <- x %>%
-      dplyr::mutate(event_in_washout = 0L) %>%
+    x <- x |>
+      dplyr::mutate(event_in_washout = 0L) |>
       PatientProfiles::addCohortIntersectDays(
         indexDate = "cohort_start_date",
         targetCohortTable = outcomeCohortTable,
         targetCohortId = outcomeCohortId,
         targetDate = outcomeDateVariable,
         window = c(0, Inf),
+        order = "first",
         nameStyle = "days_to_event"
+      ) |>
+      dplyr::mutate(
+        days_to_event = as.numeric(.data$days_to_event)
       )
   } else {
     # get any events before or after index date
-    x <- x %>%
+    x <- x |>
       PatientProfiles::addCohortIntersectFlag(
         indexDate = "cohort_start_date",
         targetCohortTable = outcomeCohortTable,
         targetCohortId = outcomeCohortId,
         window = c(-outcomeWashout,-1),
         nameStyle = "event_in_washout"
-      ) %>%
+      ) |>
       PatientProfiles::addCohortIntersectDays(
         indexDate = "cohort_start_date",
         targetCohortTable = outcomeCohortTable,
         targetCohortId = outcomeCohortId,
         targetDate = outcomeDateVariable,
         window = c(0, Inf),
+        order = "first",
         nameStyle = "days_to_event"
+      ) |>
+      dplyr::mutate(
+        days_to_event = as.numeric(.data$days_to_event)
       )
   }
 
@@ -126,60 +136,68 @@ addCohortSurvival <- function(x,
   # 4) followUpDays (if followUpDays is not Inf)
 
   if (isTRUE(censorOnCohortExit)) {
-    x <- x %>%
-      dplyr::mutate(days_end_cohort = !!CDMConnector::datediff(
-        "cohort_start_date", "cohort_end_date")) %>%
+    x <- x |>
+      dplyr::mutate(days_end_cohort = clock::date_count_between(
+        start = .data$cohort_start_date,
+        end = .data$cohort_end_date,
+        precision = "day"
+      )) |>
       dplyr::mutate(days_to_event = dplyr::if_else(
         .data$days_to_event <= .data$days_end_cohort,
         .data$days_to_event, as.numeric(NA)
-      )) %>%
+      )) |>
       dplyr::mutate(days_to_exit = dplyr::if_else(
         .data$days_to_exit < .data$days_end_cohort,
         .data$days_to_exit, .data$days_end_cohort
-      )) %>%
-      dplyr::select(!"days_end_cohort") %>%
-      dplyr::compute(name = comp$name, temporary = comp$temporary)
+      )) |>
+      dplyr::select(!"days_end_cohort") |>
+      dplyr::compute(name = comp$name, temporary = comp$temporary,
+                     logPrefix = "CohortSurvival_addCohortSurvival_censor_on_cohort_exit_")
   }
 
   if (!is.null(censorOnDate)) {
-    x <- x %>%
-      dplyr::mutate(censor_date = .env$censorOnDate) %>%
-      dplyr::mutate(days_to_censor = !!CDMConnector::datediff(
-        "cohort_start_date", "censor_date"
-      )) %>%
+    x <- x |>
+      dplyr::mutate(censor_date = .env$censorOnDate) |>
+      dplyr::mutate(days_to_censor = clock::date_count_between(
+        start = .data$cohort_start_date,
+        end = .data$censor_date,
+        precision = "day"
+      )) |>
       dplyr::mutate(days_to_event = dplyr::if_else(
         .data$days_to_event >= .data$days_to_censor,
         as.numeric(NA), .data$days_to_event
-      )) %>%
+      )) |>
       dplyr::mutate(days_to_exit = dplyr::if_else(
         .data$days_to_exit < .data$days_to_censor,
         .data$days_to_exit, .data$days_to_censor
-      )) %>%
-      dplyr::select(!c("days_to_censor", "censor_date")) %>%
-      dplyr::compute(name = comp$name, temporary = comp$temporary)
+      )) |>
+      dplyr::select(!c("days_to_censor", "censor_date")) |>
+      dplyr::compute(name = comp$name, temporary = comp$temporary,
+                     logPrefix = "CohortSurvival_addCohortSurvival_censor_on_date")
   }
 
   if (followUpDays != Inf) {
-    x <- x %>%
+    x <- x |>
       dplyr::mutate(days_to_event = dplyr::if_else(
         .data$days_to_event <= .env$followUpDays,
         .data$days_to_event, as.numeric(NA)
-      )) %>%
+      )) |>
       dplyr::mutate(days_to_exit = dplyr::if_else(
         .data$days_to_exit < .env$followUpDays,
         .data$days_to_exit, .env$followUpDays
-      )) %>%
-      dplyr::compute(name = comp$name, temporary = comp$temporary)
+      )) |>
+      dplyr::compute(name = comp$name, temporary = comp$temporary,
+                     logPrefix = "CohortSurvival_addCohortSurvival_follow_up_days_")
   }
 
   # now just using days_to_event and days_to_exit
   # add status variable (1 if event, 0 if not)
   # add time variable (days to event for those with event,
   # days to exit if no event)
-  x <- x %>%
+  x <- x |>
     dplyr::mutate(status = dplyr::if_else(
       !is.na(.data$days_to_event), 1, 0
-    )) %>%
+    )) |>
     dplyr::mutate(time = dplyr::if_else(.data$status == 1,
                                         .data$days_to_event, .data$days_to_exit
     ))
@@ -187,20 +205,20 @@ addCohortSurvival <- function(x,
   # for anyone with an outcome in the washout
   # we keep them, but their time and event will be set to NA
   # (ie they won't contribute to any analysis)
-  x <- x %>%
+  x <- x |>
     dplyr::mutate(
-      status = dplyr::if_else(!is.na(.data$event_in_washout) &&
+      status = dplyr::if_else(!is.na(.data$event_in_washout) &
                                 .data$event_in_washout == 1, NA,
                               .data$status
       ),
-      time = dplyr::if_else(!is.na(.data$event_in_washout) &&
+      time = dplyr::if_else(!is.na(.data$event_in_washout) &
                               .data$event_in_washout == 1, NA,
                             .data$time
       )
     )
   # likewise if we censor on a date prior to their cohort start date
   if(!is.null(censorOnDate)) {
-    x <- x %>%
+    x <- x |>
       dplyr::mutate(
         status = dplyr::if_else(.data$cohort_start_date > .env$censorOnDate, NA,
                                 .data$status
@@ -211,9 +229,10 @@ addCohortSurvival <- function(x,
       )
   }
 
-  x <- x %>%
-    dplyr::select(!c("event_in_washout", "days_to_event")) %>%
-    dplyr::compute(name = comp$name, temporary = comp$temporary)
+  x <- x |>
+    dplyr::select(!c("event_in_washout", "days_to_event")) |>
+    dplyr::compute(name = comp$name, temporary = comp$temporary,
+                   logPrefix = "CohortSurvival_addCohortSurvival_clean")
 
   return(x)
 }
@@ -229,25 +248,17 @@ validateExtractSurvivalInputs <- function(cdm,
   omopgenerics::validateCdmArgument(cdm)
   omopgenerics::validateCohortArgument(cdm[[outcomeCohortTable]])
   checkExposureCohortId(cohortTable)
-  omopgenerics::assertDate(censorOnDate, null = TRUE, )
+  omopgenerics::assertDate(censorOnDate, null = TRUE)
   checkCensorOnDate(cohortTable, censorOnDate)
-  omopgenerics::assertNumeric(outcomeCohortId, length = 1, min = 1)
+  outcomeCohortId <- omopgenerics::validateCohortIdArgument(outcomeCohortId, cdm[[outcomeCohortTable]],
+                                                            null = FALSE)
   omopgenerics::assertLogical(censorOnCohortExit, length = 1)
   omopgenerics::assertNumeric(followUpDays, length = 1, min = 1, integerish = TRUE)
   omopgenerics::assertNumeric(outcomeWashout, length = 1, min = 0, integerish = TRUE)
+  outcomeCohortId <- omopgenerics::validateCohortIdArgument(outcomeCohortId, cdm[[outcomeCohortTable]],
+                                                            null = FALSE)
 
-  # check specified cohort is in cohort table
-  errorMessage <- checkmate::makeAssertCollection()
-  if (!is.null(outcomeCohortId)) {
-    checkmate::assertTRUE(
-      checkCohortId(
-        cohort = cdm[[outcomeCohortTable]],
-        cohortId = outcomeCohortId
-      ),
-      add = errorMessage
-    )
-  }
-  return(checkmate::reportAssertions(collection = errorMessage))
+
 }
 
 newTable <- function(name, call = parent.frame()) {

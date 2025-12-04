@@ -26,6 +26,11 @@
 #' @param riskInterval Interval of time to print risk table below the plot
 #' @param logLog If TRUE, the survival probabilities are transformed using the log-log formula
 #' @param timeScale The scale of time in the x-axis. Can be "days", "months", or "years"
+#' @param style	A character string defining the visual theme to apply to the plot.
+#' You can set this to NULL to apply the standard ggplot2 default style, or provide
+#' a name for one of the package's pre-defined styles. Refer to the plotStyle() function
+#' for all available style pre-defined themes. For further customization, you can always
+#' modify the returned ggplot object directly.
 #'
 #' @return A plot of survival probabilities over time
 #' @export
@@ -47,8 +52,8 @@ plotSurvival <- function(result,
                          riskTable = FALSE,
                          riskInterval = 30,
                          logLog = FALSE,
-                         timeScale = "days") {
-
+                         timeScale = "days",
+                         style = NULL) {
   rlang::check_installed("visOmopResults")
   rlang::check_installed("ggplot2")
   rlang::check_installed("scales")
@@ -59,29 +64,47 @@ plotSurvival <- function(result,
     return(visOmopResults::emptyPlot())
   }
 
-  result <- result %>% asSurvivalResult()
+  # Convert to survival result if needed
+  if (inherits(result, "summarised_result")) {
+    result <- asSurvivalResult(result)
+  } else if (!inherits(result, "survival_result")) {
+    cli::cli_abort("Input {.arg result} must be a {.cls summarised_result} or {.cls survival_result} object.")
+  }
+
+  # Check available result types
+  available_types <- result$result_type |> unique()
+
+  # Check for survival estimates type (merged type)
+  has_estimates <- "survival_estimates" %in% available_types
+
+  if (!has_estimates) {
+    cli::cli_abort("No survival estimates data found for plotting. Expected {.val survival_estimates} result type.")
+  }
 
   # Adjust time scale
   if (timeScale == "years") {
-    result <- result %>%
+    result <- result |>
       dplyr::mutate(time = .data$time / 365.25)
     xlab <- "Time in years"
   } else if (timeScale == "months") {
-    result <- result %>%
+    result <- result |>
       dplyr::mutate(time = .data$time / 30.4375)
     xlab <- "Time in months"
   } else {
     xlab <- "Time in days"
   }
 
-  if (isFALSE(cumulativeFailure) && "cumulative_failure_probability" %in% unique(result$result_type)) {
+  # Check if result contains cumulative failure probability using competing_outcome column
+  has_cumulative_failure <- any(result$competing_outcome != "none", na.rm = TRUE)
+
+  if (isFALSE(cumulativeFailure) && has_cumulative_failure) {
     cli::cli_abort("cumulativeFailure must be TRUE if result comes from a competing risk analysis")
   }
 
-  if (cumulativeFailure & unique(result$result_type) != "cumulative_failure_probability") {
-    result <- result %>%
+  # Convert survival to cumulative failure if requested and not already cumulative failure
+  if (cumulativeFailure && !has_cumulative_failure) {
+    result <- result |>
       dplyr::mutate(
-        result_type = "cumulative_failure_probability",
         estimate = 1 - .data$estimate,
         estimate_95CI_lower = 1 - .data$estimate_95CI_lower,
         estimate_95CI_upper = 1 - .data$estimate_95CI_upper
@@ -89,17 +112,22 @@ plotSurvival <- function(result,
   }
 
   # Only plot resuts for which all estimates are not NA
-  result <- result %>%
+  result <- result |>
     dplyr::filter(
       !is.na(.data$estimate),
       !is.na(.data$estimate_95CI_lower),
       !is.na(.data$estimate_95CI_upper)
     )
 
-  plot_name <- stringr::str_to_sentence(gsub("_", " ", unique(result$result_type)))
+  # Handle y-axis label based on cumulative failure or competing outcomes
+  if (has_cumulative_failure || cumulativeFailure) {
+    plot_name <- "Cumulative failure probability"
+  } else {
+    plot_name <- "Survival probability"
+  }
 
   if (logLog) {
-    result <- result %>%
+    result <- result |>
       dplyr::mutate(estimate = log(-log(.data$estimate)),
                     estimate_95CI_lower = log(-log(.data$estimate_95CI_lower)),
                     estimate_95CI_upper = log(-log(.data$estimate_95CI_upper)),
@@ -121,29 +149,30 @@ plotSurvival <- function(result,
     ymax = NULL,
     facet = facet,
     colour = colour,
-    label = labels
+    label = labels,
+    style = style
   ) +
     ggplot2::xlab(xlab) +
     ggplot2::ylab(plot_name) +
     ggplot2::scale_y_continuous(labels = scales::comma) +
-    visOmopResults::themeVisOmop()
+    visOmopResults::themeVisOmop(style = style)
 
   if (ribbon) {
-    plot <- plot %>% addRibbon()
+    plot <- plot |> addRibbon()
   }
 
   if (riskTable) {
-    max_t <- result %>%
-      dplyr::pull(.data$time) %>%
+    max_t <- result |>
+      dplyr::pull(.data$time) |>
       max()
 
     riskTimes <- seq(0, max_t, by = riskInterval)
 
     if (!is.null(facet)) {
-      x <- result %>%
+      x <- result |>
         tidyr::unite("facet", dplyr::any_of(facet), sep = " and ", remove = FALSE)
 
-      attr(x, "events") <- attr(result, "events") %>%
+      attr(x, "events") <- attr(result, "events") |>
         tidyr::unite("facet", dplyr::any_of(facet), sep = " and ", remove = FALSE)
 
       facetLevels <- unique(x[["facet"]])
@@ -151,10 +180,10 @@ plotSurvival <- function(result,
       plotList <- list()
 
       applyPlot <- function(plotList, level) {
-        subResult <- x %>%
+        subResult <- x |>
           dplyr::filter(.data$facet == level)
-        attr(subResult, "events") <- attr(x, "events") %>%
-          dplyr::filter(.data$facet == level) %>%
+        attr(subResult, "events") <- attr(x, "events") |>
+          dplyr::filter(.data$facet == level) |>
           dplyr::compute()
 
         facetPlot <- visOmopResults::scatterPlot(
@@ -168,21 +197,22 @@ plotSurvival <- function(result,
           ymax = NULL,
           facet = NULL,
           colour = colour,
-          label = character()
+          label = character(),
+          style = style
         ) +
           ggplot2::xlab("Time in days") +
           ggplot2::ylab(plot_name) +
           ggplot2::scale_y_continuous(labels = scales::comma) +
           ggplot2::ggtitle(level) +
-          visOmopResults::themeVisOmop()
+          visOmopResults::themeVisOmop(style = style)
 
         if (ribbon) {
-          facetPlot <- facetPlot %>% addRibbon()
+          facetPlot <- facetPlot |> addRibbon()
         }
 
         riskData <- generateRiskData(subResult, riskTimes, colour)
 
-        if (nrow(riskData) == 0) {
+        if (nrow(riskData) == 1) {
           cli::cli_abort("Check the riskInterval provided. It seems that interval
                         does not provide the times for which n_risk can be retrieved.
                         Check the `events` attribute from your asSurvivalResult()
@@ -190,13 +220,13 @@ plotSurvival <- function(result,
                         available")
         }
 
-        names_risk <- riskData %>%
-          dplyr::select(-c(dplyr::starts_with("time"))) %>%
+        names_risk <- riskData |>
+          dplyr::select(-c(dplyr::starts_with("time"))) |>
           colnames()
 
         nameRisk <- paste0("p",as.character(level))
-        assign(nameRisk, riskData %>%
-                 tidyr::pivot_longer(dplyr::all_of(c(names_risk, "time")), names_to = "layer", values_to = "label") %>%
+        assign(nameRisk, riskData |>
+                 tidyr::pivot_longer(dplyr::all_of(c(names_risk, "time")), names_to = "layer", values_to = "label") |>
                  ggplot2::ggplot(ggplot2::aes(x = .data$timeb)) +
                  ggplot2::geom_text(ggplot2::aes(y = factor(.data$layer, c(names_risk, "time")), label = dplyr::if_else(is.na(.data$label), sprintf("NA"), .data$label))) +
                  ggplot2::labs(y = "", x = NULL) +
@@ -217,7 +247,7 @@ plotSurvival <- function(result,
 
       riskData <- generateRiskData(result, riskTimes, colour)
 
-      if (nrow(riskData) == 0) {
+      if (nrow(riskData) == 1) {
         cli::cli_abort("Check the riskInterval provided. It seems that interval
                       does not provide the times for which n_risk can be retrieved.
                       Check the `events` attribute from your asSurvivalResult()
@@ -225,13 +255,13 @@ plotSurvival <- function(result,
                       available")
       }
 
-      names_risk <- riskData %>%
-        dplyr::select(-c(dplyr::starts_with("time"))) %>%
+      names_risk <- riskData |>
+        dplyr::select(-c(dplyr::starts_with("time"))) |>
         colnames()
 
-      p2 <- riskData %>%
-        tidyr::pivot_longer(dplyr::all_of(c(names_risk, "time")), names_to = "layer", values_to = "label") %>%
-        dplyr::mutate(layer = visOmopResults::customiseText(.data$layer)) %>%
+      p2 <- riskData |>
+        tidyr::pivot_longer(dplyr::all_of(c(names_risk, "time")), names_to = "layer", values_to = "label") |>
+        dplyr::mutate(layer = visOmopResults::customiseText(.data$layer)) |>
         ggplot2::ggplot(ggplot2::aes(x = .data$timeb)) +
         ggplot2::geom_text(ggplot2::aes(y = factor(.data$layer, visOmopResults::customiseText(c(names_risk, "time"))), label = dplyr::if_else(is.na(.data$label), sprintf("NA"), .data$label))) +
         ggplot2::labs(y = "", x = NULL) +
@@ -248,56 +278,56 @@ plotSurvival <- function(result,
 
 generateRiskData <- function(result, riskTimes, colour) {
   if (is.null(colour)) {
-    riskdata <- attr(result, "events") %>%
-      dplyr::filter(.data$time %in% riskTimes) %>%
-      dplyr::mutate(n_risk = as.character(.data$n_risk)) %>%
-      dplyr::select("time", "n_risk") %>%
+    riskdata <- attr(result, "events") |>
+      dplyr::filter(.data$time %in% riskTimes) |>
+      dplyr::mutate(n_risk = as.character(.data$n_risk)) |>
+      dplyr::select("time", "n_risk") |>
       dplyr::mutate(timeb = .data$time,
                     time = as.character(.data$time))
 
     riskdataend <- dplyr::tibble(
       time = as.character(riskTimes),
       timeb = riskTimes
-    ) %>%
-      dplyr::filter(!(.data$time %in% (riskdata %>% dplyr::pull("time"))))
+    ) |>
+      dplyr::filter(!(.data$time %in% (riskdata |> dplyr::pull("time"))))
 
-    for (i in colnames(riskdata %>% dplyr::select(dplyr::starts_with("n_risk")))) {
-      riskdataend <- riskdataend %>%
+    for (i in colnames(riskdata |> dplyr::select(dplyr::starts_with("n_risk")))) {
+      riskdataend <- riskdataend |>
         dplyr::mutate(!!i := NA_character_)
     }
 
-    riskdata <- dplyr::union_all(riskdata, riskdataend) %>%
+    riskdata <- dplyr::union_all(riskdata, riskdataend) |>
       dplyr::mutate(n_risk = dplyr::if_else(is.na(.data$n_risk), "", .data$n_risk))
 
   } else {
-    riskdata <- attr(result, "events") %>%
-      dplyr::filter(.data$time %in% riskTimes) %>%
-      dplyr::mutate(n_risk = as.character(.data$n_risk)) %>%
-      tidyr::unite("colour", colour, sep = " and ", remove = FALSE) %>%
-      dplyr::select("time", "n_risk", "colour") %>%
-      dplyr::mutate(colour := stringr::str_replace_all(.data$colour, "&&&", "and")) %>%
+    riskdata <- attr(result, "events") |>
+      dplyr::filter(.data$time %in% riskTimes) |>
+      dplyr::mutate(n_risk = as.character(.data$n_risk)) |>
+      tidyr::unite("colour", dplyr::all_of(colour), sep = " and ", remove = FALSE) |>
+      dplyr::select("time", "n_risk", "colour") |>
+      dplyr::mutate(colour := stringr::str_replace_all(.data$colour, "&&&", "and")) |>
       dplyr::mutate(timeb = .data$time,
                     time = as.character(.data$time),
-                    colour := paste0("n_risk", .data$colour)) %>%
-      dplyr::distinct() %>%
-      tidyr::pivot_wider(names_from = dplyr::any_of("colour"), values_from = .data$n_risk)
+                    colour := paste0("n_risk", .data$colour)) |>
+      dplyr::distinct() |>
+      tidyr::pivot_wider(names_from = dplyr::any_of("colour"), values_from = "n_risk")
 
     riskdataend <- dplyr::tibble(
       time = as.character(riskTimes),
       timeb = riskTimes
-    ) %>%
-      dplyr::filter(!(.data$time %in% (riskdata %>% dplyr::pull("time"))))
+    ) |>
+      dplyr::filter(!(.data$time %in% (riskdata |> dplyr::pull("time"))))
 
-    for (i in colnames(riskdata %>% dplyr::select(dplyr::starts_with("n_risk")))) {
-      riskdataend <- riskdataend %>%
+    for (i in colnames(riskdata |> dplyr::select(dplyr::starts_with("n_risk")))) {
+      riskdataend <- riskdataend |>
         dplyr::mutate(!!i := NA_character_)
     }
 
-    riskdata <- dplyr::union_all(riskdata, riskdataend) %>%
+    riskdata <- dplyr::union_all(riskdata, riskdataend) |>
       dplyr::mutate(dplyr::across(dplyr::everything(), ~ tidyr::replace_na(.x, "")))
   }
   colnames(riskdata) <- gsub("n risk", "", gsub("_", " ", colnames(riskdata)))
-  colnames(riskdata)[colnames(riskdata) == rep("overall", length(colour)) %>% paste0(collapse = " and ")] <- "overall"
+  colnames(riskdata)[colnames(riskdata) == rep("overall", length(colour)) |> paste0(collapse = " and ")] <- "overall"
   return(riskdata)
 }
 
@@ -308,4 +338,44 @@ addRibbon <- function(plot){
                    ymax = .data$estimate_95CI_upper),
       alpha = 0.3, color = NA, show.legend = FALSE) +
     ggplot2::geom_line(linewidth = 0.25)
+}
+
+#' Variables that can be used for faceting and colouring survival plots
+#'
+#' @param result Survival results
+#' @param varying If FALSE (default), only variables with non-unique values will be
+#' returned, otherwise all available variables will be returned.
+#'
+#' @export
+#'
+#' @examples
+#' \donttest{
+#' cdm <- mockMGUS2cdm()
+#' surv <- estimateSingleEventSurvival(cdm,
+#'                                     targetCohortTable = "mgus_diagnosis",
+#'                                     outcomeCohortTable = "death_cohort")
+#' availableSurvivalGrouping(surv)
+#' }
+
+availableSurvivalGrouping <- function(result, varying = FALSE) {
+  omopgenerics::assertLogical(varying, length = 1)
+
+  # Convert to survival result if needed
+  if (inherits(result, "summarised_result")) {
+    result <- asSurvivalResult(result)
+  } else if (!inherits(result, "survival_result")) {
+    cli::cli_abort("Input {.arg result} must be a {.cls summarised_result} or {.cls survival_result} object.")
+  }
+
+  cols <- colnames(result)
+  if (!varying) {
+    pos <- lapply(as.list(cols), function(x, res = result) {
+      res |>
+        dplyr::pull(.data[[x]]) |>
+        unique() |>
+        length()
+    }) |> unlist()
+    cols <- cols[pos > 1]
+  }
+  return(cols)
 }

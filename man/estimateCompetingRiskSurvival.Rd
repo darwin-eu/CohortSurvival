@@ -30,23 +30,24 @@ estimateCompetingRiskSurvival(
 \arguments{
 \item{cdm}{CDM reference}
 
-\item{targetCohortTable}{targetCohortTable}
+\item{targetCohortTable}{The target cohort table of interest.}
 
 \item{outcomeCohortTable}{The outcome cohort table of interest.}
 
 \item{competingOutcomeCohortTable}{The competing outcome cohort table of interest.}
 
-\item{targetCohortId}{targetCohortId}
+\item{targetCohortId}{Target cohorts to include. It can either be a
+cohort_definition_id value or a cohort_name. Multiple ids are allowed.}
 
-\item{outcomeCohortId}{ID of event cohorts to include. Only one outcome
-(and so one ID) can be considered.}
+\item{outcomeCohortId}{Outcome cohorts to include. It can either be a
+cohort_definition_id value or a cohort_name. Multiple ids are allowed.}
 
 \item{outcomeDateVariable}{Variable containing date of outcome event}
 
 \item{outcomeWashout}{Washout time in days for the outcome}
 
-\item{competingOutcomeCohortId}{ID of event cohorts to include. Only one competing outcome
-(and so one ID) can be considered.}
+\item{competingOutcomeCohortId}{Competing outcome cohorts to include. It can either be a
+cohort_definition_id value or a cohort_name. Multiple ids are allowed.}
 
 \item{competingOutcomeDateVariable}{Variable containing date of competing outcome event}
 

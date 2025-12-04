@@ -25,11 +25,13 @@ addCohortSurvival(
 \item{outcomeCohortTable}{The outcome cohort table of interest.}
 
 \item{outcomeCohortId}{ID of event cohorts to include. Only one outcome
-(and so one ID) can be considered.}
+(and so one ID) can be considered. It can either be a
+cohort_definition_id value or a cohort_name.}
 
 \item{outcomeDateVariable}{Variable containing date of outcome event}
 
-\item{outcomeWashout}{Washout time in days for the outcome}
+\item{outcomeWashout}{Washout time in days for the outcome. If an individual has
+an outcome during the washout period, status and time will be set to NA}
 
 \item{censorOnCohortExit}{If TRUE, an individual's follow up will be
 censored at their cohort exit}
@@ -55,7 +57,7 @@ Add survival information to a cohort table
 \donttest{
 
 cdm <- mockMGUS2cdm()
-cdm$mgus_diagnosis <- cdm$mgus_diagnosis \%>\%
+cdm$mgus_diagnosis <- cdm$mgus_diagnosis |>
   addCohortSurvival(
     cdm = cdm,
     outcomeCohortTable = "death_cohort",

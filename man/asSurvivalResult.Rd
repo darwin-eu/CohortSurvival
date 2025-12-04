@@ -26,8 +26,8 @@ surv <- estimateSingleEventSurvival(
   outcomeCohortTable = "death_cohort",
   outcomeCohortId = 1,
   eventGap = 7
-) \%>\%
-  asSurvivalResult()
+) |>
+asSurvivalResult()
 }
 
 }

@@ -39,13 +39,13 @@ All the details provided in the single event survival vignette are also valid in
 Let us take a glimpse at the three cohorts we will use this time: the mgus diagnosis as a target, and both the death cohort and the progression to multiple myeloma as outcomes.
 
 ```{r}
-cdm$mgus_diagnosis %>% 
+cdm$mgus_diagnosis |> 
   glimpse()
 
-cdm$death_cohort %>% 
+cdm$death_cohort |> 
   glimpse()
 
-cdm$progression %>%
+cdm$progression |>
   glimpse()
 ```
 
@@ -60,8 +60,8 @@ MGUS_death_prog <- estimateCompetingRiskSurvival(cdm,
   competingOutcomeCohortTable = "death_cohort"
 ) 
 
-MGUS_death_prog %>% 
-  asSurvivalResult() %>% 
+MGUS_death_prog |> 
+  asSurvivalResult() |> 
   glimpse()
 ```
 
@@ -96,7 +96,7 @@ MGUS_death_prog <-  estimateCompetingRiskSurvival(cdm,
 As well as results for each strata, we will always also have overall results returned. We can filter the output table to plot only the results for the different strata levels, if we do not wish to add the overall cohort in the plot. We can also ask for the cumulative failure probability to be plotted instead of the survival probability, which makes more sense in the competing outcome case.
 
 ```{r, fig.height=6, fig.width=8}
-plotSurvival(MGUS_death_prog %>% 
+plotSurvival(MGUS_death_prog |> 
                dplyr::filter(strata_name != "Overall"), 
              facet = "sex",
              colour = "variable",

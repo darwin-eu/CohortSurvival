@@ -36,15 +36,17 @@ The mgus2 dataset contains survival data of 1341 sequential patients with monocl
 
 In this vignette we will first estimate survival following a diagnosis of MGUS, with death being our primary outcome of interest. In a study we would typically need to first define study cohorts ourselves, before starting the analysis, but in the case of our example data we already have these cohorts available: `mgus_diagnosis` for our target cohort and `death_cohort` for our outcome cohort.
 
+If you have a target cohort and a death table in your cdm but not a death cohort per se, you can use the function [deathCohort]{https://ohdsi.github.io/CohortConstructor/articles/a01_building_base_cohorts.html?q=death#death-cohort} from CohortConstructor to create it. The most efficient way to do so is to restrict the creation to your target cohort, by calling `deathCohort(cdm, name = "death_cohort", subsetCohort = "name_of_your_target_cohort_table")`.
+
 In our target cohort we also have a number of additional features (age or sex of the patients, for instance) recorded, which we will use for stratification.
 
 Let us first take a quick look at the data we will be working with:
 
 ```{r}
-cdm$mgus_diagnosis %>% 
+cdm$mgus_diagnosis |> 
   glimpse()
 
-cdm$death_cohort %>% 
+cdm$death_cohort |> 
   glimpse()
 ```
 
@@ -64,7 +66,7 @@ MGUS_death <- estimateSingleEventSurvival(
   targetCohortTable = "mgus_diagnosis",
   outcomeCohortTable = "death_cohort"
 )
-MGUS_death %>% 
+MGUS_death |> 
   glimpse()
 class(MGUS_death)
 ```
@@ -135,10 +137,12 @@ If we ask for a survival estimate which is not available, the function will not 
 tableSurvival(MGUS_death, times = c(30,90,180, 500))
 ```
 
-Other options of this table include giving the estimates in years instead of days. Check `?tableSurvival` for additional options included in the function parameters.
+Other options of this table include giving the estimates in years instead of days, or changing its style (we can either manually ask for the aesthetic we want ot use one of the predefined ones). Check `?tableSurvival` for additional options included in the function parameters.
 
 ```{r}
 tableSurvival(MGUS_death, times = c(1,2), timeScale = "years")
+
+tableSurvival(MGUS_death, times = c(1,2), style = "darwin")
 ```
 
 One of them is a special input called `.options`, which allows the user to ask for a variety of additional formatting choices. To see the list of options, we can call `optionsTableSurvival` :
@@ -163,31 +167,33 @@ riskTable(MGUS_death)
 
 ## Survival format
 
-If we are only working on a survival study, and we want to manually inspect the result tables, we might want to put them in an easier format to work with. Note, however, that the visualisation functions from this package will not work with this new result format.
+If we are only working on a survival study, and we want to manually inspect the result tables, we might want to put them in an easier format to work with.
 
 The function `asSurvivalResult()` allows us to convert the result to a survival format, with the main table containing the estimates and the information on events, summary and attrition being stored as attributes.
 
 ```{r}
 # Transforming the output to a survival result format
-MGUS_death_survresult <- MGUS_death %>% 
+MGUS_death_survresult <- MGUS_death |> 
   asSurvivalResult() 
-MGUS_death_survresult %>%
+MGUS_death_survresult |>
   glimpse()
 # Events, attrition and summary are now attributes of the result object
-attr(MGUS_death_survresult,"events") %>%
+attr(MGUS_death_survresult,"events") |>
   glimpse()
-attr(MGUS_death_survresult,"summary") %>%
+attr(MGUS_death_survresult,"summary") |>
   glimpse()
-attr(MGUS_death_survresult,"attrition") %>%
+attr(MGUS_death_survresult,"attrition") |>
   glimpse()
 ```
 
 We can now directly check all estimates for times 10 to 15, for instance, like this:
 
 ```{r}
-MGUS_death_survresult %>%
+MGUS_death_survresult |>
   filter(time %in% c(10:15))
 ```
+
+The plotting and tabulating functions will work with both input types (`summarised_result` and `survival_result`). However, when specifying facetting and colouring options for the plots, we will need to use column names from the survival format. To know what variables are available to call, one can use the function `availableSurvivalGrouping()`. 
 
 ## Changing estimation parameters
 
@@ -223,8 +229,8 @@ MGUS_death_all <- omopgenerics::bind(
   MGUS_death_fu
 )
 
-MGUS_death_all %>%
-  asSurvivalResult() %>%
+MGUS_death_all |>
+  asSurvivalResult() |>
   glimpse()
 ```
 Note that the survival result has an additional column `follow_up_days`, as we would expect. Let us now see that both the `tableSurvival` and `plotSurvival` functions display all required information.
@@ -257,7 +263,14 @@ All the previous potential changes in other parameters, as well as the different
 tableSurvival(MGUS_death_strata)
 ```
 
-To plot the results property, we will have to specify faceting and colouring options. One choice is to separate the plots into sex and display different age groups in each one of them:
+To plot the results property, we will have to specify faceting and colouring options. To know what variables are available for plotting, we can use the function `availableSurvivalGrouping()` as mentioned before.
+
+```{r}
+availableSurvivalGrouping(MGUS_death_strata)
+```
+
+Now we know the column names in the survival format, which have non-unique values (as expected), are `age_group` and `sex`.
+One choice is to separate the plots into sex and display different age groups in each one of them:
 
 ```{r, fig.height=6, fig.width=8}
 plotSurvival(MGUS_death_strata,

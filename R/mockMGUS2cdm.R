@@ -25,7 +25,7 @@
 #' cdm$person
 #' }
 mockMGUS2cdm <- function() {
-  mgus2 <- survival::mgus2 %>%
+  mgus2 <- survival::mgus2 |>
     dplyr::mutate(
       cohort_start_date_diag = as.Date(paste0(
         .data$dxyr, "-01-01"
@@ -34,28 +34,28 @@ mockMGUS2cdm <- function() {
         .data$ptime),
       cohort_start_date_death = clock::add_days(.data$cohort_start_date_diag,
         .data$futime)
-    ) %>%
-    dplyr::rename("subject_id" = "id") %>%
+    ) |>
+    dplyr::rename("subject_id" = "id") |>
     dplyr::mutate(
       observation_period_start_date = clock::add_days(
         .data$cohort_start_date_diag,
         -.data$age)
-    ) %>%
+    ) |>
     dplyr::mutate(subject_id = as.integer(.data$subject_id))
 
 
-  mgus2Diag <- mgus2 %>%
+  mgus2Diag <- mgus2 |>
     dplyr::select(
       "subject_id", "cohort_start_date_diag",
       "age", "sex", "hgb", "creat", "mspike"
-    ) %>%
-    dplyr::rename("cohort_start_date" = "cohort_start_date_diag") %>%
+    ) |>
+    dplyr::rename("cohort_start_date" = "cohort_start_date_diag") |>
     dplyr::mutate(
       cohort_end_date = .data$cohort_start_date,
       cohort_definition_id = 1L
-    ) %>%
-    dplyr::relocate("cohort_definition_id") %>%
-    dplyr::relocate("cohort_end_date", .after = "cohort_start_date") %>%
+    ) |>
+    dplyr::relocate("cohort_definition_id") |>
+    dplyr::relocate("cohort_end_date", .after = "cohort_start_date") |>
     dplyr::mutate(age_group = dplyr::if_else(.data$age < 70, "<70", ">=70"))
 
   mgus2Diag <- dplyr::as_tibble(mgus2Diag)
@@ -66,14 +66,14 @@ mockMGUS2cdm <- function() {
   attr(mgus2Diag, "cohort_attrition") <- addAttrition(mgus2Diag, attr(mgus2Diag, "cohort_set"))
 
 
-  mgus2Pr <- mgus2 %>%
-    dplyr::filter(.data$pstat == 1) %>%
-    dplyr::select("subject_id", "cohort_start_date_progression") %>%
-    dplyr::rename("cohort_start_date" = "cohort_start_date_progression") %>%
+  mgus2Pr <- mgus2 |>
+    dplyr::filter(.data$pstat == 1) |>
+    dplyr::select("subject_id", "cohort_start_date_progression") |>
+    dplyr::rename("cohort_start_date" = "cohort_start_date_progression") |>
     dplyr::mutate(
       cohort_end_date = .data$cohort_start_date,
       cohort_definition_id = 1L
-    ) %>%
+    ) |>
     dplyr::relocate("cohort_definition_id")
 
   mgus2Pr <- dplyr::as_tibble(mgus2Pr)
@@ -84,18 +84,18 @@ mockMGUS2cdm <- function() {
   attr(mgus2Pr, "cohort_attrition") <- addAttrition(mgus2Pr, attr(mgus2Pr, "cohort_set"))
 
 
-  mgus2Pr2 <- mgus2 %>%
-    dplyr::filter(.data$pstat == 1) %>%
-    dplyr::select("subject_id", "cohort_start_date_progression") %>%
-    dplyr::rename("cohort_start_date" = "cohort_start_date_progression") %>%
+  mgus2Pr2 <- mgus2 |>
+    dplyr::filter(.data$pstat == 1) |>
+    dplyr::select("subject_id", "cohort_start_date_progression") |>
+    dplyr::rename("cohort_start_date" = "cohort_start_date_progression") |>
     dplyr::mutate(cohort_end_date = .data$cohort_start_date)
-  mgus2Pr2 <- mgus2Pr2 %>%
-    dplyr::mutate(cohort_definition_id = 1L) %>%
+  mgus2Pr2 <- mgus2Pr2 |>
+    dplyr::mutate(cohort_definition_id = 1L) |>
     dplyr::union_all(
-      mgus2Pr2 %>%
+      mgus2Pr2 |>
         dplyr::mutate(cohort_definition_id = 2 + dplyr::row_number() %% 2)
-    ) %>%
-    dplyr::relocate("cohort_definition_id") %>%
+    ) |>
+    dplyr::relocate("cohort_definition_id") |>
     dplyr::mutate(cohort_definition_id = as.integer(.data$cohort_definition_id))
 
   mgus2Pr2 <- dplyr::as_tibble(mgus2Pr2)
@@ -106,14 +106,14 @@ mockMGUS2cdm <- function() {
   )
   attr(mgus2Pr2, "cohort_attrition") <- addAttrition(mgus2Pr2, attr(mgus2Pr2, "cohort_set"))
 
-  mgus2Death <- mgus2 %>%
-    dplyr::filter(.data$death == 1) %>%
-    dplyr::select("subject_id", "cohort_start_date_death") %>%
-    dplyr::rename("cohort_start_date" = "cohort_start_date_death") %>%
+  mgus2Death <- mgus2 |>
+    dplyr::filter(.data$death == 1) |>
+    dplyr::select("subject_id", "cohort_start_date_death") |>
+    dplyr::rename("cohort_start_date" = "cohort_start_date_death") |>
     dplyr::mutate(
       cohort_end_date = .data$cohort_start_date,
       cohort_definition_id = 1L
-    ) %>%
+    ) |>
     dplyr::relocate("cohort_definition_id")
 
   mgus2Death <- dplyr::as_tibble(mgus2Death)
@@ -123,8 +123,8 @@ mockMGUS2cdm <- function() {
   )
   attr(mgus2Death, "cohort_attrition") <- addAttrition(mgus2Death, attr(mgus2Death, "cohort_set"))
 
-  mgus2Person <- mgus2 %>%
-    dplyr::rename("person_id" = "subject_id") %>%
+  mgus2Person <- mgus2 |>
+    dplyr::rename("person_id" = "subject_id") |>
     dplyr::mutate(
       gender_concept_id = dplyr::if_else(
         .data$sex == "F", 8532L, 8507L
@@ -134,23 +134,23 @@ mockMGUS2cdm <- function() {
       day_of_birth = clock::get_day(mgus2$observation_period_start_date),
       race_concept_id = 0L,
       ethnicity_concept_id = 0L
-    ) %>%
+    ) |>
     dplyr::select(
       "person_id", "gender_concept_id",
       "year_of_birth", "month_of_birth", "day_of_birth",
       "race_concept_id", "ethnicity_concept_id"
     )
 
-  mgus2OP <- mgus2 %>%
-    dplyr::rename("person_id" = "subject_id") %>%
+  mgus2OP <- mgus2 |>
+    dplyr::rename("person_id" = "subject_id") |>
     dplyr::select(
       "person_id", "observation_period_start_date",
       "cohort_start_date_death"
-    ) %>%
+    ) |>
     dplyr::mutate(
       observation_period_id = sample(c(1:1000000), dim(mgus2)[1]),
       period_type_concept_id = 44814725L
-    ) %>%
+    ) |>
     dplyr::rename("observation_period_end_date" = "cohort_start_date_death")
 
 
@@ -192,17 +192,17 @@ mockMGUS2cdm <- function() {
 }
 
 addAttrition <- function(cohort, set) {
-  cohort %>%
-    dplyr::group_by(.data$cohort_definition_id) %>%
+  cohort |>
+    dplyr::group_by(.data$cohort_definition_id) |>
     dplyr::summarise(
       number_records = dplyr::n(),
       number_subjects = dplyr::n_distinct(.data$subject_id)
-    ) %>%
+    ) |>
     dplyr::left_join(
-      set %>% dplyr::select("cohort_definition_id"),
+      set |> dplyr::select("cohort_definition_id"),
       by = "cohort_definition_id",
       copy = TRUE
-    ) %>%
+    ) |>
     dplyr::mutate(
       "number_records" = dplyr::if_else(
         is.na(.data$number_records), 0, .data$number_records
@@ -214,8 +214,8 @@ addAttrition <- function(cohort, set) {
       "reason" = "Initial qualifying events",
       "excluded_records" = 0,
       "excluded_subjects" = 0
-    ) %>%
-    dplyr::collect() %>%
+    ) |>
+    dplyr::collect() |>
     dplyr::mutate(
       number_records = as.integer(.data$number_records),
       number_subjects = as.integer(.data$number_subjects),

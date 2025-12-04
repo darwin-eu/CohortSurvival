@@ -19,6 +19,7 @@ reference:
 - subtitle: Plot results
 - contents:
   - matches("plotSurvival")
+  - matches("availableSurvivalGrouping")
 - subtitle: Tidy results
 - contents:
   - matches("asSurvivalResult")

@@ -4,7 +4,7 @@ test_that("omopgenerics reexports work", {
   cdm <- mockMGUS2cdm()
   surv <- estimateSingleEventSurvival(cdm,
                                       "mgus_diagnosis",
-                                      "death_cohort") %>%
+                                      "death_cohort") |>
     omopgenerics::suppress(minCellCount = 5)
 
   survCR <- estimateCompetingRiskSurvival(cdm,
@@ -26,7 +26,7 @@ test_that("omopgenerics reexports work", {
   # suppresing results
   surv_nosup <- estimateSingleEventSurvival(cdm,
                                            "mgus_diagnosis",
-                                           "death_cohort") %>%
+                                           "death_cohort") |>
     omopgenerics::suppress(minCellCount = 0)
 
   expect_false(isTRUE(all.equal(surv, surv_nosup, check.attributes = FALSE)))
@@ -58,21 +58,21 @@ test_that("omopgenerics filterSettings", {
 
   study_result <- omopgenerics::bind(single_event, competing_risk)
 
-  expect_true(all(study_result %>%
-                omopgenerics::filterSettings(analysis_type == "competing_risk") %>%
-                dplyr::select(result_id) %>% dplyr::arrange(result_id) %>%
+  expect_true(all(study_result |>
+                omopgenerics::filterSettings(analysis_type == "competing_risk") |>
+                dplyr::select(result_id) |> dplyr::arrange(result_id) |>
                 dplyr::distinct() == c(5,6,7,8)))
 
-  expect_true(all(study_result %>%
-                    omopgenerics::filterSettings(analysis_type == "single_event") %>%
-                    dplyr::select(result_id) %>% dplyr::arrange(result_id) %>%
+  expect_true(all(study_result |>
+                    omopgenerics::filterSettings(analysis_type == "single_event") |>
+                    dplyr::select(result_id) |> dplyr::arrange(result_id) |>
                     dplyr::distinct() == c(1,2,3,4)))
 
-  expect_warning(study_result %>%
+  expect_warning(study_result |>
                     omopgenerics::tidy())
 
-  expect_no_error(study_result %>%
-                    omopgenerics::filterSettings(result_type == "survival_events") %>%
+  expect_no_error(study_result |>
+                    omopgenerics::filterSettings(result_type == "survival_events") |>
                     omopgenerics::tidy())
 
   CDMConnector::cdmDisconnect(cdmSurvival)

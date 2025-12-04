@@ -17,7 +17,7 @@ test_that("survival events", {
   )
   resCR <- riskTable(survCR, type = "tibble")
 
-  expect_true(res %>%
+  expect_true(res |>
                 dplyr::tally() == 182)
   expect_true(all(
     colnames(res) ==
@@ -26,7 +26,7 @@ test_that("survival events", {
         '[header_name]Estimate name\n[header_level]Number events',
         '[header_name]Estimate name\n[header_level]Number censored')))
 
-  expect_true(resCR %>%
+  expect_true(resCR |>
                 dplyr::tally() == 32)
   expect_true(all(
     colnames(resCR) ==
@@ -44,17 +44,17 @@ test_that("survival events", {
 
   res3 <- riskTable(surv2, eventGap = 14, type = "tibble")
 
-  expect_true(all(res3 %>%
-    dplyr::select(Time) %>%
-    dplyr::pull() %>%
+  expect_true(all(res3 |>
+    dplyr::select(Time) |>
+    dplyr::pull() |>
     as.numeric() %% 14 ==
       c(rep(0,31),4,rep(0,29),2,rep(0,31),4)
   ))
 
   res4 <- riskTable(surv2, type = "tibble")
 
-  expect_true(all(res4 %>%
-                dplyr::pull("Event gap") %>%
+  expect_true(all(res4 |>
+                dplyr::pull("Event gap") |>
                 unique() == c("2", "14")))
 
   CDMConnector::cdmDisconnect(cdm)

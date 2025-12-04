@@ -39,37 +39,37 @@ The CohortSurvival package does not have implemented functionality to do more co
 To get the `time` and `status` information we need for the `coxph` function in the package `survival`, for instance, we only need to call `addCohortSurvival`. The stratification variables need to be columns previously added to the cohort by the user.
 
 ```{r, fig.width=5}
-input_survival_single <- cdm$mgus_diagnosis %>%
+input_survival_single <- cdm$mgus_diagnosis |>
        addCohortSurvival(
        cdm = cdm,
        outcomeCohortTable = "death_cohort",
        outcomeCohortId = 1
        ) 
 
-input_survival_single %>% 
+input_survival_single |> 
   glimpse()
 ```
 
 We can decide to change some of the default parameters in this function. Information on all these can be found `?addCohortSurvival`. For instance, we can choose to exclude people with an outcome only 180 days before index date, instead of anytime, and follow them up for only one year. We can also decide to use `cohort_end_date` as their outcome variable and censor them at a particular date, for instance, the 1st of January of 1994. We see how that gives us different results:
 
 ```{r}
-cdm$mgus_diagnosis %>%
+cdm$mgus_diagnosis |>
        addCohortSurvival(
        cdm = cdm,
        outcomeCohortTable = "death_cohort",
        outcomeWashout = 180,
        followUpDays = 365
-       ) %>%
-  filter(cohort_start_date > "1993-01-01") %>%
+       ) |>
+  filter(cohort_start_date > "1993-01-01") |>
   glimpse()
-cdm$mgus_diagnosis %>%
+cdm$mgus_diagnosis |>
        addCohortSurvival(
        cdm = cdm,
        outcomeCohortTable = "death_cohort",
        outcomeDateVariable = "cohort_end_date",
        censorOnDate = as.Date("1994-01-01")
-       ) %>%
-    filter(cohort_start_date > "1993-01-01") %>%
+       ) |>
+    filter(cohort_start_date > "1993-01-01") |>
   glimpse()
 ```
 
@@ -87,26 +87,26 @@ For competing risk settings, we need to use the same function that adds `time` a
 ```{r}
 
 # Add all status and time information for both outcomes
-  input_survival_cr <- cdm$mgus_diagnosis %>%
-    addCohortSurvival(cdm, "progression") %>%
+  input_survival_cr <- cdm$mgus_diagnosis |>
+    addCohortSurvival(cdm, "progression") |>
     dplyr::rename(
       "outcome_time" = "time",
       "outcome_status" = "status"
-    ) %>%
-     addCohortSurvival(cdm, "death_cohort") %>%
+    ) |>
+     addCohortSurvival(cdm, "death_cohort") |>
     dplyr::rename(
       "competing_outcome_time" = "time",
       "competing_outcome_status" = "status"
     )
   
   # Collect and 
-  input_survival_cr <- input_survival_cr %>%
-    dplyr::collect() %>%
+  input_survival_cr <- input_survival_cr |>
+    dplyr::collect() |>
     dplyr::mutate(
       time = pmin(outcome_time, competing_outcome_time),
       status = factor(
         dplyr::if_else(competing_outcome_time <= outcome_time, 2 * competing_outcome_status, outcome_status))
-    ) %>%
+    ) |>
     dplyr::select(-c("outcome_time", "outcome_status", "competing_outcome_time", "competing_outcome_status"))
 
 ```
@@ -114,7 +114,7 @@ For competing risk settings, we need to use the same function that adds `time` a
 We can use the package `cmprsk` to fit a Fine and Gray model to the competing risk data. We first change our `sex` covariate to numeric, and then we can run the analysis:
 
 ```{r, fig.height=6, fig.width=8}
-input_survival_cr <- input_survival_cr %>%
+input_survival_cr <- input_survival_cr |>
   dplyr::mutate(sex = dplyr::if_else(sex == "M", 0, 1))
 
 covs <- data.frame(input_survival_cr$age, input_survival_cr$sex)

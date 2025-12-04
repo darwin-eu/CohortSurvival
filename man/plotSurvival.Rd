@@ -13,7 +13,8 @@ plotSurvival(
   riskTable = FALSE,
   riskInterval = 30,
   logLog = FALSE,
-  timeScale = "days"
+  timeScale = "days",
+  style = NULL
 )
 }
 \arguments{
@@ -35,6 +36,12 @@ instead of the survival probability}
 \item{logLog}{If TRUE, the survival probabilities are transformed using the log-log formula}
 
 \item{timeScale}{The scale of time in the x-axis. Can be "days", "months", or "years"}
+
+\item{style}{A character string defining the visual theme to apply to the plot.
+You can set this to NULL to apply the standard ggplot2 default style, or provide
+a name for one of the package's pre-defined styles. Refer to the plotStyle() function
+for all available style pre-defined themes. For further customization, you can always
+modify the returned ggplot object directly.}
 }
 \value{
 A plot of survival probabilities over time
