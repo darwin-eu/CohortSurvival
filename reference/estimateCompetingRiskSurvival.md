@@ -37,7 +37,7 @@ estimateCompetingRiskSurvival(
 
 - targetCohortTable:
 
-  targetCohortTable
+  The target cohort table of interest.
 
 - outcomeCohortTable:
 
@@ -49,12 +49,13 @@ estimateCompetingRiskSurvival(
 
 - targetCohortId:
 
-  targetCohortId
+  Target cohorts to include. It can either be a cohort_definition_id
+  value or a cohort_name. Multiple ids are allowed.
 
 - outcomeCohortId:
 
-  ID of event cohorts to include. Only one outcome (and so one ID) can
-  be considered.
+  Outcome cohorts to include. It can either be a cohort_definition_id
+  value or a cohort_name. Multiple ids are allowed.
 
 - outcomeDateVariable:
 
@@ -66,8 +67,8 @@ estimateCompetingRiskSurvival(
 
 - competingOutcomeCohortId:
 
-  ID of event cohorts to include. Only one competing outcome (and so one
-  ID) can be considered.
+  Competing outcome cohorts to include. It can either be a
+  cohort_definition_id value or a cohort_name. Multiple ids are allowed.
 
 - competingOutcomeDateVariable:
 

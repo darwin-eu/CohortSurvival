@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">CohortSurvival</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.2</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.1.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -23,8 +23,7 @@
     <li><a class="dropdown-item" href="../articles/a03_Further_survival_analyses.html">Further survival analyses</a></li>
   </ul></li>
 <li class="active nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
-      </ul><ul class="navbar-nav"><li class="nav-item"><a class="external-link nav-link" href="https://github.com/darwin-eu/CohortSurvival/" aria-label="GitHub"><span class="fa fab fa-github fa-lg"></span></a></li>
-      </ul></div>
+      </ul><ul class="navbar-nav"></ul></div>
 
 
   </div>
@@ -32,27 +31,48 @@
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="../logo.png" class="logo" alt=""><h1>Changelog</h1>
-      <small>Source: <a href="https://github.com/darwin-eu/CohortSurvival/blob/main/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
+
     </div>
 
     <div class="section level2">
+<h2 class="pkg-version" data-toc-text="1.1.0" id="cohortsurvival-110">CohortSurvival 1.1.0<a class="anchor" aria-label="anchor" href="#cohortsurvival-110"></a></h2>
+<ul><li>Use “first” option in addCohortSurvival to remove warning by @KimLopezGuell #375</li>
+<li>Allow tableSurvival to display single event and competing risk together by @KimLopezGuell #374</li>
+<li>Allow empty results tables instead of giving errors by @KimLopezGuell #372</li>
+<li>Add tableSurvivalAttrition by @catalamarti #371</li>
+<li>Change default style argument to NULL by @catalamarti #368</li>
+<li>Use native pipe and remove magrittr dependency by @catalamarti #366</li>
+<li>Report quantiles .05 and .95 in estimateSurvival by @KimLopezGuell #365</li>
+<li>Change result_type of competing risk for coherence by @KimLopezGuell #364</li>
+<li>Allow cohort names in addCohortSurvival by @KimLopezGuell #363</li>
+<li>Add style and hide argument to plot and table functions by @KimLopezGuell #350</li>
+</ul></div>
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="1.0.3" id="cohortsurvival-103">CohortSurvival 1.0.3<a class="anchor" aria-label="anchor" href="#cohortsurvival-103"></a></h2><p class="text-muted">CRAN release: 2025-08-18</p>
+<ul><li>Fix bug on character days_to_event by @KimLopezGuell #348</li>
+<li>Add logPrefix in compute() by @KimLopezGuell #347</li>
+<li>Report survival output for empty target and outcome tables by @KimLopezGuell #346</li>
+<li>Add availableSurvivalGrouping() function for clarity on plot variables by @KimLopezGuell #344</li>
+<li>Allow cohortId inputs to be cohort names by @KimLopezGuell #343</li>
+</ul></div>
+    <div class="section level2">
 <h2 class="pkg-version" data-toc-text="1.0.2" id="cohortsurvival-102">CohortSurvival 1.0.2<a class="anchor" aria-label="anchor" href="#cohortsurvival-102"></a></h2><p class="text-muted">CRAN release: 2025-06-16</p>
-<ul><li>Survival result keeps distinctive columns by <a href="https://github.com/KimLopezGuell" class="external-link">@KimLopezGuell</a> <a href="https://github.com/darwin-eu/CohortSurvival/issues/335" class="external-link">#335</a></li>
-<li>Remove spaces in strata level by <a href="https://github.com/KimLopezGuell" class="external-link">@KimLopezGuell</a> <a href="https://github.com/darwin-eu/CohortSurvival/issues/333" class="external-link">#333</a></li>
-<li>Added time scaling in survival plot <a href="https://github.com/darwin-eu/CohortSurvival/issues/331" class="external-link">#331</a></li>
-<li>Problem when timeScale and times are incompatible by <a href="https://github.com/KimLopezGuell" class="external-link">@KimLopezGuell</a> <a href="https://github.com/darwin-eu/CohortSurvival/issues/330" class="external-link">#330</a></li>
-<li>Loglog plot by <a href="https://github.com/KimLopezGuell" class="external-link">@KimLopezGuell</a> <a href="https://github.com/darwin-eu/CohortSurvival/issues/329" class="external-link">#329</a></li>
-<li>Create NEWS.md by <a href="https://github.com/catalamarti" class="external-link">@catalamarti</a> <a href="https://github.com/darwin-eu/CohortSurvival/issues/327" class="external-link">#327</a></li>
-<li>Attrition duplicates by <a href="https://github.com/KimLopezGuell" class="external-link">@KimLopezGuell</a> <a href="https://github.com/darwin-eu/CohortSurvival/issues/326" class="external-link">#326</a></li>
-<li>Omopgenerics tidy by <a href="https://github.com/KimLopezGuell" class="external-link">@KimLopezGuell</a> <a href="https://github.com/darwin-eu/CohortSurvival/issues/322" class="external-link">#322</a></li>
+<ul><li>Survival result keeps distinctive columns by @KimLopezGuell #335</li>
+<li>Remove spaces in strata level by @KimLopezGuell #333</li>
+<li>Added time scaling in survival plot #331</li>
+<li>Problem when timeScale and times are incompatible by @KimLopezGuell #330</li>
+<li>Loglog plot by @KimLopezGuell #329</li>
+<li>Create NEWS.md by @catalamarti #327</li>
+<li>Attrition duplicates by @KimLopezGuell #326</li>
+<li>Omopgenerics tidy by @KimLopezGuell #322</li>
 </ul></div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="1.0.1" id="cohortsurvival-101">CohortSurvival 1.0.1<a class="anchor" aria-label="anchor" href="#cohortsurvival-101"></a></h2><p class="text-muted">CRAN release: 2025-04-02</p>
-<ul><li>Change RMST (SE) to RMST (95% CI) by <a href="https://github.com/KimLopezGuell" class="external-link">@KimLopezGuell</a> <a href="https://github.com/darwin-eu/CohortSurvival/issues/316" class="external-link">#316</a></li>
-<li>Added change in time axis in plots by <a href="https://github.com/KimLopezGuell" class="external-link">@KimLopezGuell</a> <a href="https://github.com/darwin-eu/CohortSurvival/issues/315" class="external-link">#315</a></li>
-<li>Tablesurvival months by <a href="https://github.com/KimLopezGuell" class="external-link">@KimLopezGuell</a> <a href="https://github.com/darwin-eu/CohortSurvival/issues/312" class="external-link">#312</a></li>
-<li>Lifecycle Badge changes to Stable by <a href="https://github.com/KimLopezGuell" class="external-link">@KimLopezGuell</a> <a href="https://github.com/darwin-eu/CohortSurvival/issues/311" class="external-link">#311</a></li>
-<li>Attrition problem in CR analyses by <a href="https://github.com/KimLopezGuell" class="external-link">@KimLopezGuell</a> <a href="https://github.com/darwin-eu/CohortSurvival/issues/308" class="external-link">#308</a></li>
+<ul><li>Change RMST (SE) to RMST (95% CI) by @KimLopezGuell #316</li>
+<li>Added change in time axis in plots by @KimLopezGuell #315</li>
+<li>Tablesurvival months by @KimLopezGuell #312</li>
+<li>Lifecycle Badge changes to Stable by @KimLopezGuell #311</li>
+<li>Attrition problem in CR analyses by @KimLopezGuell #308</li>
 </ul></div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="1.0.0" id="cohortsurvival-100">CohortSurvival 1.0.0<a class="anchor" aria-label="anchor" href="#cohortsurvival-100"></a></h2><p class="text-muted">CRAN release: 2025-03-19</p>

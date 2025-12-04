@@ -1,17 +1,16 @@
-# Table with survival events
+# Display the attrition of a survival result in a visual table
 
-Table with survival events
+Display the attrition of a survival result in a visual table
 
 ## Usage
 
 ``` r
-riskTable(
-  x,
-  eventGap = NULL,
-  header = c("estimate"),
+tableSurvivalAttrition(
+  result,
   type = "gt",
-  groupColumn = NULL,
-  hide = c("result_id", "estimate_type"),
+  header = "variable_name",
+  groupColumn = c("cdm_name", "target_cohort", "variable_level"),
+  hide = c("estimate_name"),
   style = NULL,
   .options = list()
 )
@@ -19,16 +18,19 @@ riskTable(
 
 ## Arguments
 
-- x:
+- result:
 
-  Result from estimateSingleEventSurvival or
-  estimateCompetingRiskSurvival.
+  A summarised_result object obtained either from
+  [`estimateSingleEventSurvival()`](https://darwin-eu.github.io/CohortSurvival/reference/estimateSingleEventSurvival.md)
+  or
+  [`estimateCompetingRiskSurvival()`](https://darwin-eu.github.io/CohortSurvival/reference/estimateCompetingRiskSurvival.md).
 
-- eventGap:
+- type:
 
-  Event gap defining the times at which to report the risk table
-  information. Must be one of the eventGap inputs used for the
-  estimation function. If NULL, all available are reported.
+  Character string specifying the desired output table format. See
+  `tableType()` for supported table types. If `type = NULL`, global
+  options (set via `setGlobalTableOptions()`) will be used if available;
+  otherwise, a default `'gt'` table is created.
 
 - header:
 
@@ -40,13 +42,6 @@ riskTable(
     header for these columns.
 
   - Any other input to create an overall header.
-
-- type:
-
-  Character string specifying the desired output table format. See
-  `tableType()` for supported table types. If `type = NULL`, global
-  options (set via `setGlobalTableOptions()`) will be used if available;
-  otherwise, a default `'gt'` table is created.
 
 - groupColumn:
 
@@ -92,59 +87,55 @@ riskTable(
 
 ## Value
 
-A tibble containing the risk table information (n_risk, n_events,
-n_censor) for all times within the event gap specified.
+A visual table
 
 ## Examples
 
 ``` r
 # \donttest{
+library(CohortSurvival)
+
 cdm <- mockMGUS2cdm()
-surv <- estimateSingleEventSurvival(cdm,
-                                    targetCohortTable = "mgus_diagnosis",
-                                    outcomeCohortTable = "death_cohort")
+
+surv <- estimateSingleEventSurvival(
+  cdm = cdm,
+  targetCohortTable = "mgus_diagnosis",
+  outcomeCohortTable = "death_cohort"
+)
 #> - Getting survival for target cohort 'mgus_diagnosis' and outcome cohort
 #> 'death_cohort'
 #> Getting overall estimates
 #> `eventgap`, `outcome_washout`, `censor_on_cohort_exit`, `follow_up_days`, and
 #> `minimum_survival_days` casted to character.
-riskTable(surv)
-#> Warning: ! `riskTable()` has been renamed to `tableSurvivalEvents()`.
-#> ℹ The current function name will be deprecated in a future version.
-#> ℹ Please use `tableSurvivalEvents()` instead.
+
+tableSurvivalAttrition(surv)
 
 
   
 
 
-CDM name
+Reason id
 ```
 
-Target cohort
+Reason
 
-Outcome name
+Variable name
 
-Time
+number_records
 
-Event gap
+number_subjects
 
-Estimate name
+excluded_records
 
-Number at risk
+excluded_subjects
 
-Number events
+mock; mgus_diagnosis_1; death_cohort
 
-Number censored
+1
 
-mock
+Initial qualifying events
 
-mgus_diagnosis
-
-death_cohort
-
-0
-
-30
+1,384
 
 1,384
 
@@ -152,153 +143,27 @@ death_cohort
 
 0
 
-30
-
-30
-
-1,104
-
-285
-
-3
-
-60
-
-30
-
-895
-
-182
-
-27
-
-90
-
-30
-
-652
-
-167
-
-79
-
-120
-
-30
-
-438
-
-131
-
-74
-
-150
-
-30
-
-299
-
-86
-
-54
-
-180
-
-30
-
-187
-
-57
-
-54
-
-210
-
-30
-
-109
-
-20
-
-58
-
-240
-
-30
-
-61
-
-15
-
-33
-
-270
-
-30
-
-31
-
-11
-
-18
-
-300
-
-30
-
-16
-
-4
-
-10
-
-330
-
-30
-
-7
-
-3
-
-6
-
-360
-
-30
-
-3
-
-1
-
-3
-
-390
-
-30
-
 2
 
-0
+No outcome event in washout period
 
-1
+1,384
 
-420
-
-30
-
-1
+1,384
 
 0
 
-1
+0
 
-424
+3
 
-30
+Survival days for outcome less than 1
 
-1
+1,384
 
-1
+1,384
+
+0
 
 0
 

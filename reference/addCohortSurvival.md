@@ -36,7 +36,8 @@ addCohortSurvival(
 - outcomeCohortId:
 
   ID of event cohorts to include. Only one outcome (and so one ID) can
-  be considered.
+  be considered. It can either be a cohort_definition_id value or a
+  cohort_name.
 
 - outcomeDateVariable:
 
@@ -44,7 +45,8 @@ addCohortSurvival(
 
 - outcomeWashout:
 
-  Washout time in days for the outcome
+  Washout time in days for the outcome. If an individual has an outcome
+  during the washout period, status and time will be set to NA
 
 - censorOnCohortExit:
 
@@ -78,8 +80,7 @@ whether the patient had the event (value: 1), or did not have the event
 # \donttest{
 
 cdm <- mockMGUS2cdm()
-#> ■■■■■■■■■■■■■■■■■■■■■■■■■         80% | ETA:  1s
-cdm$mgus_diagnosis <- cdm$mgus_diagnosis %>%
+cdm$mgus_diagnosis <- cdm$mgus_diagnosis |>
   addCohortSurvival(
     cdm = cdm,
     outcomeCohortTable = "death_cohort",

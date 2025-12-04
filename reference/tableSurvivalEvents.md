@@ -5,7 +5,7 @@ Table with survival events
 ## Usage
 
 ``` r
-riskTable(
+tableSurvivalEvents(
   x,
   eventGap = NULL,
   header = c("estimate"),
@@ -100,6 +100,7 @@ n_censor) for all times within the event gap specified.
 ``` r
 # \donttest{
 cdm <- mockMGUS2cdm()
+#> ■■■■■■■■■■■■■■■■■■■■■■■■■         80% | ETA:  1s
 surv <- estimateSingleEventSurvival(cdm,
                                     targetCohortTable = "mgus_diagnosis",
                                     outcomeCohortTable = "death_cohort")
@@ -108,10 +109,7 @@ surv <- estimateSingleEventSurvival(cdm,
 #> Getting overall estimates
 #> `eventgap`, `outcome_washout`, `censor_on_cohort_exit`, `follow_up_days`, and
 #> `minimum_survival_days` casted to character.
-riskTable(surv)
-#> Warning: ! `riskTable()` has been renamed to `tableSurvivalEvents()`.
-#> ℹ The current function name will be deprecated in a future version.
-#> ℹ Please use `tableSurvivalEvents()` instead.
+tableSurvivalEvents(surv)
 
 
   

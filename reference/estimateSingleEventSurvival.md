@@ -41,12 +41,13 @@ estimateSingleEventSurvival(
 
 - targetCohortId:
 
-  targetCohortId
+  Target cohorts to include. It can either be a cohort_definition_id
+  value or a cohort_name. Multiple ids are allowed.
 
 - outcomeCohortId:
 
-  ID of event cohorts to include. Only one outcome (and so one ID) can
-  be considered.
+  Outcome cohorts to include. It can either be a cohort_definition_id
+  value or a cohort_name. Multiple ids are allowed.
 
 - outcomeDateVariable:
 
@@ -107,7 +108,6 @@ an attribute of the output
 ``` r
 # \donttest{
 cdm <- mockMGUS2cdm()
-#> ■■■■■■■■■■■■■■■■■■■■■■■■■         80% | ETA:  1s
 surv <- estimateSingleEventSurvival(
   cdm = cdm,
   targetCohortTable = "mgus_diagnosis",

@@ -35,14 +35,14 @@ function in the package `survival`, for instance, we only need to call
 previously added to the cohort by the user.
 
 ``` r
-input_survival_single <- cdm$mgus_diagnosis %>%
+input_survival_single <- cdm$mgus_diagnosis |>
        addCohortSurvival(
        cdm = cdm,
        outcomeCohortTable = "death_cohort",
        outcomeCohortId = 1
        ) 
 
-input_survival_single %>% 
+input_survival_single |> 
   glimpse()
 #> Rows: ??
 #> Columns: 13
@@ -72,14 +72,14 @@ variable and censor them at a particular date, for instance, the 1st of
 January of 1994. We see how that gives us different results:
 
 ``` r
-cdm$mgus_diagnosis %>%
+cdm$mgus_diagnosis |>
        addCohortSurvival(
        cdm = cdm,
        outcomeCohortTable = "death_cohort",
        outcomeWashout = 180,
        followUpDays = 365
-       ) %>%
-  filter(cohort_start_date > "1993-01-01") %>%
+       ) |>
+  filter(cohort_start_date > "1993-01-01") |>
   glimpse()
 #> Rows: ??
 #> Columns: 13
@@ -97,14 +97,14 @@ cdm$mgus_diagnosis %>%
 #> $ days_to_exit         <dbl> 19, 43, 12, 1, 10, 46, 40, 41, 22, 31, 6, 57, 52,…
 #> $ status               <dbl> 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0…
 #> $ time                 <dbl> 19, 43, 12, 1, 10, 46, 40, 41, 22, 31, 6, 57, 52,…
-cdm$mgus_diagnosis %>%
+cdm$mgus_diagnosis |>
        addCohortSurvival(
        cdm = cdm,
        outcomeCohortTable = "death_cohort",
        outcomeDateVariable = "cohort_end_date",
        censorOnDate = as.Date("1994-01-01")
-       ) %>%
-    filter(cohort_start_date > "1993-01-01") %>%
+       ) |>
+    filter(cohort_start_date > "1993-01-01") |>
   glimpse()
 #> Rows: ??
 #> Columns: 13
@@ -119,7 +119,7 @@ cdm$mgus_diagnosis %>%
 #> $ creat                <dbl> 1.1, 1.4, 1.1, 1.5, 1.5, 1.4, 1.8, 1.1, 0.8, 2.0,…
 #> $ mspike               <dbl> 0.8, 1.3, 1.5, 1.4, 0.5, 1.2, 0.5, 1.5, 0.0, 0.0,…
 #> $ age_group            <chr> ">=70", ">=70", ">=70", ">=70", ">=70", "<70", "<…
-#> $ days_to_exit         <int> 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0…
+#> $ days_to_exit         <dbl> 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0…
 #> $ status               <dbl> 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0…
 #> $ time                 <dbl> 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0…
 ```
@@ -164,26 +164,26 @@ models.
 ``` r
 
 # Add all status and time information for both outcomes
-  input_survival_cr <- cdm$mgus_diagnosis %>%
-    addCohortSurvival(cdm, "progression") %>%
+  input_survival_cr <- cdm$mgus_diagnosis |>
+    addCohortSurvival(cdm, "progression") |>
     dplyr::rename(
       "outcome_time" = "time",
       "outcome_status" = "status"
-    ) %>%
-     addCohortSurvival(cdm, "death_cohort") %>%
+    ) |>
+     addCohortSurvival(cdm, "death_cohort") |>
     dplyr::rename(
       "competing_outcome_time" = "time",
       "competing_outcome_status" = "status"
     )
   
   # Collect and 
-  input_survival_cr <- input_survival_cr %>%
-    dplyr::collect() %>%
+  input_survival_cr <- input_survival_cr |>
+    dplyr::collect() |>
     dplyr::mutate(
       time = pmin(outcome_time, competing_outcome_time),
       status = factor(
         dplyr::if_else(competing_outcome_time <= outcome_time, 2 * competing_outcome_status, outcome_status))
-    ) %>%
+    ) |>
     dplyr::select(-c("outcome_time", "outcome_status", "competing_outcome_time", "competing_outcome_status"))
 ```
 
@@ -192,7 +192,7 @@ competing risk data. We first change our `sex` covariate to numeric, and
 then we can run the analysis:
 
 ``` r
-input_survival_cr <- input_survival_cr %>%
+input_survival_cr <- input_survival_cr |>
   dplyr::mutate(sex = dplyr::if_else(sex == "M", 0, 1))
 
 covs <- data.frame(input_survival_cr$age, input_survival_cr$sex)

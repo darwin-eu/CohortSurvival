@@ -14,7 +14,8 @@ plotSurvival(
   riskTable = FALSE,
   riskInterval = 30,
   logLog = FALSE,
-  timeScale = "days"
+  timeScale = "days",
+  style = NULL
 )
 ```
 
@@ -58,6 +59,15 @@ plotSurvival(
 
   The scale of time in the x-axis. Can be "days", "months", or "years"
 
+- style:
+
+  A character string defining the visual theme to apply to the plot. You
+  can set this to NULL to apply the standard ggplot2 default style, or
+  provide a name for one of the package's pre-defined styles. Refer to
+  the plotStyle() function for all available style pre-defined themes.
+  For further customization, you can always modify the returned ggplot
+  object directly.
+
 ## Value
 
 A plot of survival probabilities over time
@@ -76,6 +86,8 @@ surv <- estimateSingleEventSurvival(cdm,
 #> `eventgap`, `outcome_washout`, `censor_on_cohort_exit`, `follow_up_days`, and
 #> `minimum_survival_days` casted to character.
 plotSurvival(surv)
+#> Warning: eventgap column will be added to the survival result object to include all
+#> relevant information
 
 # }
 ```

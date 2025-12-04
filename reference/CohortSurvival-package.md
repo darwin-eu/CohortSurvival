@@ -20,7 +20,7 @@ Authors:
 - Edward Burn <edward.burn@ndorms.ox.ac.uk>
   ([ORCID](https://orcid.org/0000-0002-9286-1128))
 
-- Marti Catala <marti.catalasabate@ndorms.ox.ac.uk>
+- Martí Català <marti.catalasabate@ndorms.ox.ac.uk>
   ([ORCID](https://orcid.org/0000-0003-3308-9905))
 
 - Xintong Li <xintong.li@ndorms.ox.ac.uk>

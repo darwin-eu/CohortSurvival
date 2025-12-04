@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">CohortSurvival</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.2</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.1.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -23,8 +23,7 @@
     <li><a class="dropdown-item" href="../articles/a03_Further_survival_analyses.html">Further survival analyses</a></li>
   </ul></li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
-      </ul><ul class="navbar-nav"><li class="nav-item"><a class="external-link nav-link" href="https://github.com/darwin-eu/CohortSurvival/" aria-label="GitHub"><span class="fa fab fa-github fa-lg"></span></a></li>
-      </ul></div>
+      </ul><ul class="navbar-nav"></ul></div>
 
 
   </div>
@@ -32,7 +31,7 @@
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="../logo.png" class="logo" alt=""><h1>A tidy implementation of the summarised_characteristics object.</h1>
-      <small class="dont-index">Source: <a href="https://github.com/darwin-eu/CohortSurvival/blob/main/R/asSurvivalResult.R" class="external-link"><code>R/asSurvivalResult.R</code></a></small>
+
       <div class="d-none name"><code>asSurvivalResult.Rd</code></div>
     </div>
 
@@ -63,6 +62,7 @@ object.</p>
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># \donttest{</span></span></span>
 <span class="r-in"><span><span class="va">cdm</span> <span class="op">&lt;-</span> <span class="fu"><a href="mockMGUS2cdm.html">mockMGUS2cdm</a></span><span class="op">(</span><span class="op">)</span></span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">■■■■■■■■■■■■■■■■■■■■■■■■■       </span>  80% | ETA:  1s</span>
 <span class="r-in"><span><span class="va">surv</span> <span class="op">&lt;-</span> <span class="fu"><a href="estimateSingleEventSurvival.html">estimateSingleEventSurvival</a></span><span class="op">(</span></span></span>
 <span class="r-in"><span>  cdm <span class="op">=</span> <span class="va">cdm</span>,</span></span>
 <span class="r-in"><span>  targetCohortTable <span class="op">=</span> <span class="st">"mgus_diagnosis"</span>,</span></span>
@@ -70,13 +70,15 @@ object.</p>
 <span class="r-in"><span>  outcomeCohortTable <span class="op">=</span> <span class="st">"death_cohort"</span>,</span></span>
 <span class="r-in"><span>  outcomeCohortId <span class="op">=</span> <span class="fl">1</span>,</span></span>
 <span class="r-in"><span>  eventGap <span class="op">=</span> <span class="fl">7</span></span></span>
-<span class="r-in"><span><span class="op">)</span> <span class="op"><a href="pipe.html">%&gt;%</a></span></span></span>
-<span class="r-in"><span>  <span class="fu">asSurvivalResult</span><span class="op">(</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
+<span class="r-in"><span><span class="fu">asSurvivalResult</span><span class="op">(</span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> - Getting survival for target cohort 'mgus_diagnosis' and outcome cohort</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> 'death_cohort'</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Getting overall estimates</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> `eventgap`, `outcome_washout`, `censor_on_cohort_exit`, `follow_up_days`, and</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> `minimum_survival_days` casted to character.</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span><span style="font-weight: bold;">eventgap</span> column will be added to the survival result object to include all</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> relevant information</span>
 <span class="r-in"><span><span class="co"># }</span></span></span>
 <span class="r-in"><span></span></span>
 </code></pre></div>

@@ -11,17 +11,20 @@
 <url><loc>https://darwin-eu.github.io/CohortSurvival/news/index.html</loc></url>
 <url><loc>https://darwin-eu.github.io/CohortSurvival/reference/CohortSurvival-package.html</loc></url>
 <url><loc>https://darwin-eu.github.io/CohortSurvival/reference/addCohortSurvival.html</loc></url>
+<url><loc>https://darwin-eu.github.io/CohortSurvival/reference/asSummarisedResult.html</loc></url>
 <url><loc>https://darwin-eu.github.io/CohortSurvival/reference/asSurvivalResult.html</loc></url>
+<url><loc>https://darwin-eu.github.io/CohortSurvival/reference/availableSurvivalGrouping.html</loc></url>
 <url><loc>https://darwin-eu.github.io/CohortSurvival/reference/estimateCompetingRiskSurvival.html</loc></url>
 <url><loc>https://darwin-eu.github.io/CohortSurvival/reference/estimateSingleEventSurvival.html</loc></url>
 <url><loc>https://darwin-eu.github.io/CohortSurvival/reference/index.html</loc></url>
 <url><loc>https://darwin-eu.github.io/CohortSurvival/reference/mockMGUS2cdm.html</loc></url>
 <url><loc>https://darwin-eu.github.io/CohortSurvival/reference/optionsTableSurvival.html</loc></url>
-<url><loc>https://darwin-eu.github.io/CohortSurvival/reference/pipe.html</loc></url>
 <url><loc>https://darwin-eu.github.io/CohortSurvival/reference/plotSurvival.html</loc></url>
 <url><loc>https://darwin-eu.github.io/CohortSurvival/reference/reexports.html</loc></url>
 <url><loc>https://darwin-eu.github.io/CohortSurvival/reference/riskTable.html</loc></url>
+<url><loc>https://darwin-eu.github.io/CohortSurvival/reference/tableDoc.html</loc></url>
 <url><loc>https://darwin-eu.github.io/CohortSurvival/reference/tableSurvival.html</loc></url>
-<url><loc>https://darwin-eu.github.io/CohortSurvival/reference/tidyeval.html</loc></url>
+<url><loc>https://darwin-eu.github.io/CohortSurvival/reference/tableSurvivalAttrition.html</loc></url>
+<url><loc>https://darwin-eu.github.io/CohortSurvival/reference/tableSurvivalEvents.html</loc></url>
 </urlset>
 

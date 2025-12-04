@@ -38,7 +38,7 @@ mgus diagnosis as a target, and both the death cohort and the
 progression to multiple myeloma as outcomes.
 
 ``` r
-cdm$mgus_diagnosis %>% 
+cdm$mgus_diagnosis |> 
   glimpse()
 #> Rows: ??
 #> Columns: 10
@@ -54,7 +54,7 @@ cdm$mgus_diagnosis %>%
 #> $ mspike               <dbl> 0.5, 2.0, 2.6, 1.2, 1.0, 0.5, 1.3, 1.6, 2.4, 2.3,…
 #> $ age_group            <chr> ">=70", ">=70", ">=70", "<70", ">=70", ">=70", ">…
 
-cdm$death_cohort %>% 
+cdm$death_cohort |> 
   glimpse()
 #> Rows: ??
 #> Columns: 4
@@ -64,7 +64,7 @@ cdm$death_cohort %>%
 #> $ cohort_start_date    <date> 1981-01-31, 1968-01-26, 1980-02-16, 1977-04-03, …
 #> $ cohort_end_date      <date> 1981-01-31, 1968-01-26, 1980-02-16, 1977-04-03, …
 
-cdm$progression %>%
+cdm$progression |>
   glimpse()
 #> Rows: ??
 #> Columns: 4
@@ -90,8 +90,8 @@ MGUS_death_prog <- estimateCompetingRiskSurvival(cdm,
   competingOutcomeCohortTable = "death_cohort"
 ) 
 
-MGUS_death_prog %>% 
-  asSurvivalResult() %>% 
+MGUS_death_prog |> 
+  asSurvivalResult() |> 
   glimpse()
 #> Rows: 850
 #> Columns: 10
@@ -101,7 +101,7 @@ MGUS_death_prog %>%
 #> $ competing_outcome   <chr> "death_cohort", "death_cohort", "death_cohort", "d…
 #> $ variable            <chr> "progression", "progression", "progression", "prog…
 #> $ time                <dbl> 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, …
-#> $ result_type         <chr> "cumulative_failure_probability", "cumulative_fail…
+#> $ result_type         <chr> "survival_estimates", "survival_estimates", "survi…
 #> $ estimate            <dbl> 0.0000, 0.0000, 0.0014, 0.0014, 0.0022, 0.0029, 0.…
 #> $ estimate_95CI_lower <dbl> 0.0000, NA, 0.0004, 0.0004, 0.0007, 0.0011, 0.0015…
 #> $ estimate_95CI_upper <dbl> 0.0000, NA, 0.0058, 0.0058, 0.0067, 0.0077, 0.0087…
@@ -151,7 +151,7 @@ probability to be plotted instead of the survival probability, which
 makes more sense in the competing outcome case.
 
 ``` r
-plotSurvival(MGUS_death_prog %>% 
+plotSurvival(MGUS_death_prog |> 
                dplyr::filter(strata_name != "Overall"), 
              facet = "sex",
              colour = "variable",

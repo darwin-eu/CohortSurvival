@@ -32,6 +32,13 @@ starting the analysis, but in the case of our example data we already
 have these cohorts available: `mgus_diagnosis` for our target cohort and
 `death_cohort` for our outcome cohort.
 
+If you have a target cohort and a death table in your cdm but not a
+death cohort per se, you can use the function
+\[deathCohort\]{<https://ohdsi.github.io/CohortConstructor/articles/a01_building_base_cohorts.html?q=death#death-cohort>}
+from CohortConstructor to create it. The most efficient way to do so is
+to restrict the creation to your target cohort, by calling
+`deathCohort(cdm, name = "death_cohort", subsetCohort = "name_of_your_target_cohort_table")`.
+
 In our target cohort we also have a number of additional features (age
 or sex of the patients, for instance) recorded, which we will use for
 stratification.
@@ -39,7 +46,7 @@ stratification.
 Let us first take a quick look at the data we will be working with:
 
 ``` r
-cdm$mgus_diagnosis %>% 
+cdm$mgus_diagnosis |> 
   glimpse()
 #> Rows: ??
 #> Columns: 10
@@ -55,7 +62,7 @@ cdm$mgus_diagnosis %>%
 #> $ mspike               <dbl> 0.5, 2.0, 2.6, 1.2, 1.0, 0.5, 1.3, 1.6, 2.4, 2.3,…
 #> $ age_group            <chr> ">=70", ">=70", ">=70", "<70", ">=70", ">=70", ">…
 
-cdm$death_cohort %>% 
+cdm$death_cohort |> 
   glimpse()
 #> Rows: ??
 #> Columns: 4
@@ -95,9 +102,9 @@ MGUS_death <- estimateSingleEventSurvival(
   targetCohortTable = "mgus_diagnosis",
   outcomeCohortTable = "death_cohort"
 )
-MGUS_death %>% 
+MGUS_death |> 
   glimpse()
-#> Rows: 1,355
+#> Rows: 1,361
 #> Columns: 13
 #> $ result_id        <int> 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,…
 #> $ cdm_name         <chr> "mock", "mock", "mock", "mock", "mock", "mock", "mock…
@@ -130,10 +137,10 @@ settings(MGUS_death)
 #> # A tibble: 4 × 17
 #>   result_id result_type     package_name package_version group strata additional
 #>       <int> <chr>           <chr>        <chr>           <chr> <chr>  <chr>     
-#> 1         1 survival_proba… CohortSurvi… 1.0.2           targ… ""     "time"    
-#> 2         2 survival_events CohortSurvi… 1.0.2           targ… ""     "time"    
-#> 3         3 survival_summa… CohortSurvi… 1.0.2           targ… ""     ""        
-#> 4         4 survival_attri… CohortSurvi… 1.0.2           targ… "reas… "reason_i…
+#> 1         1 survival_estim… CohortSurvi… 1.1.0           targ… ""     "time"    
+#> 2         2 survival_events CohortSurvi… 1.1.0           targ… ""     "time"    
+#> 3         3 survival_summa… CohortSurvi… 1.1.0           targ… ""     ""        
+#> 4         4 survival_attri… CohortSurvi… 1.1.0           targ… "reas… "reason_i…
 #> # ℹ 10 more variables: min_cell_count <chr>, analysis_type <chr>,
 #> #   censor_on_cohort_exit <chr>, competing_outcome <chr>, eventgap <chr>,
 #> #   follow_up_days <chr>, minimum_survival_days <chr>, outcome <chr>,
@@ -267,12 +274,20 @@ tableSurvival(MGUS_death, times = c(30,90,180, 500))
 [TABLE]
 
 Other options of this table include giving the estimates in years
-instead of days. Check
+instead of days, or changing its style (we can either manually ask for
+the aesthetic we want ot use one of the predefined ones). Check
 [`?tableSurvival`](https://darwin-eu.github.io/CohortSurvival/reference/tableSurvival.md)
 for additional options included in the function parameters.
 
 ``` r
 tableSurvival(MGUS_death, times = c(1,2), timeScale = "years")
+```
+
+[TABLE]
+
+``` r
+
+tableSurvival(MGUS_death, times = c(1,2), style = "darwin")
 ```
 
 [TABLE]
@@ -354,8 +369,7 @@ riskTable(MGUS_death)
 
 If we are only working on a survival study, and we want to manually
 inspect the result tables, we might want to put them in an easier format
-to work with. Note, however, that the visualisation functions from this
-package will not work with this new result format.
+to work with.
 
 The function
 [`asSurvivalResult()`](https://darwin-eu.github.io/CohortSurvival/reference/asSurvivalResult.md)
@@ -365,9 +379,9 @@ and attrition being stored as attributes.
 
 ``` r
 # Transforming the output to a survival result format
-MGUS_death_survresult <- MGUS_death %>% 
+MGUS_death_survresult <- MGUS_death |> 
   asSurvivalResult() 
-MGUS_death_survresult %>%
+MGUS_death_survresult |>
   glimpse()
 #> Rows: 425
 #> Columns: 10
@@ -377,34 +391,36 @@ MGUS_death_survresult %>%
 #> $ competing_outcome   <chr> "none", "none", "none", "none", "none", "none", "n…
 #> $ variable            <chr> "death_cohort", "death_cohort", "death_cohort", "d…
 #> $ time                <dbl> 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, …
-#> $ result_type         <chr> "survival_probability", "survival_probability", "s…
+#> $ result_type         <chr> "survival_estimates", "survival_estimates", "survi…
 #> $ estimate            <dbl> 1.0000, 0.9697, 0.9494, 0.9386, 0.9270, 0.9198, 0.…
 #> $ estimate_95CI_lower <dbl> 1.0000, 0.9607, 0.9379, 0.9260, 0.9134, 0.9056, 0.…
 #> $ estimate_95CI_upper <dbl> 1.0000, 0.9787, 0.9610, 0.9513, 0.9408, 0.9342, 0.…
 # Events, attrition and summary are now attributes of the result object
-attr(MGUS_death_survresult,"events") %>%
+attr(MGUS_death_survresult,"events") |>
   glimpse()
 #> Rows: 16
-#> Columns: 10
+#> Columns: 11
 #> $ cdm_name          <chr> "mock", "mock", "mock", "mock", "mock", "mock", "moc…
 #> $ target_cohort     <chr> "mgus_diagnosis", "mgus_diagnosis", "mgus_diagnosis"…
 #> $ outcome           <chr> "death_cohort", "death_cohort", "death_cohort", "dea…
 #> $ competing_outcome <chr> "none", "none", "none", "none", "none", "none", "non…
 #> $ variable          <chr> "death_cohort", "death_cohort", "death_cohort", "dea…
 #> $ time              <dbl> 0, 30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 33…
+#> $ result_type       <chr> "survival_events", "survival_events", "survival_even…
 #> $ eventgap          <chr> "30", "30", "30", "30", "30", "30", "30", "30", "30"…
 #> $ n_risk            <dbl> 1384, 1104, 895, 652, 438, 299, 187, 109, 61, 31, 16…
 #> $ n_events          <dbl> 0, 285, 182, 167, 131, 86, 57, 20, 15, 11, 4, 3, 1, …
 #> $ n_censor          <dbl> 0, 3, 27, 79, 74, 54, 54, 58, 33, 18, 10, 6, 3, 1, 1…
-attr(MGUS_death_survresult,"summary") %>%
+attr(MGUS_death_survresult,"summary") |>
   glimpse()
 #> Rows: 1
-#> Columns: 25
+#> Columns: 32
 #> $ cdm_name                            <chr> "mock"
 #> $ target_cohort                       <chr> "mgus_diagnosis"
 #> $ outcome                             <chr> "death_cohort"
 #> $ competing_outcome                   <chr> "none"
 #> $ variable                            <chr> "death_cohort"
+#> $ result_type                         <chr> "survival_summary"
 #> $ number_records                      <dbl> 1384
 #> $ n_events                            <dbl> 963
 #> $ restricted_mean_survival            <dbl> 133
@@ -414,27 +430,34 @@ attr(MGUS_death_survresult,"summary") %>%
 #> $ q0_survival                         <dbl> 0
 #> $ q0_survival_95CI_lower              <dbl> 0
 #> $ q0_survival_95CI_higher             <dbl> 0
+#> $ q05_survival                        <dbl> 2
+#> $ q05_survival_95CI_lower             <dbl> 2
+#> $ q05_survival_95CI_higher            <dbl> 4
 #> $ q25_survival                        <dbl> 41
 #> $ q25_survival_95CI_lower             <dbl> 35
 #> $ q25_survival_95CI_higher            <dbl> 46
 #> $ q75_survival                        <dbl> 189
 #> $ q75_survival_95CI_lower             <dbl> 173
 #> $ q75_survival_95CI_higher            <dbl> 214
+#> $ q95_survival                        <dbl> 424
+#> $ q95_survival_95CI_lower             <dbl> 356
+#> $ q95_survival_95CI_higher            <dbl> NA
 #> $ q100_survival                       <dbl> 424
 #> $ q100_survival_95CI_lower            <dbl> NA
 #> $ q100_survival_95CI_higher           <dbl> NA
 #> $ restricted_mean_survival_95CI_upper <dbl> 141
 #> $ restricted_mean_survival_95CI_lower <dbl> 124
-attr(MGUS_death_survresult,"attrition") %>%
+attr(MGUS_death_survresult,"attrition") |>
   glimpse()
 #> Rows: 12
-#> Columns: 7
+#> Columns: 8
 #> $ cdm_name          <chr> "mock", "mock", "mock", "mock", "mock", "mock", "moc…
 #> $ target_cohort     <chr> "mgus_diagnosis_1", "mgus_diagnosis_1", "mgus_diagno…
 #> $ outcome           <chr> "death_cohort", "death_cohort", "death_cohort", "dea…
 #> $ competing_outcome <chr> "none", "none", "none", "none", "none", "none", "non…
 #> $ reason            <chr> "Initial qualifying events", "Initial qualifying eve…
 #> $ variable_name     <chr> "number_records", "number_subjects", "excluded_recor…
+#> $ result_type       <chr> "survival_attrition", "survival_attrition", "surviva…
 #> $ count             <int> 1384, 1384, 0, 0, 1384, 1384, 0, 0, 1384, 1384, 0, 0
 ```
 
@@ -442,20 +465,27 @@ We can now directly check all estimates for times 10 to 15, for
 instance, like this:
 
 ``` r
-MGUS_death_survresult %>%
+MGUS_death_survresult |>
   filter(time %in% c(10:15))
 #> # A tibble: 6 × 10
 #>   cdm_name target_cohort  outcome   competing_outcome variable  time result_type
 #>   <chr>    <chr>          <chr>     <chr>             <chr>    <dbl> <chr>      
-#> 1 mock     mgus_diagnosis death_co… none              death_c…    10 survival_p…
-#> 2 mock     mgus_diagnosis death_co… none              death_c…    11 survival_p…
-#> 3 mock     mgus_diagnosis death_co… none              death_c…    12 survival_p…
-#> 4 mock     mgus_diagnosis death_co… none              death_c…    13 survival_p…
-#> 5 mock     mgus_diagnosis death_co… none              death_c…    14 survival_p…
-#> 6 mock     mgus_diagnosis death_co… none              death_c…    15 survival_p…
+#> 1 mock     mgus_diagnosis death_co… none              death_c…    10 survival_e…
+#> 2 mock     mgus_diagnosis death_co… none              death_c…    11 survival_e…
+#> 3 mock     mgus_diagnosis death_co… none              death_c…    12 survival_e…
+#> 4 mock     mgus_diagnosis death_co… none              death_c…    13 survival_e…
+#> 5 mock     mgus_diagnosis death_co… none              death_c…    14 survival_e…
+#> 6 mock     mgus_diagnosis death_co… none              death_c…    15 survival_e…
 #> # ℹ 3 more variables: estimate <dbl>, estimate_95CI_lower <dbl>,
 #> #   estimate_95CI_upper <dbl>
 ```
+
+The plotting and tabulating functions will work with both input types
+(`summarised_result` and `survival_result`). However, when specifying
+facetting and colouring options for the plots, we will need to use
+column names from the survival format. To know what variables are
+available to call, one can use the function
+[`availableSurvivalGrouping()`](https://darwin-eu.github.io/CohortSurvival/reference/availableSurvivalGrouping.md).
 
 ## Changing estimation parameters
 
@@ -520,8 +550,8 @@ MGUS_death_all <- omopgenerics::bind(
   MGUS_death_fu
 )
 
-MGUS_death_all %>%
-  asSurvivalResult() %>%
+MGUS_death_all |>
+  asSurvivalResult() |>
   glimpse()
 #> Rows: 526
 #> Columns: 11
@@ -531,7 +561,7 @@ MGUS_death_all %>%
 #> $ competing_outcome   <chr> "none", "none", "none", "none", "none", "none", "n…
 #> $ variable            <chr> "death_cohort", "death_cohort", "death_cohort", "d…
 #> $ time                <dbl> 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, …
-#> $ result_type         <chr> "survival_probability", "survival_probability", "s…
+#> $ result_type         <chr> "survival_estimates", "survival_estimates", "survi…
 #> $ follow_up_days      <chr> "Inf", "Inf", "Inf", "Inf", "Inf", "Inf", "Inf", "…
 #> $ estimate            <dbl> 1.0000, 0.9697, 0.9494, 0.9386, 0.9270, 0.9198, 0.…
 #> $ estimate_95CI_lower <dbl> 1.0000, 0.9607, 0.9379, 0.9260, 0.9134, 0.9056, 0.…
@@ -590,8 +620,21 @@ tableSurvival(MGUS_death_strata)
 [TABLE]
 
 To plot the results property, we will have to specify faceting and
-colouring options. One choice is to separate the plots into sex and
-display different age groups in each one of them:
+colouring options. To know what variables are available for plotting, we
+can use the function
+[`availableSurvivalGrouping()`](https://darwin-eu.github.io/CohortSurvival/reference/availableSurvivalGrouping.md)
+as mentioned before.
+
+``` r
+availableSurvivalGrouping(MGUS_death_strata)
+#> [1] "age_group"           "sex"                 "time"               
+#> [4] "estimate"            "estimate_95CI_lower" "estimate_95CI_upper"
+```
+
+Now we know the column names in the survival format, which have
+non-unique values (as expected), are `age_group` and `sex`. One choice
+is to separate the plots into sex and display different age groups in
+each one of them:
 
 ``` r
 plotSurvival(MGUS_death_strata,
@@ -599,7 +642,7 @@ plotSurvival(MGUS_death_strata,
              colour = "age_group")
 ```
 
-![](a01_Single_event_of_interest_files/figure-html/unnamed-chunk-26-1.png)
+![](a01_Single_event_of_interest_files/figure-html/unnamed-chunk-27-1.png)
 
 We can add the respective risk tables under each plot as well.
 
@@ -609,7 +652,7 @@ plotSurvival(MGUS_death_strata,
              riskTable = TRUE)
 ```
 
-![](a01_Single_event_of_interest_files/figure-html/unnamed-chunk-27-1.png)
+![](a01_Single_event_of_interest_files/figure-html/unnamed-chunk-28-1.png)
 
 Because of the density of information in the tables, sometimes the
 visualisation is not ideal. You might need to export the plot as an
@@ -624,7 +667,7 @@ customise facets. Next we show the default facets obtained for
 plotSurvival(MGUS_death_strata, facet = c("age_group", "sex"))
 ```
 
-![](a01_Single_event_of_interest_files/figure-html/unnamed-chunk-28-1.png)
+![](a01_Single_event_of_interest_files/figure-html/unnamed-chunk-29-1.png)
 
 Next, we create customised facets by using functions from the ggplot2
 package. We set “age_group” to columns and “sex” to rows:
@@ -634,7 +677,7 @@ plotSurvival(MGUS_death_strata) +
   facet_grid(rows = vars(sex), cols = vars(age_group))
 ```
 
-![](a01_Single_event_of_interest_files/figure-html/unnamed-chunk-29-1.png)
+![](a01_Single_event_of_interest_files/figure-html/unnamed-chunk-30-1.png)
 
 ## Multiple target or outcome cohorts
 
@@ -665,10 +708,10 @@ settings(MGUS_MM_death)
 #> # A tibble: 4 × 17
 #>   result_id result_type     package_name package_version group strata additional
 #>       <int> <chr>           <chr>        <chr>           <chr> <chr>  <chr>     
-#> 1         1 survival_proba… CohortSurvi… 1.0.2           targ… ""     "time"    
-#> 2         2 survival_events CohortSurvi… 1.0.2           targ… ""     "time"    
-#> 3         3 survival_summa… CohortSurvi… 1.0.2           targ… ""     ""        
-#> 4         4 survival_attri… CohortSurvi… 1.0.2           targ… "reas… "reason_i…
+#> 1         1 survival_estim… CohortSurvi… 1.1.0           targ… ""     "time"    
+#> 2         2 survival_events CohortSurvi… 1.1.0           targ… ""     "time"    
+#> 3         3 survival_summa… CohortSurvi… 1.1.0           targ… ""     ""        
+#> 4         4 survival_attri… CohortSurvi… 1.1.0           targ… "reas… "reason_i…
 #> # ℹ 10 more variables: min_cell_count <chr>, analysis_type <chr>,
 #> #   censor_on_cohort_exit <chr>, competing_outcome <chr>, eventgap <chr>,
 #> #   follow_up_days <chr>, minimum_survival_days <chr>, outcome <chr>,
@@ -682,7 +725,7 @@ tableSurvival(MGUS_MM_death)
 plotSurvival(MGUS_MM_death, colour = "target_cohort")
 ```
 
-![](a01_Single_event_of_interest_files/figure-html/unnamed-chunk-31-1.png)
+![](a01_Single_event_of_interest_files/figure-html/unnamed-chunk-32-1.png)
 
 An alternative to running the estimation function twice is to have (or
 create) a table with both target or outcome cohorts together, each one
@@ -715,7 +758,7 @@ tableSurvival(MGUS_death_prog)
 plotSurvival(MGUS_death_prog, colour = "outcome")
 ```
 
-![](a01_Single_event_of_interest_files/figure-html/unnamed-chunk-33-1.png)
+![](a01_Single_event_of_interest_files/figure-html/unnamed-chunk-34-1.png)
 
 ## Checking the assumption of proportionality between outcomes
 
@@ -729,7 +772,7 @@ for `death` and `progression`:
 plotSurvival(MGUS_death_prog, colour = "outcome", logLog = TRUE)
 ```
 
-![](a01_Single_event_of_interest_files/figure-html/unnamed-chunk-34-1.png)
+![](a01_Single_event_of_interest_files/figure-html/unnamed-chunk-35-1.png)
 
 ## Export and import a survival output
 
@@ -763,7 +806,7 @@ table and the one we plotted at the beginning of this vignette:
 plotSurvival(MGUS_death_imported, riskTable = TRUE)
 ```
 
-![](a01_Single_event_of_interest_files/figure-html/unnamed-chunk-37-1.png)
+![](a01_Single_event_of_interest_files/figure-html/unnamed-chunk-38-1.png)
 
 ## Disconnect from the cdm database connection
 

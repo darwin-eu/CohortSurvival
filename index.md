@@ -44,7 +44,7 @@ In our cdm reference we have three cohort tables of interest: 1) MGUS
 diagnosis cohort
 
 ``` r
-cdm$mgus_diagnosis %>%
+cdm$mgus_diagnosis |>
   glimpse()
 #> Rows: ??
 #> Columns: 10
@@ -64,7 +64,7 @@ cdm$mgus_diagnosis %>%
 2.  MGUS progression to multiple myeloma cohort
 
 ``` r
-cdm$progression %>%
+cdm$progression |>
   glimpse()
 #> Rows: ??
 #> Columns: 4
@@ -78,7 +78,7 @@ cdm$progression %>%
 3.  Death cohort
 
 ``` r
-cdm$death_cohort %>%
+cdm$death_cohort |>
   glimpse()
 #> Rows: ??
 #> Columns: 4
@@ -99,7 +99,7 @@ MGUS_death <- estimateSingleEventSurvival(cdm,
   targetCohortTable = "mgus_diagnosis",
   outcomeCohortTable = "death_cohort"
 )
-MGUS_death %>% 
+MGUS_death |> 
   glimpse()
 #> Rows: 1,354
 #> Columns: 13
@@ -187,7 +187,7 @@ MGUS_death_prog <-  estimateCompetingRiskSurvival(cdm,
   strata = list(c("age_group", "sex"))
 )
 
-plotSurvival(MGUS_death_prog  %>%
+plotSurvival(MGUS_death_prog  |>
              dplyr::filter(strata_name != "overall"), 
              cumulativeFailure = TRUE,
              facet = "strata_level",
