@@ -96,6 +96,7 @@ A visual table
 library(CohortSurvival)
 
 cdm <- mockMGUS2cdm()
+#> ■■■■■■■■■■■■■■■■■■■■■■■■■         80% | ETA:  1s
 
 surv <- estimateSingleEventSurvival(
   cdm = cdm,

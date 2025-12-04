@@ -100,6 +100,7 @@ n_censor) for all times within the event gap specified.
 ``` r
 # \donttest{
 cdm <- mockMGUS2cdm()
+#> ■■■■■■■■■■■■■■■■■■■■■■■■■         80% | ETA:  1s
 surv <- estimateSingleEventSurvival(cdm,
                                     targetCohortTable = "mgus_diagnosis",
                                     outcomeCohortTable = "death_cohort")
