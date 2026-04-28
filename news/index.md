@@ -2,6 +2,8 @@
 
 ## CohortSurvival 1.1.0
 
+CRAN release: 2025-12-04
+
 - Use “first” option in addCohortSurvival to remove warning by
   @KimLopezGuell \#375
 - Allow tableSurvival to display single event and competing risk

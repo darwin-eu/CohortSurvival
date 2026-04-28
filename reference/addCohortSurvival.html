@@ -118,6 +118,14 @@ whether the patient had the event (value: 1), or did not have the event
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># \donttest{</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="va">cdm</span> <span class="op">&lt;-</span> <span class="fu"><a href="mockMGUS2cdm.html">mockMGUS2cdm</a></span><span class="op">(</span><span class="op">)</span></span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Creating a new cdm</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Uploading table person (1384 rows) - [1/7]</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Uploading table observation_period (1384 rows) - [2/7]</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Uploading table visit_occurrence (1 rows) - [3/7]</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Uploading table death_cohort (963 rows) - [4/7]</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Uploading table mgus_diagnosis (1384 rows) - [5/7]</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Uploading table progression (115 rows) - [6/7]</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Uploading table progression_type (230 rows) - [7/7]</span>
 <span class="r-in"><span><span class="va">cdm</span><span class="op">$</span><span class="va">mgus_diagnosis</span> <span class="op">&lt;-</span> <span class="va">cdm</span><span class="op">$</span><span class="va">mgus_diagnosis</span> <span class="op">|&gt;</span></span></span>
 <span class="r-in"><span>  <span class="fu">addCohortSurvival</span><span class="op">(</span></span></span>
 <span class="r-in"><span>    cdm <span class="op">=</span> <span class="va">cdm</span>,</span></span>

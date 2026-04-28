@@ -17,9 +17,17 @@ CDM reference containing data from the survival::mgus2 dataset
 ``` r
  # \donttest{
 cdm <- mockMGUS2cdm()
+#> Creating a new cdm
+#> Uploading table person (1384 rows) - [1/7]
+#> Uploading table observation_period (1384 rows) - [2/7]
+#> Uploading table visit_occurrence (1 rows) - [3/7]
+#> Uploading table death_cohort (963 rows) - [4/7]
+#> Uploading table mgus_diagnosis (1384 rows) - [5/7]
+#> Uploading table progression (115 rows) - [6/7]
+#> Uploading table progression_type (230 rows) - [7/7]
 cdm$person
 #> # Source:   table<person> [?? x 7]
-#> # Database: DuckDB 1.4.2 [unknown@Linux 6.11.0-1018-azure:R 4.5.2/:memory:]
+#> # Database: DuckDB 1.5.2 [unknown@Linux 6.17.0-1010-azure:R 4.6.0/:memory:]
 #>    person_id gender_concept_id year_of_birth month_of_birth day_of_birth
 #>        <int>             <int>         <int>          <int>        <int>
 #>  1         1              8532          1980             10            5
