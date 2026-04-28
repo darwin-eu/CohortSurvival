@@ -2497,3 +2497,52 @@ test_that("tableSurvival estimates parameter works correctly", {
 
   CDMConnector::cdmDisconnect(cdm)
 })
+
+test_that("competing outcome events in washout are excluded with correct attrition reason", {
+  skip_on_cran()
+  cdm <- CohortSurvival::mockMGUS2cdm()
+
+  # Add competing event 5 days BEFORE index date for subject 1
+  cdm$death_cohort <- cdm$death_cohort |>
+    dplyr::mutate(
+      cohort_start_date = dplyr::if_else(subject_id == 1,
+                                         as.Date("1980-12-27"),
+                                         cohort_start_date),
+      cohort_end_date = dplyr::if_else(subject_id == 1,
+                                       as.Date("1981-01-31"),
+                                       cohort_end_date)
+    )
+
+  surv <- CohortSurvival::estimateCompetingRiskSurvival(
+    cdm = cdm,
+    targetCohortTable = "mgus_diagnosis",
+    targetCohortId = 1,
+    outcomeCohortTable = "progression",
+    outcomeCohortId = 1,
+    competingOutcomeCohortTable = "death_cohort",
+    competingOutcomeCohortId = 1,
+    competingOutcomeWashout = 10,
+    minimumSurvivalDays = 0
+  )
+
+  attr_tbl <- attr(surv |>
+                     asSurvivalResult(), "attrition") |>
+    dplyr::collect()
+
+  expect_true(any(attr_tbl$reason == "No competing outcome event in washout period"))
+  expect_true(
+    attr_tbl |>
+      dplyr::filter(reason == "No competing outcome event in washout period",
+                    variable_name == "excluded_subjects") |>
+      dplyr::pull(count) == 1
+  )
+  expect_true(
+    attr_tbl |>
+      dplyr::filter(reason == "Survival days for competing outcome less than 0",
+                    variable_name == "excluded_subjects") |>
+      dplyr::pull(count) == 0
+  )
+
+  CDMConnector::cdmDisconnect(cdm)
+})
+
