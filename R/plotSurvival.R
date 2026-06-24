@@ -26,6 +26,9 @@
 #' @param riskInterval Interval of time to print risk table below the plot
 #' @param logLog If TRUE, the survival probabilities are transformed using the log-log formula
 #' @param timeScale The scale of time in the x-axis. Can be "days", "months", or "years"
+#' @param type Character string specifying the desired plot type.
+#' See `visOmopResults::scatterPlot()` for supported types.
+#' If `type = NULL`, the default backend plot type is used.
 #' @param style	A character string defining the visual theme to apply to the plot.
 #' You can set this to NULL to apply the standard ggplot2 default style, or provide
 #' a name for one of the package's pre-defined styles. Refer to the plotStyle() function
@@ -53,6 +56,7 @@ plotSurvival <- function(result,
                          riskInterval = 30,
                          logLog = FALSE,
                          timeScale = "days",
+                         type = NULL,
                          style = NULL) {
   rlang::check_installed("visOmopResults")
   rlang::check_installed("ggplot2")
@@ -61,7 +65,7 @@ plotSurvival <- function(result,
   # Missing input checks
   if (nrow(result) == 0) {
     cli::cli_warn("Empty result object")
-    return(visOmopResults::emptyPlot())
+    return(visOmopResults::emptyPlot(type = type))
   }
 
   # Convert to survival result if needed
@@ -149,6 +153,7 @@ plotSurvival <- function(result,
     ymax = NULL,
     facet = facet,
     colour = colour,
+    type = type,
     label = labels,
     style = style
   ) +
@@ -197,6 +202,7 @@ plotSurvival <- function(result,
           ymax = NULL,
           facet = NULL,
           colour = colour,
+          type = type,
           label = character(),
           style = style
         ) +

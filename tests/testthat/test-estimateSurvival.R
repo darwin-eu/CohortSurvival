@@ -1,4 +1,5 @@
 test_that("mgus example: no Competing risk", {
+  skip_on_cran()
   cdm <- mockMGUS2cdm()
   surv <- estimateSingleEventSurvival(cdm,
                                       targetCohortTable = "mgus_diagnosis",
@@ -72,6 +73,124 @@ test_that("mgus example: no Competing risk", {
                     (survCR |>
                        dplyr::pull("variable") |>
                        unique())))
+
+  CDMConnector::cdmDisconnect(cdm)
+})
+
+test_that("weighted KM uses target cohort weight column", {
+  skip_on_cran()
+
+  observation_period <- dplyr::tibble(
+    observation_period_id = c(1, 2),
+    person_id = c(1, 2),
+    observation_period_start_date = c(as.Date("2019-01-01"), as.Date("2019-01-01")),
+    observation_period_end_date = c(as.Date("2021-01-01"), as.Date("2021-01-01")),
+    period_type_concept_id = c(0, 0)
+  )
+
+  target_cohort <- dplyr::tibble(
+    cohort_definition_id = c(1, 1),
+    subject_id = c(1, 2),
+    cohort_start_date = c(as.Date("2020-01-01"), as.Date("2020-01-01")),
+    cohort_end_date = c(as.Date("2020-01-01"), as.Date("2020-01-01")),
+    weight = c(1, 100),
+    bad_weight = c("low", "high")
+  )
+
+  outcome_cohort <- dplyr::tibble(
+    cohort_definition_id = c(1),
+    subject_id = c(1),
+    cohort_start_date = c(as.Date("2020-01-02")),
+    cohort_end_date = c(as.Date("2020-01-02"))
+  )
+
+  person <- dplyr::tibble(
+    person_id = c(1, 2),
+    year_of_birth = c(1980, 1980),
+    month_of_birth = c(1, 1),
+    day_of_birth = c(1, 1),
+    gender_concept_id = c(0, 0),
+    ethnicity_concept_id = c(0, 0),
+    race_concept_id = c(0, 0)
+  )
+
+  cdm <- mockCohortSurvival(
+    tables = list(
+      person = person,
+      observation_period = observation_period
+    ),
+    cohortTables = list(
+      target = target_cohort,
+      outcome = outcome_cohort
+    ),
+    cdmName = "weighted_km"
+  )
+
+  unweighted <- estimateSingleEventSurvival(
+    cdm = cdm,
+    targetCohortTable = "target",
+    targetCohortId = 1,
+    outcomeCohortTable = "outcome",
+    outcomeCohortId = 1,
+    eventGap = 1,
+    estimateGap = 1,
+    followUpDays = 2
+  ) |>
+    asSurvivalResult() |>
+    dplyr::filter(.data$time == 1) |>
+    dplyr::pull(.data$estimate)
+
+  weighted <- estimateSingleEventSurvival(
+    cdm = cdm,
+    targetCohortTable = "target",
+    targetCohortId = 1,
+    outcomeCohortTable = "outcome",
+    outcomeCohortId = 1,
+    eventGap = 1,
+    estimateGap = 1,
+    followUpDays = 2,
+    weight = "weight"
+  ) |>
+    asSurvivalResult() |>
+    dplyr::filter(.data$time == 1) |>
+    dplyr::pull(.data$estimate)
+
+  expect_equal(unweighted, 0.5, tolerance = 1e-6)
+  expect_equal(weighted, 100/101, tolerance = 1e-6)
+  expect_gt(weighted, unweighted)
+
+  expect_error(
+    estimateSingleEventSurvival(
+      cdm = cdm,
+      targetCohortTable = "target",
+      targetCohortId = 1,
+      outcomeCohortTable = "outcome",
+      outcomeCohortId = 1,
+      weight = 1
+    )
+  )
+
+  expect_error(
+    estimateSingleEventSurvival(
+      cdm = cdm,
+      targetCohortTable = "target",
+      targetCohortId = 1,
+      outcomeCohortTable = "outcome",
+      outcomeCohortId = 1,
+      weight = "missing_weight"
+    )
+  )
+
+  expect_error(
+    estimateSingleEventSurvival(
+      cdm = cdm,
+      targetCohortTable = "target",
+      targetCohortId = 1,
+      outcomeCohortTable = "outcome",
+      outcomeCohortId = 1,
+      weight = "bad_weight"
+    )
+  )
 
   CDMConnector::cdmDisconnect(cdm)
 })
@@ -1159,6 +1278,17 @@ test_that("funcionality with created dataset", {
   expect_true(all(surv7 |>
                     dplyr::select(estimate)|> dplyr::pull() - c(rep(1, 6), 0.5, 0.5, 0.5, 0) < c(0.01)))
 
+  expect_no_error(
+    estimateSurvival(
+      cdm,
+      targetCohortTable = "exposure_cohort",
+      targetCohortId = 1,
+      outcomeCohortTable = "cohort1",
+      outcomeCohortId = 1,
+      censorOnDate = as.Date("2020-05-04")
+    )
+  )
+
   CDMConnector::cdmDisconnect(cdm)
 })
 
@@ -2164,6 +2294,7 @@ test_that("restrictedMeanFollowUp", {
 })
 
 test_that("mgus example: empty outcome tables or cohorts", {
+  skip_on_cran()
     cdm <- mockMGUS2cdm()
     cdm$death_c <- cdm$death_cohort |>
       dplyr::filter(cohort_definition_id == 2) |>
@@ -2239,6 +2370,7 @@ test_that("n_censor", {
   })
 
 test_that("no outcomes among cohort", {
+  skip_on_cran()
     cdm <- mockMGUS2cdm()
     cdm$death_cohort <- cdm$death_cohort |>
       dplyr::filter(subject_id == 1)
@@ -2283,6 +2415,7 @@ test_that("no outcomes among cohort", {
   })
 
 test_that("tables from cdm do not change after estimation", {
+  skip_on_cran()
   cdm <- mockMGUS2cdm()
   old_cdm <- cdm
 
@@ -2304,6 +2437,7 @@ test_that("tables from cdm do not change after estimation", {
 })
 
 test_that("median survival is NA when it cannot be estimated completely", {
+  skip_on_cran()
   cdm <- mockMGUS2cdm()
   rows_allowed <- c(seq(1,1400,2))
   cdm$death_cohort <- cdm$death_cohort |>
@@ -2327,6 +2461,7 @@ test_that("median survival is NA when it cannot be estimated completely", {
 })
 
 test_that("empty input cohort after input filtering", {
+  skip_on_cran()
   cdm <- mockMGUS2cdm()
   expect_warning(surv <- estimateSingleEventSurvival(cdm, "mgus_diagnosis", "death_cohort",
                                               censorOnCohortExit = TRUE))
@@ -2382,6 +2517,7 @@ test_that("empty input cohort after input filtering", {
 })
 
 test_that("empty input cohort before input filtering", {
+  skip_on_cran()
   cdm <- mockMGUS2cdm()
   cdm$mgus_diagnosis <- cdm$mgus_diagnosis |>
     dplyr::filter(cohort_definition_id == 10)
@@ -2393,6 +2529,7 @@ expect_true(surv |>
 })
 
 test_that("multiple strata names", {
+  skip_on_cran()
   cdm <- mockMGUS2cdm()
   cdm$mgus_diagnosis <- cdm$mgus_diagnosis |>
     dplyr::mutate(

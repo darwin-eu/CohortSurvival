@@ -14,6 +14,7 @@ Estimate survival using data mapped to the Observational Medical Outcomes Partne
 Useful links:
 \itemize{
   \item \url{https://darwin-eu.github.io/CohortSurvival/}
+  \item Report bugs at \url{https://github.com/darwin-eu/CohortSurvival/issues}
 }
 
 }

@@ -28,14 +28,38 @@ checkExposureCohortId <- function(cohort) {
 }
 
 checkCensorOnDate <- function(cohort, censorOnDate) {
-  if(!is.null(censorOnDate)) {
-    start_dates <- cohort |>
-      dplyr::select("cohort_start_date") |>
-      dplyr::pull()
-    if(max(start_dates) > censorOnDate) {
-      return(cli::cli_abort(c(
-        "the target cohort has at least one cohort_start_date after the censor date {censorOnDate}"
-      )))
+  if (!is.null(censorOnDate)) {
+    # allow either a Date or the name of a column on the cohort that contains per-subject censor dates
+    if (is.character(censorOnDate)) {
+      omopgenerics::assertCharacter(censorOnDate, length = 1)
+      if (!(censorOnDate %in% colnames(cohort))) {
+        return(cli::cli_abort(c("the cohort does not contain a column named '{censorOnDate}'")))
+      }
+      censor_dates <- cohort |>
+        dplyr::select(dplyr::all_of(censorOnDate)) |>
+        dplyr::pull()
+      if (!inherits(censor_dates, "Date")) {
+        return(cli::cli_abort(c(
+          "the column '{censorOnDate}' must be of Date type"
+        )))
+      }
+      start_dates <- cohort |>
+        dplyr::select("cohort_start_date") |>
+        dplyr::pull()
+      if (max(start_dates, na.rm = TRUE) > max(censor_dates, na.rm = TRUE)) {
+        return(cli::cli_abort(c(
+          "the target cohort has at least one cohort_start_date after the maximum censor date in column {censorOnDate}"
+        )))
+      }
+    } else {
+      start_dates <- cohort |>
+        dplyr::select("cohort_start_date") |>
+        dplyr::pull()
+      if (max(start_dates) > censorOnDate) {
+        return(cli::cli_abort(c(
+          "the target cohort has at least one cohort_start_date after the censor date {censorOnDate}"
+        )))
+      }
     }
   }
 }

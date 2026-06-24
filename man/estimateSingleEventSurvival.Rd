@@ -14,6 +14,7 @@ estimateSingleEventSurvival(
   outcomeWashout = Inf,
   censorOnCohortExit = FALSE,
   censorOnDate = NULL,
+  weight = NULL,
   followUpDays = Inf,
   strata = NULL,
   eventGap = 30,
@@ -44,6 +45,9 @@ censored at their cohort exit}
 
 \item{censorOnDate}{if not NULL, an individual's follow up will be censored
 at the given date}
+
+\item{weight}{if not NULL, the name of a column in the target cohort table
+containing observation weights to use in the Kaplan-Meier estimation}
 
 \item{followUpDays}{Number of days to follow up individuals (lower bound 1,
 upper bound Inf)}

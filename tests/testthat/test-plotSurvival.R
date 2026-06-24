@@ -12,6 +12,9 @@ test_that("basic Survival plot", {
   plot <- plotSurvival(surv)
   expect_true(ggplot2::is_ggplot(plot))
 
+  plot_null_type <- plotSurvival(surv, type = NULL)
+  expect_true(ggplot2::is_ggplot(plot_null_type))
+
   CDMConnector::cdmDisconnect(cdm)
 })
 
@@ -193,6 +196,7 @@ test_that("darwin style produces correct plot", {
 })
 
 test_that("expected errors for available columns and plot", {
+  skip_on_cran()
   cdm <- mockMGUS2cdm()
   surv <- estimateSingleEventSurvival(cdm, "mgus_diagnosis", "death_cohort")
   expect_error(availableSurvivalGrouping(cdm))

@@ -23,6 +23,7 @@ mockCohortSurvival <- function(tables, cohortTables, cdmName = "mock") {
     cdmName = cdmName
   )
 
+  rlang::check_installed("CDMConnector")
   cdm <- CDMConnector::copyCdmTo(db, cdm, schema = "main", overwrite = TRUE)
 
   attr(cdm, "cdm_schema") <- "main"

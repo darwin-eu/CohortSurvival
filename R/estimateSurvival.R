@@ -30,6 +30,8 @@
 #' censored at their cohort exit
 #' @param censorOnDate if not NULL, an individual's follow up will be censored
 #' at the given date
+#' @param weight if not NULL, the name of a column in the target cohort table
+#' containing observation weights to use in the Kaplan-Meier estimation
 #' @param followUpDays Number of days to follow up individuals (lower bound 1,
 #' upper bound Inf)
 #' @param strata strata
@@ -72,6 +74,7 @@ estimateSingleEventSurvival <- function(cdm,
                                         outcomeWashout = Inf,
                                         censorOnCohortExit = FALSE,
                                         censorOnDate = NULL,
+                                        weight = NULL,
                                         followUpDays = Inf,
                                         strata = NULL,
                                         eventGap = 30,
@@ -148,6 +151,7 @@ estimateSingleEventSurvival <- function(cdm,
         competingOutcomeDateVariable = "cohort_start_date",
         censorOnCohortExit = censorOnCohortExit,
         censorOnDate = censorOnDate,
+        weight = weight,
         followUpDays = followUpDays,
         strata = strata,
         eventGap = eventGap,
@@ -400,6 +404,8 @@ estimateSingleEventSurvival <- function(cdm,
 #' censored at their cohort exit
 #' @param censorOnDate if not NULL, an individual's follow up will be censored
 #' at the given date
+#' @param weight if not NULL, the name of a column in the target cohort table
+#' containing observation weights to use in the Kaplan-Meier estimation
 #' @param followUpDays Number of days to follow up individuals (lower bound 1,
 #' upper bound Inf)
 #' @param strata strata
@@ -448,6 +454,7 @@ estimateCompetingRiskSurvival <- function(cdm,
                                           competingOutcomeWashout = Inf,
                                           censorOnCohortExit = FALSE,
                                           censorOnDate = NULL,
+                                          weight = NULL,
                                           followUpDays = Inf,
                                           strata = NULL,
                                           eventGap = 30,
@@ -464,6 +471,7 @@ estimateCompetingRiskSurvival <- function(cdm,
   if (is.null(competingOutcomeCohortId)) {
     competingOutcomeCohortId <- getCohortId(competingOutcomeCohortTable, cdm)
   }
+
 
   # Handle empty cohorts
   emptyOutcomes <- omopgenerics::settings(cdm[[outcomeCohortTable]]) |>
@@ -550,6 +558,7 @@ estimateCompetingRiskSurvival <- function(cdm,
         competingOutcomeWashout = competingOutcomeWashout,
         censorOnCohortExit = censorOnCohortExit,
         censorOnDate = censorOnDate,
+        weight = weight,
         followUpDays = followUpDays,
         strata = strata,
         eventGap = eventGap,
@@ -800,6 +809,7 @@ estimateSurvival <- function(cdm,
                              competingOutcomeWashout = Inf,
                              censorOnCohortExit = FALSE,
                              censorOnDate = NULL,
+                             weight = NULL,
                              followUpDays = Inf,
                              strata = NULL,
                              eventGap = 30,
@@ -820,7 +830,15 @@ estimateSurvival <- function(cdm,
   omopgenerics::assertCharacter(outcomeDateVariable, length = 1)
   omopgenerics::assertCharacter(competingOutcomeDateVariable, length = 1)
   omopgenerics::assertLogical(censorOnCohortExit, length = 1)
-  omopgenerics::assertDate(censorOnDate, null = TRUE)
+  if (is.character(censorOnDate)) {
+    omopgenerics::assertCharacter(censorOnDate, length = 1)
+  } else {
+    omopgenerics::assertDate(censorOnDate, null = TRUE)
+  }
+  omopgenerics::assertCharacter(weight, length = 1, null = TRUE)
+  if (!is.null(weight)) {
+    omopgenerics::assertChoice(weight, choices = colnames(cdm[[targetCohortTable]]))
+  }
   omopgenerics::assertNumeric(followUpDays, length = 1, min = 1, integerish = TRUE)
   omopgenerics::assertNumeric(outcomeWashout, length = 1, min = 0, integerish = TRUE)
   omopgenerics::assertNumeric(competingOutcomeWashout, length = 1, min = 0, integerish = TRUE)
@@ -857,6 +875,15 @@ estimateSurvival <- function(cdm,
                    logPrefix = "CohortSurvival_estimateSurvival_remove_na") |>
     omopgenerics::recordCohortAttrition(reason = "No outcome event in washout period")
 
+  if (!is.null(competingOutcomeCohortTable)) {
+    workingExposureTable <- workingExposureTable |>
+      dplyr::filter(!is.na(.data$competing_risk_time) &
+                      !is.na(.data$competing_risk_status)) |>
+      dplyr::compute(temporary = FALSE,
+                     logPrefix = "CohortSurvival_estimateSurvival_remove_na_cr") |>
+      omopgenerics::recordCohortAttrition(reason = "No competing outcome event in washout period")
+  }
+
   workingExposureTable <- workingExposureTable |>
     dplyr::filter(.data$outcome_time >= .env$minimumSurvivalDays) |>
   omopgenerics::recordCohortAttrition(reason = paste0("Survival days for outcome less than ", minimumSurvivalDays))
@@ -875,6 +902,13 @@ estimateSurvival <- function(cdm,
       status1 = "outcome_status", time2 = "competing_risk_time",
       status2 = "competing_risk_status", nameOutTime = "outcome_or_competing_time",
       nameOutStatus = "outcome_or_competing_status")
+  }
+
+  # Validate weight column is numeric after data has been collected
+  if (!is.null(weight)) {
+    if (!is.numeric(survData[[weight]])) {
+      cli::cli_abort("weight column must be numeric")
+    }
   }
 
   # time points to extract survival estimates
@@ -907,9 +941,9 @@ estimateSurvival <- function(cdm,
 
   # fit survival, with strata
   if (is.null(competingOutcomeCohortTable)) {
-    surv <- singleEventSurvival(survData, timepoints, strata, eventGap, restrictedMeanFollowUp)
+    surv <- singleEventSurvival(survData, timepoints, strata, eventGap, restrictedMeanFollowUp, weight)
   } else {
-    surv <- competingRiskSurvival(survData, timepoints, strata, eventGap, restrictedMeanFollowUp)
+    surv <- competingRiskSurvival(survData, timepoints, strata, eventGap, restrictedMeanFollowUp, weight)
   }
 
   # process and summarise results
@@ -1090,15 +1124,19 @@ addCompetingRiskVars <- function(data, time1, status1, time2, status2,
 }
 
 singleEventSurvival <- function(survData, times, variables, eventGap,
-                                restrictedMeanFollowUp = NULL) {
+                                restrictedMeanFollowUp = NULL,
+                                weight = NULL) {
   estimates <- list()
   fitSummary <- list()
 
   var_columns <- unlist(variables) |> unique()
 
+  weights <- if (!is.null(weight)) survData[[weight]] else NULL
+
   cli::cli_progress_message("Getting overall estimates")
   fit <- survival::survfit(survival::Surv(outcome_time, outcome_status) ~ 1,
-                           data = survData
+                           data = survData,
+                           weights = weights
   )
 
   # Calculate quantiles
@@ -1187,7 +1225,7 @@ singleEventSurvival <- function(survData, times, variables, eventGap,
           "survival::Surv(outcome_time, outcome_status) ~ 1",
           name
         ), collapse = " + "))
-        fit <- survival::survfit(expr, data = survData)
+        fit <- survival::survfit(expr, data = survData, weights = weights)
         tidyFit <- broom::tidy(fit)
 
         format_surv_strata_quantile <- function(x) {
@@ -1366,9 +1404,10 @@ singleEventSurvival <- function(survData, times, variables, eventGap,
 }
 
 competingRiskSurvival <- function(survData, times, variables, eventGap,
-                                  restrictedMeanFollowUp = NULL) {
-  if (!length(unique(as.character(survData |>
-                                  dplyr::pull("outcome_or_competing_status")))) == 3) {
+                                  restrictedMeanFollowUp = NULL,
+                                  weight = NULL) {
+  # Ensure the competing-risk status variable has three levels: 0 (none), 1 (outcome), 2 (competing)
+  if (length(unique(as.character(survData |> dplyr::pull("outcome_or_competing_status")))) != 3) {
     cli::cli_h1("No results for competing risk analysis")
     cli::cli_text(c(
       "Competing risk variable must have three levels.",
@@ -1386,13 +1425,16 @@ competingRiskSurvival <- function(survData, times, variables, eventGap,
 
   var_columns <- unlist(variables) |> unique()
 
+  weights <- if (!is.null(weight)) survData[[weight]] else NULL
+
   cli::cli_progress_message("Getting overall estimates")
   fit <- survival::survfit(
     formula = survival::Surv(
       outcome_or_competing_time,
       outcome_or_competing_status
     ) ~ 1,
-    data = survData
+    data = survData,
+    weights = weights
   )
   summ <- summary(fit, times = times, extend = TRUE, data.frame = TRUE)
 
@@ -1463,7 +1505,8 @@ competingRiskSurvival <- function(survData, times, variables, eventGap,
         fit <- survival::survfit(
           formula = expr,
           data = survData |>
-            dplyr::filter(dplyr::if_any(.env$name, ~ !is.na(.x)))
+            dplyr::filter(dplyr::if_any(.env$name, ~ !is.na(.x))),
+          weights = weights
         )
         summ <- summary(fit, times = times, extend = TRUE, data.frame = TRUE)
         tidyFit <- broom::tidy(fit)

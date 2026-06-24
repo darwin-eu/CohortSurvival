@@ -14,6 +14,7 @@ plotSurvival(
   riskInterval = 30,
   logLog = FALSE,
   timeScale = "days",
+  type = NULL,
   style = NULL
 )
 }
@@ -36,6 +37,10 @@ instead of the survival probability}
 \item{logLog}{If TRUE, the survival probabilities are transformed using the log-log formula}
 
 \item{timeScale}{The scale of time in the x-axis. Can be "days", "months", or "years"}
+
+\item{type}{Character string specifying the desired plot type.
+See \code{visOmopResults::scatterPlot()} for supported types.
+If \code{type = NULL}, the default backend plot type is used.}
 
 \item{style}{A character string defining the visual theme to apply to the plot.
 You can set this to NULL to apply the standard ggplot2 default style, or provide

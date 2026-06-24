@@ -69,6 +69,92 @@ test_that("working example", {
   CDMConnector::cdmDisconnect(cdm)
 })
 
+test_that("censorOnDate accepts cohort column name", {
+  skip_on_cran()
+  db <- DBI::dbConnect(duckdb::duckdb(), ":memory:")
+
+  cohort <- dplyr::tibble(
+    cohort_definition_id = c(1,1,1),
+    subject_id = c(1,2,3),
+    cohort_start_date = c(as.Date("2020-01-01"),
+                          as.Date("2020-01-02"),
+                          as.Date("2021-01-01")),
+    cohort_end_date = c(as.Date("2020-04-01"),
+                        as.Date("2020-08-02"),
+                        as.Date("2021-03-01")),
+    censor_date = c(as.Date("2021-01-04"), as.Date("2021-01-04"), as.Date("2021-01-04")),
+    low_censor = c(as.Date("2020-01-04"), as.Date("2020-01-04"), as.Date("2020-01-04"))
+  )
+  events <- dplyr::tibble(
+    cohort_definition_id = c(1,1,1),
+    subject_id = c(1,2,3),
+    cohort_start_date = c(as.Date("2019-01-01"),
+                          as.Date("2020-01-05"),
+                          as.Date("2021-02-01")),
+    cohort_end_date = c(as.Date("2019-01-01"),
+                        as.Date("2020-01-05"),
+                        as.Date("2021-02-01")),
+  )
+  observation_period <- dplyr::tibble(
+    observation_period_id = c(1,1,1),
+    person_id = c(1,2,3),
+    observation_period_start_date = c(as.Date("2000-01-01"),
+                                      as.Date("2000-01-02"),
+                                      as.Date("2000-01-01")),
+    observation_period_end_date = c(as.Date("2023-04-01"),
+                                    as.Date("2023-05-02"),
+                                    as.Date("2023-03-01")),
+    period_type_concept_id = c(rep(0,3))
+  )
+  person <- dplyr::tibble(
+    person_id = c(1, 2, 3, 4, 5),
+    year_of_birth = c(rep(1990, 5)),
+    month_of_birth = c(rep(2, 5)),
+    day_of_birth = c(rep(11, 5)),
+    gender_concept_id = c(rep(0,5)),
+    ethnicity_concept_id = c(rep(0,5)),
+    race_concept_id = c(rep(0,5))
+  )
+
+  cdm <- mockCohortSurvival(
+    tables = list(
+      person = person,
+      observation_period = observation_period
+    ),
+    cohortTables = list(
+      cohort1 = cohort,
+      cohort2 = events
+    ),
+    cdmName = "mock_es"
+  )
+
+  cohortCensorCol <- cdm$cohort1 |>
+    addCohortSurvival(
+      cdm = cdm,
+      outcomeCohortTable = "cohort2",
+      outcomeCohortId = 1,
+      censorOnDate = "censor_date"
+    ) |>
+    dplyr::arrange(subject_id)
+
+  expect_true(all(compareNA(sort(cohortCensorCol |>
+                                   dplyr::select(status) |>
+                                   dplyr::pull()),
+                            sort(c(NA, 1, 0)))))
+
+  expect_error(
+    cdm$cohort1 |>
+      addCohortSurvival(
+        cdm = cdm,
+        outcomeCohortTable = "cohort2",
+        outcomeCohortId = 1,
+        censorOnDate = "low_censor"
+      )
+  )
+
+  CDMConnector::cdmDisconnect(cdm)
+})
+
 test_that("another working example", {
   skip_on_cran()
   db <- DBI::dbConnect(duckdb::duckdb(), ":memory:")
@@ -345,6 +431,23 @@ test_that("censorOnDate", {
   )
 
   CDMConnector::cdmDisconnect(cdm)
+})
+
+test_that("checkCensorOnDate validates direct censor date inputs", {
+  cohort <- dplyr::tibble(
+    cohort_definition_id = c(1, 1),
+    subject_id = c(1, 2),
+    cohort_start_date = c(as.Date("2020-01-01"), as.Date("2020-01-02")),
+    cohort_end_date = c(as.Date("2020-01-10"), as.Date("2020-01-11")),
+    censor_date = c(as.Date("2020-01-05"), as.Date("2020-01-06")),
+    bad_censor = c("2020-01-05", "2020-01-06")
+  )
+
+  expect_silent(CohortSurvival:::checkCensorOnDate(cohort, as.Date("2020-01-12")))
+  expect_error(CohortSurvival:::checkCensorOnDate(cohort, as.Date("2019-12-31")))
+  expect_silent(CohortSurvival:::checkCensorOnDate(cohort, "censor_date"))
+  expect_error(CohortSurvival:::checkCensorOnDate(cohort, "bad_censor"))
+  expect_error(CohortSurvival:::checkCensorOnDate(cohort, "missing_column"))
 })
 
 test_that("followUpDays", {
@@ -811,6 +914,7 @@ test_that("multiple records per person", {
 })
 
 test_that("cohort id or cohort name", {
+  skip_on_cran()
   db <- DBI::dbConnect(duckdb::duckdb(), ":memory:")
 
   cohort <- dplyr::tibble(

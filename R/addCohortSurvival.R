@@ -156,8 +156,16 @@ addCohortSurvival <- function(x,
   }
 
   if (!is.null(censorOnDate)) {
+    # create a helper censor_date column either from a scalar Date or a cohort column
+    if (is.character(censorOnDate)) {
+      x <- x |>
+        dplyr::mutate(censor_date = .data[[censorOnDate]])
+    } else {
+      x <- x |>
+        dplyr::mutate(censor_date = .env$censorOnDate)
+    }
+
     x <- x |>
-      dplyr::mutate(censor_date = .env$censorOnDate) |>
       dplyr::mutate(days_to_censor = clock::date_count_between(
         start = .data$cohort_start_date,
         end = .data$censor_date,
@@ -171,7 +179,6 @@ addCohortSurvival <- function(x,
         .data$days_to_exit < .data$days_to_censor,
         .data$days_to_exit, .data$days_to_censor
       )) |>
-      dplyr::select(!c("days_to_censor", "censor_date")) |>
       dplyr::compute(name = comp$name, temporary = comp$temporary,
                      logPrefix = "CohortSurvival_addCohortSurvival_censor_on_date")
   }
@@ -202,6 +209,19 @@ addCohortSurvival <- function(x,
                                         .data$days_to_event, .data$days_to_exit
     ))
 
+  # if censorOnDate was used, now that `status` and `time` exist
+  # apply the censor_date effect (set to NA for cohort_start_date > censor_date)
+  if (!is.null(censorOnDate)) {
+    x <- x |>
+      dplyr::compute(name = comp$name, temporary = comp$temporary,
+                     logPrefix = "CohortSurvival_addCohortSurvival_censor_on_date_materialized") |>
+      dplyr::mutate(
+        status = dplyr::if_else(.data$cohort_start_date > .data$censor_date, NA, .data$status),
+        time = dplyr::if_else(.data$cohort_start_date > .data$censor_date, NA, .data$time)
+      ) |>
+      dplyr::select(!c("days_to_censor", "censor_date"))
+  }
+
   # for anyone with an outcome in the washout
   # we keep them, but their time and event will be set to NA
   # (ie they won't contribute to any analysis)
@@ -217,17 +237,7 @@ addCohortSurvival <- function(x,
       )
     )
   # likewise if we censor on a date prior to their cohort start date
-  if(!is.null(censorOnDate)) {
-    x <- x |>
-      dplyr::mutate(
-        status = dplyr::if_else(.data$cohort_start_date > .env$censorOnDate, NA,
-                                .data$status
-        ),
-        time = dplyr::if_else(.data$cohort_start_date > .env$censorOnDate, NA,
-                              .data$time
-        )
-      )
-  }
+  # earlier we applied cohort-start > censor_date adjustments when creating censor_date
 
   x <- x |>
     dplyr::select(!c("event_in_washout", "days_to_event")) |>
@@ -248,17 +258,17 @@ validateExtractSurvivalInputs <- function(cdm,
   omopgenerics::validateCdmArgument(cdm)
   omopgenerics::validateCohortArgument(cdm[[outcomeCohortTable]])
   checkExposureCohortId(cohortTable)
-  omopgenerics::assertDate(censorOnDate, null = TRUE)
+  if (is.character(censorOnDate)) {
+    omopgenerics::assertCharacter(censorOnDate, length = 1)
+  } else {
+    omopgenerics::assertDate(censorOnDate, null = TRUE)
+  }
   checkCensorOnDate(cohortTable, censorOnDate)
   outcomeCohortId <- omopgenerics::validateCohortIdArgument(outcomeCohortId, cdm[[outcomeCohortTable]],
                                                             null = FALSE)
   omopgenerics::assertLogical(censorOnCohortExit, length = 1)
   omopgenerics::assertNumeric(followUpDays, length = 1, min = 1, integerish = TRUE)
   omopgenerics::assertNumeric(outcomeWashout, length = 1, min = 0, integerish = TRUE)
-  outcomeCohortId <- omopgenerics::validateCohortIdArgument(outcomeCohortId, cdm[[outcomeCohortTable]],
-                                                            null = FALSE)
-
-
 }
 
 newTable <- function(name, call = parent.frame()) {

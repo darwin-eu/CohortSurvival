@@ -179,6 +179,7 @@ mockMGUS2cdm <- function() {
                                      ),
                                      cdmName = "mock")
 
+  rlang::check_installed("CDMConnector")
   cdm2 <- CDMConnector::copyCdmTo(db,
                             cdm,
                             schema = "main",
