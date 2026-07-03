@@ -18,11 +18,15 @@ tableSurvival(
 )
 }
 \arguments{
-\item{x}{Result from estimateSingleEventSurvival or estimateCompetingRiskSurvival}
+\item{x}{Result from \code{estimateSingleEventSurvival()} or
+\code{estimateCompetingRiskSurvival()}. A \code{summarised_result} or \code{survival_result}
+is accepted.}
 
-\item{times}{Times at which to report survival in the summary table}
+\item{times}{Times at which to report estimates in the summary table. These
+must match available estimate times after applying \code{timeScale}; unavailable
+times are omitted with a message.}
 
-\item{timeScale}{Time unit to report survival in: days, months or years}
+\item{timeScale}{Time unit to report survival in: days, months, or years.}
 
 \item{header}{A vector specifying the elements to include in the header.
 The order of elements matters, with the first being the topmost header.
@@ -62,7 +66,7 @@ This argument can be provided in one of the following ways:
 See \code{tableStyle()} for available options.
 \item \strong{YAML file path:} Provide the path to an existing \code{.yml} file defining
 a new style.
-\item \strong{List of custome R code:} Supply a block of custom R code or a named list
+\item \strong{List of custom R code:} Supply a block of custom R code or a named list
 describing styles for each table section. This code must be specific to
 the selected table type.
 If \code{style = NULL}, the function will use global options
@@ -75,10 +79,21 @@ For more details, see the \emph{Styles} vignette on the package website.
 \code{visOmopResults::tableOptions()} shows allowed arguments and their default values.}
 }
 \value{
-A tibble containing a summary of observed survival in the required units
+A formatted table containing a summary of observed survival or
+cumulative incidence in the required units.
 }
 \description{
-Table with survival summary
+Create a formatted table from the summary and, optionally, time-specific
+estimate result types returned by \code{estimateSingleEventSurvival()} or
+\code{estimateCompetingRiskSurvival()}. For single-event analyses, time-specific
+rows are survival probabilities. For competing-risk analyses, they are
+cumulative incidence probabilities for the outcome and competing outcome.
+}
+\details{
+Restricted mean survival is taken from the estimation output. Its
+interpretation depends on the \code{restrictedMeanFollowUp} value used when the
+survival result was estimated; use a common value there when comparing
+restricted means across groups or strata.
 }
 \examples{
 \donttest{

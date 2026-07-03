@@ -1,6 +1,6 @@
 Package: CohortSurvival
 Title: Estimate Survival from Common Data Model Cohorts
-Version: 1.1.0
+Version: 1.1.2
 Authors@R: c(
     person("Kim", "López-Güell", email = "kim.lopez@spc.ox.ac.uk", 
     role = c("aut", "cre"),
@@ -24,13 +24,11 @@ Description: Estimate survival using data mapped to the Observational Medical Ou
 License: Apache License (>= 2)
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.3.3
+RoxygenNote: 8.0.0
 Imports: 
     broom,
-    CDMConnector (>= 2.0.0),
     cli,
     clock,
-    DBI,
     dplyr,
     glue,
     omopgenerics (>= 1.1.0),
@@ -45,6 +43,7 @@ Imports:
 Suggests: 
     testthat (>= 3.0.0),
     CodelistGenerator,
+    DBI,
     roxygen2,
     knitr,
     tictoc,
@@ -56,9 +55,10 @@ Suggests:
     gt,
     flextable,
     scales,
-    visOmopResults (>= 1.4.0),
-    extrafont
+    visOmopResults (>= 1.5.0),
+    extrafont,
+    CDMConnector (>= 2.0.0)
 Config/testthat/edition: 3
-Config/testthat/parallel: true
 VignetteBuilder: knitr
 URL: https://darwin-eu.github.io/CohortSurvival/
+BugReports: https://github.com/darwin-eu/CohortSurvival/issues

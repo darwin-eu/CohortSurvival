@@ -1,4 +1,5 @@
 test_that("mgus example: no Competing risk", {
+  skip_on_cran()
   cdm <- mockMGUS2cdm()
   surv <- estimateSingleEventSurvival(cdm,
                                       targetCohortTable = "mgus_diagnosis",
@@ -72,6 +73,124 @@ test_that("mgus example: no Competing risk", {
                     (survCR |>
                        dplyr::pull("variable") |>
                        unique())))
+
+  CDMConnector::cdmDisconnect(cdm)
+})
+
+test_that("weighted KM uses target cohort weight column", {
+  skip_on_cran()
+
+  observation_period <- dplyr::tibble(
+    observation_period_id = c(1L, 2L),
+    person_id = c(1L, 2L),
+    observation_period_start_date = c(as.Date("2019-01-01"), as.Date("2019-01-01")),
+    observation_period_end_date = c(as.Date("2021-01-01"), as.Date("2021-01-01")),
+    period_type_concept_id = c(0L, 0L)
+  )
+
+  target_cohort <- dplyr::tibble(
+    cohort_definition_id = c(1L, 1L),
+    subject_id = c(1L, 2L),
+    cohort_start_date = c(as.Date("2020-01-01"), as.Date("2020-01-01")),
+    cohort_end_date = c(as.Date("2020-01-01"), as.Date("2020-01-01")),
+    weight = c(1, 100),
+    bad_weight = c("low", "high")
+  )
+
+  outcome_cohort <- dplyr::tibble(
+    cohort_definition_id = c(1L),
+    subject_id = c(1L),
+    cohort_start_date = c(as.Date("2020-01-02")),
+    cohort_end_date = c(as.Date("2020-01-02"))
+  )
+
+  person <- dplyr::tibble(
+    person_id = c(1L, 2L),
+    year_of_birth = c(1980L, 1980L),
+    month_of_birth = c(1L, 1L),
+    day_of_birth = c(1L, 1L),
+    gender_concept_id = c(0L, 0L),
+    ethnicity_concept_id = c(0L, 0L),
+    race_concept_id = c(0L, 0L)
+  )
+
+  cdm <- mockCohortSurvival(
+    tables = list(
+      person = person,
+      observation_period = observation_period
+    ),
+    cohortTables = list(
+      target = target_cohort,
+      outcome = outcome_cohort
+    ),
+    cdmName = "weighted_km"
+  )
+
+  unweighted <- estimateSingleEventSurvival(
+    cdm = cdm,
+    targetCohortTable = "target",
+    targetCohortId = 1,
+    outcomeCohortTable = "outcome",
+    outcomeCohortId = 1,
+    eventGap = 1,
+    estimateGap = 1,
+    followUpDays = 2
+  ) |>
+    asSurvivalResult() |>
+    dplyr::filter(.data$time == 1) |>
+    dplyr::pull(.data$estimate)
+
+  weighted <- estimateSingleEventSurvival(
+    cdm = cdm,
+    targetCohortTable = "target",
+    targetCohortId = 1,
+    outcomeCohortTable = "outcome",
+    outcomeCohortId = 1,
+    eventGap = 1,
+    estimateGap = 1,
+    followUpDays = 2,
+    weight = "weight"
+  ) |>
+    asSurvivalResult() |>
+    dplyr::filter(.data$time == 1) |>
+    dplyr::pull(.data$estimate)
+
+  expect_equal(unweighted, 0.5, tolerance = 1e-6)
+  expect_equal(weighted, 100/101, tolerance = 1e-6)
+  expect_gt(weighted, unweighted)
+
+  expect_error(
+    estimateSingleEventSurvival(
+      cdm = cdm,
+      targetCohortTable = "target",
+      targetCohortId = 1,
+      outcomeCohortTable = "outcome",
+      outcomeCohortId = 1,
+      weight = 1
+    )
+  )
+
+  expect_error(
+    estimateSingleEventSurvival(
+      cdm = cdm,
+      targetCohortTable = "target",
+      targetCohortId = 1,
+      outcomeCohortTable = "outcome",
+      outcomeCohortId = 1,
+      weight = "missing_weight"
+    )
+  )
+
+  expect_error(
+    estimateSingleEventSurvival(
+      cdm = cdm,
+      targetCohortTable = "target",
+      targetCohortId = 1,
+      outcomeCohortTable = "outcome",
+      outcomeCohortId = 1,
+      weight = "bad_weight"
+    )
+  )
 
   CDMConnector::cdmDisconnect(cdm)
 })
@@ -193,20 +312,20 @@ test_that("multiple exposures, multiple outcomes: single event", {
   skip_on_cran()
 
   observation_period <- dplyr::tibble(
-    observation_period_id = c(1, 2, 3, 4, 5,6),
-    person_id = c(1, 2, 3, 4, 5,6),
+    observation_period_id = c(1L, 2L, 3L, 4L, 5L,6L),
+    person_id = c(1L, 2L, 3L, 4L, 5L,6L),
     observation_period_start_date = c(
       rep(as.Date("1980-07-20"),6)
     ),
     observation_period_end_date = c(
       rep(as.Date("2023-05-20"),6)
     ),
-    period_type_concept_id = c(rep(0,6))
+    period_type_concept_id = c(rep(0L,6L))
   )
 
   exposure_cohort <- dplyr::tibble(
-    subject_id = c(1, 2, 3, 3, 4, 5),
-    cohort_definition_id = c(1, 1, 1, 2, 2, 2),
+    subject_id = c(1L, 2L, 3L, 3L, 4L, 5L),
+    cohort_definition_id = c(1L, 1L, 1L, 2L, 2L, 2L),
     cohort_start_date = c(
       as.Date("2020-01-01"),
       as.Date("2020-02-03"),
@@ -227,8 +346,8 @@ test_that("multiple exposures, multiple outcomes: single event", {
 
 
   outcome_cohort <- dplyr::tibble(
-    cohort_definition_id = c(2, 3, 3),
-    subject_id = c(2, 3, 4),
+    cohort_definition_id = c(2L, 3L, 3L),
+    subject_id = c(2L, 3L, 4L),
     cohort_start_date = c(
       as.Date("2021-01-01"),
       as.Date("2021-01-01"),
@@ -242,13 +361,13 @@ test_that("multiple exposures, multiple outcomes: single event", {
   )
 
   person <- dplyr::tibble(
-    person_id = c(1, 2, 3, 4, 5),
-    year_of_birth = c(rep(1990, 5)),
-    month_of_birth = c(rep(02, 5)),
-    day_of_birth = c(rep(11, 5)),
-    gender_concept_id = c(rep(0,5)),
-    ethnicity_concept_id = c(rep(0,5)),
-    race_concept_id = c(rep(0,5))
+    person_id = c(1L, 2L, 3L, 4L, 5L),
+    year_of_birth = c(rep(1990L, 5L)),
+    month_of_birth = c(rep(02L, 5L)),
+    day_of_birth = c(rep(11L, 5L)),
+    gender_concept_id = c(rep(0L,5L)),
+    ethnicity_concept_id = c(rep(0L,5L)),
+    race_concept_id = c(rep(0L,5L))
   )
 
   cdm <- mockCohortSurvival(
@@ -351,20 +470,20 @@ test_that("multiple exposures, multiple outcomes: competing risk", {
   skip_on_cran()
 
   observation_period <- dplyr::tibble(
-    observation_period_id = c(1, 2, 3, 4, 5,6),
-    person_id = c(1, 2, 3, 4, 5,6),
+    observation_period_id = c(1L, 2L, 3L, 4L, 5L,6L),
+    person_id = c(1L, 2L, 3L, 4L, 5L,6L),
     observation_period_start_date = c(
       rep(as.Date("1980-07-20"),6)
     ),
     observation_period_end_date = c(
       rep(as.Date("2023-05-20"),6)
     ),
-    period_type_concept_id = c(rep(0,6))
+    period_type_concept_id = c(rep(0L,6L))
   )
 
   exposure_cohort <- dplyr::tibble(
-    subject_id = c(1, 2, 3, 3, 4, 5,6,6),
-    cohort_definition_id = c(1, 1, 1, 2, 2, 2,1,2),
+    subject_id = c(1L, 2L, 3L, 3L, 4L, 5L,6L,6L),
+    cohort_definition_id = c(1L, 1L, 1L, 2L, 2L, 2L,1L,2L),
     cohort_start_date = c(
       as.Date("2020-01-01"),
       as.Date("2020-02-03"),
@@ -388,8 +507,8 @@ test_that("multiple exposures, multiple outcomes: competing risk", {
   )
 
   outcome_cohort <- dplyr::tibble(
-    cohort_definition_id = c(2,2, 3, 3),
-    subject_id = c(2, 3, 3, 4),
+    cohort_definition_id = c(2L,2L, 3L, 3L),
+    subject_id = c(2L, 3L, 3L, 4L),
     cohort_start_date = c(
       as.Date("2021-01-01"),
       as.Date("2021-01-01"),
@@ -405,8 +524,8 @@ test_that("multiple exposures, multiple outcomes: competing risk", {
   )
 
   competing_cohort <- dplyr::tibble(
-    cohort_definition_id = c(4,5, 4, 5),
-    subject_id = c(1,1, 5, 5),
+    cohort_definition_id = c(4L,5L, 4L, 5L),
+    subject_id = c(1L,1L, 5L, 5L),
     cohort_start_date = c(
       as.Date("2020-11-01"),
       as.Date("2020-11-01"),
@@ -422,13 +541,13 @@ test_that("multiple exposures, multiple outcomes: competing risk", {
   )
 
   person <- dplyr::tibble(
-    person_id = c(1, 2, 3, 4, 5),
-    year_of_birth = c(rep(1990, 5)),
-    month_of_birth = c(rep(02, 5)),
-    day_of_birth = c(rep(11, 5)),
-    gender_concept_id = c(rep(0,5)),
-    ethnicity_concept_id = c(rep(0,5)),
-    race_concept_id = c(rep(0,5))
+    person_id = c(1L, 2L, 3L, 4L, 5L),
+    year_of_birth = c(rep(1990L, 5L)),
+    month_of_birth = c(rep(02L, 5L)),
+    day_of_birth = c(rep(11L, 5L)),
+    gender_concept_id = c(rep(0L,5L)),
+    ethnicity_concept_id = c(rep(0L,5L)),
+    race_concept_id = c(rep(0L,5L))
   )
 
   cdm <- mockCohortSurvival(
@@ -556,20 +675,20 @@ test_that("required estimateGap", {
   skip_on_cran()
 
   observation_period <- dplyr::tibble(
-    observation_period_id = c(1, 2, 3, 4, 5),
-    person_id = c(1, 2, 3, 4, 5),
+    observation_period_id = c(1L, 2L, 3L, 4L, 5L),
+    person_id = c(1L, 2L, 3L, 4L, 5L),
     observation_period_start_date = c(
       rep(as.Date("1980-07-20"),5)
     ),
     observation_period_end_date = c(
       rep(as.Date("2023-05-20"),5)
     ),
-    period_type_concept_id = c(rep(0,5))
+    period_type_concept_id = c(rep(0L,5L))
   )
 
   exposure_cohort <- dplyr::tibble(
-    subject_id = c(1, 2, 3, 3, 4, 5),
-    cohort_definition_id = c(1, 1, 1, 2, 2, 2),
+    subject_id = c(1L, 2L, 3L, 3L, 4L, 5L),
+    cohort_definition_id = c(1L, 1L, 1L, 2L, 2L, 2L),
     cohort_start_date = c(
       as.Date("2020-01-01"),
       as.Date("2020-02-03"),
@@ -590,8 +709,8 @@ test_that("required estimateGap", {
 
 
   outcome_cohort <- dplyr::tibble(
-    cohort_definition_id = c(2, 3, 3),
-    subject_id = c(2, 3, 4),
+    cohort_definition_id = c(2L, 3L, 3L),
+    subject_id = c(2L, 3L, 4L),
     cohort_start_date = c(
       as.Date("2021-01-01"),
       as.Date("2021-01-01"),
@@ -605,8 +724,8 @@ test_that("required estimateGap", {
   )
 
   competing_cohort <- dplyr::tibble(
-    cohort_definition_id = c(4,5, 4, 5),
-    subject_id = c(1,1, 5, 5),
+    cohort_definition_id = c(4L,5L, 4L, 5L),
+    subject_id = c(1L,1L, 5L, 5L),
     cohort_start_date = c(
       as.Date("2020-11-01"),
       as.Date("2020-11-01"),
@@ -622,13 +741,13 @@ test_that("required estimateGap", {
   )
 
   person <- dplyr::tibble(
-    person_id = c(1, 2, 3, 4, 5),
-    year_of_birth = c(rep(1990, 5)),
-    month_of_birth = c(rep(02, 5)),
-    day_of_birth = c(rep(11, 5)),
-    gender_concept_id = c(rep(0,5)),
-    ethnicity_concept_id = c(rep(0,5)),
-    race_concept_id = c(rep(0,5))
+    person_id = c(1L, 2L, 3L, 4L, 5L),
+    year_of_birth = c(rep(1990L, 5L)),
+    month_of_birth = c(rep(02L, 5L)),
+    day_of_birth = c(rep(11L, 5L)),
+    gender_concept_id = c(rep(0L,5L)),
+    ethnicity_concept_id = c(rep(0L,5L)),
+    race_concept_id = c(rep(0L,5L))
   )
 
   cdm <- mockCohortSurvival(
@@ -697,8 +816,8 @@ test_that("required estimateGap", {
 test_that("funcionality with created dataset", {
   skip_on_cran()
   exposure_cohort <- dplyr::tibble(
-    subject_id = c(1, 2, 3),
-    cohort_definition_id = c(1, 1, 1),
+    subject_id = c(1L, 2L, 3L),
+    cohort_definition_id = c(1L, 1L, 1L),
     cohort_start_date = c(
       as.Date("2020-01-01"),
       as.Date("2020-02-03"),
@@ -714,8 +833,8 @@ test_that("funcionality with created dataset", {
     blood_type = c("A", "B", "B")
   )
   outcome_cohort <- dplyr::tibble(
-    cohort_definition_id = c(1, 1, 1, 1, 1),
-    subject_id = c(1, 1, 2, 3, 3),
+    cohort_definition_id = c(1L, 1L, 1L, 1L, 1L),
+    subject_id = c(1L, 1L, 2L, 3L, 3L),
     cohort_start_date = c(
       as.Date("2020-01-10"),
       as.Date("2020-02-02"),
@@ -732,8 +851,8 @@ test_that("funcionality with created dataset", {
     )
   )
   observation_period <- dplyr::tibble(
-    observation_period_id = c(1, 1, 1),
-    person_id = c(1, 2, 3),
+    observation_period_id = c(1L, 1L, 1L),
+    person_id = c(1L, 2L, 3L),
     observation_period_start_date = c(
       as.Date("2007-03-21"),
       as.Date("2006-09-09"),
@@ -744,17 +863,17 @@ test_that("funcionality with created dataset", {
       as.Date("2023-01-03"),
       as.Date("2023-05-20")
     ),
-    period_type_concept_id = c(rep(0,3))
+    period_type_concept_id = c(rep(0L,3L))
   )
 
   person <- dplyr::tibble(
-    person_id = c(1, 2, 3, 4, 5),
-    year_of_birth = c(rep(1990, 5)),
-    month_of_birth = c(rep(02, 5)),
-    day_of_birth = c(rep(11, 5)),
-    gender_concept_id = c(rep(0,5)),
-    ethnicity_concept_id = c(rep(0,5)),
-    race_concept_id = c(rep(0,5))
+    person_id = c(1L, 2L, 3L, 4L, 5L),
+    year_of_birth = c(rep(1990L, 5L)),
+    month_of_birth = c(rep(02L, 5L)),
+    day_of_birth = c(rep(11L, 5L)),
+    gender_concept_id = c(rep(0L,5L)),
+    ethnicity_concept_id = c(rep(0L,5L)),
+    race_concept_id = c(rep(0L,5L))
   )
 
   cdm <- mockCohortSurvival(
@@ -800,8 +919,8 @@ test_that("funcionality with created dataset", {
 
   # Competing events
   outcome_cohort <- dplyr::tibble(
-    cohort_definition_id = c(1, 1, 1),
-    subject_id = c(2, 3, 3),
+    cohort_definition_id = c(1L, 1L, 1L),
+    subject_id = c(2L, 3L, 3L),
     cohort_start_date = c(
       as.Date("2020-02-09"),
       as.Date("2020-06-01"),
@@ -814,27 +933,29 @@ test_that("funcionality with created dataset", {
     )
   )
   competing_risk_cohort <- dplyr::tibble(
-    cohort_definition_id = c(1, 1, 2),
-    subject_id = c(2, 3, 1),
+    cohort_definition_id = c(1L, 1L, 2L, 3L),
+    subject_id = c(2L, 3L, 1L, 2L),
     cohort_start_date = c(
       as.Date("2020-02-07"),
       as.Date("2021-02-02"),
-      as.Date("2020-01-03")
+      as.Date("2020-01-03"),
+      as.Date("2020-03-01")
     ),
     cohort_end_date = c(
       as.Date("2020-02-07"),
       as.Date("2021-02-02"),
-      as.Date("2020-01-03")
+      as.Date("2020-01-03"),
+      as.Date("2020-03-01")
     )
   )
   person <- dplyr::tibble(
-    person_id = c(1, 2, 3, 4, 5),
-    year_of_birth = c(rep(1990, 5)),
-    month_of_birth = c(rep(02, 5)),
-    day_of_birth = c(rep(11, 5)),
-    gender_concept_id = c(rep(0,5)),
-    ethnicity_concept_id = c(rep(0,5)),
-    race_concept_id = c(rep(0,5))
+    person_id = c(1L, 2L, 3L, 4L, 5L),
+    year_of_birth = c(rep(1990L, 5L)),
+    month_of_birth = c(rep(02L, 5L)),
+    day_of_birth = c(rep(11L, 5L)),
+    gender_concept_id = c(rep(0L,5L)),
+    ethnicity_concept_id = c(rep(0L,5L)),
+    race_concept_id = c(rep(0L,5L))
   )
 
   cdm <- mockCohortSurvival(
@@ -872,12 +993,28 @@ test_that("funcionality with created dataset", {
   expect_true(all(attr(surv2, "events") |>
                     dplyr::pull("time") %in%  c(seq(0,981, by = 30), 981)))
 
+  surv_no_competing <- estimateCompetingRiskSurvival(cdm,
+                                                    targetCohortTable = "exposure_cohort",
+                                                    outcomeCohortTable = "cohort1",
+                                                    competingOutcomeCohortTable = "cohort2",
+                                                    competingOutcomeCohortId = 3
+  ) |>
+    omopgenerics::suppress(minCellCount = 1)
+
+  analytic_settings <- omopgenerics::settings(surv_no_competing) |>
+    dplyr::filter(.data$result_type != "survival_attrition")
+  expect_true(all(analytic_settings |>
+                    dplyr::pull("analysis_type") == "single_event"))
+  expect_true(all(analytic_settings |>
+                    dplyr::pull("competing_outcome") == "none"))
+  expect_no_error(asSurvivalResult(surv_no_competing))
+
   CDMConnector::cdmDisconnect(cdm)
 
   # Censor at cohort end
   outcome_cohort <- dplyr::tibble(
-    cohort_definition_id = c(1, 1, 1, 1, 1),
-    subject_id = c(1, 1, 2, 3, 3),
+    cohort_definition_id = c(1L, 1L, 1L, 1L, 1L),
+    subject_id = c(1L, 1L, 2L, 3L, 3L),
     cohort_start_date = c(
       as.Date("2020-02-10"),
       as.Date("2020-02-02"),
@@ -895,13 +1032,13 @@ test_that("funcionality with created dataset", {
   )
 
   person <- dplyr::tibble(
-    person_id = c(1, 2, 3, 4, 5),
-    year_of_birth = c(rep(1990, 5)),
-    month_of_birth = c(rep(02, 5)),
-    day_of_birth = c(rep(11, 5)),
-    gender_concept_id = c(rep(0,5)),
-    ethnicity_concept_id = c(rep(0,5)),
-    race_concept_id = c(rep(0,5))
+    person_id = c(1L, 2L, 3L, 4L, 5L),
+    year_of_birth = c(rep(1990L, 5L)),
+    month_of_birth = c(rep(02L, 5L)),
+    day_of_birth = c(rep(11L, 5L)),
+    gender_concept_id = c(rep(0L,5L)),
+    ethnicity_concept_id = c(rep(0L,5L)),
+    race_concept_id = c(rep(0L,5L))
   )
 
   cdm <- mockCohortSurvival(
@@ -976,8 +1113,8 @@ test_that("funcionality with created dataset", {
   CDMConnector::cdmDisconnect(cdm)
 
   outcome_cohort <- dplyr::tibble(
-    cohort_definition_id = c(1, 1, 1, 1, 1),
-    subject_id = c(1, 1, 2, 3, 3),
+    cohort_definition_id = c(1L, 1L, 1L, 1L, 1L),
+    subject_id = c(1L, 1L, 2L, 3L, 3L),
     cohort_start_date = c(
       as.Date("2020-01-10"),
       as.Date("2020-02-02"),
@@ -1070,8 +1207,8 @@ test_that("funcionality with created dataset", {
   CDMConnector::cdmDisconnect(cdm)
 
   outcome_cohort <- dplyr::tibble(
-    cohort_definition_id = c(1, 1, 1, 1),
-    subject_id = c(1, 2, 3, 3),
+    cohort_definition_id = c(1L, 1L, 1L, 1L),
+    subject_id = c(1L, 2L, 3L, 3L),
     cohort_start_date = c(
       as.Date("2019-01-10"),
       as.Date("2020-02-09"),
@@ -1115,8 +1252,8 @@ test_that("funcionality with created dataset", {
   CDMConnector::cdmDisconnect(cdm)
 
   outcome_cohort <- dplyr::tibble(
-    cohort_definition_id = c(1, 1, 1, 1),
-    subject_id = c(1, 2, 3, 3),
+    cohort_definition_id = c(1L, 1L, 1L, 1L),
+    subject_id = c(1L, 2L, 3L, 3L),
     cohort_start_date = c(
       as.Date("2020-01-10"),
       as.Date("2020-02-09"),
@@ -1159,14 +1296,25 @@ test_that("funcionality with created dataset", {
   expect_true(all(surv7 |>
                     dplyr::select(estimate)|> dplyr::pull() - c(rep(1, 6), 0.5, 0.5, 0.5, 0) < c(0.01)))
 
+  expect_no_error(
+    estimateSurvival(
+      cdm,
+      targetCohortTable = "exposure_cohort",
+      targetCohortId = 1,
+      outcomeCohortTable = "cohort1",
+      outcomeCohortId = 1,
+      censorOnDate = as.Date("2020-05-04")
+    )
+  )
+
   CDMConnector::cdmDisconnect(cdm)
 })
 
 test_that("different exposure cohort ids", {
   skip_on_cran()
   cohort <- dplyr::tibble(
-    cohort_definition_id = c(1, 1, 2),
-    subject_id = c(1, 2, 3),
+    cohort_definition_id = c(1L, 1L, 2L),
+    subject_id = c(1L, 2L, 3L),
     cohort_start_date = c(
       as.Date("2020-01-01"),
       as.Date("2020-01-02"),
@@ -1179,8 +1327,8 @@ test_that("different exposure cohort ids", {
     )
   )
   outcome_cohort <- dplyr::tibble(
-    cohort_definition_id = c(1, 1, 1),
-    subject_id = c(1, 2, 3),
+    cohort_definition_id = c(1L, 1L, 1L),
+    subject_id = c(1L, 2L, 3L),
     cohort_start_date = c(
       as.Date("2020-01-10"),
       as.Date("2020-01-03"),
@@ -1194,8 +1342,8 @@ test_that("different exposure cohort ids", {
   )
 
   observation_period <- dplyr::tibble(
-    observation_period_id = c(1, 1, 1),
-    person_id = c(1, 2, 3),
+    observation_period_id = c(1L, 1L, 1L),
+    person_id = c(1L, 2L, 3L),
     observation_period_start_date = c(
       as.Date("2000-01-01"),
       as.Date("2000-01-02"),
@@ -1206,16 +1354,16 @@ test_that("different exposure cohort ids", {
       as.Date("2023-05-02"),
       as.Date("2023-03-01")
     ),
-    period_type_concept_id = c(rep(0,3))
+    period_type_concept_id = c(rep(0L,3L))
   )
   person <- dplyr::tibble(
-    person_id = c(1, 2, 3, 4, 5),
-    year_of_birth = c(rep(1990, 5)),
-    month_of_birth = c(rep(02, 5)),
-    day_of_birth = c(rep(11, 5)),
-    gender_concept_id = c(rep(0,5)),
-    ethnicity_concept_id = c(rep(0,5)),
-    race_concept_id = c(rep(0,5))
+    person_id = c(1L, 2L, 3L, 4L, 5L),
+    year_of_birth = c(rep(1990L, 5L)),
+    month_of_birth = c(rep(02L, 5L)),
+    day_of_birth = c(rep(11L, 5L)),
+    gender_concept_id = c(rep(0L,5L)),
+    ethnicity_concept_id = c(rep(0L,5L)),
+    race_concept_id = c(rep(0L,5L))
   )
 
   cdm <- mockCohortSurvival(
@@ -1299,8 +1447,8 @@ test_that("expected errors", {
 test_that("within cohort survival", {
   skip_on_cran()
   cohort <- dplyr::tibble(
-    cohort_definition_id = c(1, 1, 1),
-    subject_id = c(1, 2, 3),
+    cohort_definition_id = c(1L, 1L, 1L),
+    subject_id = c(1L, 2L, 3L),
     cohort_start_date = c(
       as.Date("2020-01-01"),
       as.Date("2020-01-02"),
@@ -1313,8 +1461,8 @@ test_that("within cohort survival", {
     )
   )
   observation_period <- dplyr::tibble(
-    observation_period_id = c(1, 1, 1),
-    person_id = c(1, 2, 3),
+    observation_period_id = c(1L, 1L, 1L),
+    person_id = c(1L, 2L, 3L),
     observation_period_start_date = c(
       as.Date("2000-01-01"),
       as.Date("2000-01-02"),
@@ -1325,17 +1473,17 @@ test_that("within cohort survival", {
       as.Date("2023-05-02"),
       as.Date("2023-03-01")
     ),
-    period_type_concept_id = c(rep(0,3))
+    period_type_concept_id = c(rep(0L,3L))
   )
 
   person <- dplyr::tibble(
-    person_id = c(1, 2, 3, 4, 5),
-    year_of_birth = c(rep(1990, 5)),
-    month_of_birth = c(rep(02, 5)),
-    day_of_birth = c(rep(11, 5)),
-    gender_concept_id = c(rep(0,5)),
-    ethnicity_concept_id = c(rep(0,5)),
-    race_concept_id = c(rep(0,5))
+    person_id = c(1L, 2L, 3L, 4L, 5L),
+    year_of_birth = c(rep(1990L, 5L)),
+    month_of_birth = c(rep(02L, 5L)),
+    day_of_birth = c(rep(11L, 5L)),
+    gender_concept_id = c(rep(0L,5L)),
+    ethnicity_concept_id = c(rep(0L,5L)),
+    race_concept_id = c(rep(0L,5L))
   )
 
   cdm <- mockCohortSurvival(
@@ -1367,8 +1515,8 @@ test_that("strata specific survival", {
   skip_on_cran()
 
   exposure_cohort <- dplyr::tibble(
-    subject_id = c(1, 2, 3, 4, 5),
-    cohort_definition_id = c(1, 1, 1,1,1),
+    subject_id = c(1L, 2L, 3L, 4L, 5L),
+    cohort_definition_id = c(1L, 1L, 1L,1L,1L),
     cohort_start_date = c(
       as.Date("2008-01-01"),
       as.Date("2010-01-01"),
@@ -1386,8 +1534,8 @@ test_that("strata specific survival", {
     sex = c("Female", "Male", "Female", "Male", "Male")
   )
   outcome_cohort <- dplyr::tibble(
-    cohort_definition_id = c(1, 1, 1, 1, 1),
-    subject_id = c(1, 1, 2, 3, 3),
+    cohort_definition_id = c(1L, 1L, 1L, 1L, 1L),
+    subject_id = c(1L, 1L, 2L, 3L, 3L),
     cohort_start_date = c(
       as.Date("2020-01-10"),
       as.Date("2020-02-02"),
@@ -1404,8 +1552,8 @@ test_that("strata specific survival", {
     )
   )
   other_outcome_cohort <- dplyr::tibble(
-    cohort_definition_id = c(1),
-    subject_id = c(4),
+    cohort_definition_id = c(1L),
+    subject_id = c(4L),
     cohort_start_date = c(
       as.Date("2011-02-09")
     ),
@@ -1414,8 +1562,8 @@ test_that("strata specific survival", {
     )
   )
   observation_period <- dplyr::tibble(
-    observation_period_id = c(1, 2, 3,4,5),
-    person_id = c(1, 2, 3,4,5),
+    observation_period_id = c(1L, 2L, 3L,4L,5L),
+    person_id = c(1L, 2L, 3L,4L,5L),
     observation_period_start_date = c(
       as.Date("2007-03-21"),
       as.Date("2009-09-09"),
@@ -1430,17 +1578,17 @@ test_that("strata specific survival", {
       as.Date("2015-01-03"),
       as.Date("2015-01-05")
     ),
-    period_type_concept_id = c(rep(0,5))
+    period_type_concept_id = c(rep(0L,5L))
   )
 
   person <- dplyr::tibble(
-    person_id = c(1, 2, 3, 4, 5),
-    year_of_birth = c(rep(1990, 5)),
-    month_of_birth = c(rep(02, 5)),
-    day_of_birth = c(rep(11, 5)),
-    gender_concept_id = c(rep(0,5)),
-    ethnicity_concept_id = c(rep(0,5)),
-    race_concept_id = c(rep(0,5))
+    person_id = c(1L, 2L, 3L, 4L, 5L),
+    year_of_birth = c(rep(1990L, 5L)),
+    month_of_birth = c(rep(02L, 5L)),
+    day_of_birth = c(rep(11L, 5L)),
+    gender_concept_id = c(rep(0L,5L)),
+    ethnicity_concept_id = c(rep(0L,5L)),
+    race_concept_id = c(rep(0L,5L))
   )
 
   cdm <- mockCohortSurvival(
@@ -1552,8 +1700,8 @@ test_that("multiple rows per person - same observation period", {
   skip_on_cran()
 
   exposure_cohort <- dplyr::tibble(
-    subject_id = c(1, 1, 2, 2, 3,4),
-    cohort_definition_id = rep(1,6),
+    subject_id = c(1L, 1L, 2L, 2L, 3L,4L),
+    cohort_definition_id = rep(1L,6L),
     cohort_start_date = c(
       as.Date("2010-01-01"),
       as.Date("2015-01-01"),
@@ -1574,8 +1722,8 @@ test_that("multiple rows per person - same observation period", {
   # outcome during first cohort entry for id 1
   # outcome during second cohort entry for id 2
   outcome_cohort <- dplyr::tibble(
-    cohort_definition_id = c(1, 1),
-    subject_id = c(1, 2),
+    cohort_definition_id = c(1L, 1L),
+    subject_id = c(1L, 2L),
     cohort_start_date = c(
       as.Date("2012-01-10"),
       as.Date("2017-01-10")
@@ -1585,8 +1733,8 @@ test_that("multiple rows per person - same observation period", {
       as.Date("2017-01-10")
     ))
   observation_period <- dplyr::tibble(
-    observation_period_id = c(1, 2,3,4),
-    person_id = c(1, 2, 3, 4),
+    observation_period_id = c(1L, 2L,3L,4L),
+    person_id = c(1L, 2L, 3L, 4L),
     observation_period_start_date = c(
       as.Date("2007-03-21"),
       as.Date("2006-09-09"),
@@ -1599,11 +1747,11 @@ test_that("multiple rows per person - same observation period", {
       as.Date("2023-05-20"),
       as.Date("2023-05-20")
     ),
-    period_type_concept_id = c(rep(0,4))
+    period_type_concept_id = c(rep(0L,4L))
   )
   competing_cohort <- dplyr::tibble(
-    cohort_definition_id = c(1),
-    subject_id = c(4),
+    cohort_definition_id = c(1L),
+    subject_id = c(4L),
     cohort_start_date = c(
       as.Date("2012-01-10")
     ),
@@ -1613,13 +1761,13 @@ test_that("multiple rows per person - same observation period", {
   )
 
   person <- dplyr::tibble(
-    person_id = c(1, 2, 3, 4, 5),
-    year_of_birth = c(rep(1990, 5)),
-    month_of_birth = c(rep(02, 5)),
-    day_of_birth = c(rep(11, 5)),
-    gender_concept_id = c(rep(0,5)),
-    ethnicity_concept_id = c(rep(0,5)),
-    race_concept_id = c(rep(0,5))
+    person_id = c(1L, 2L, 3L, 4L, 5L),
+    year_of_birth = c(rep(1990L, 5L)),
+    month_of_birth = c(rep(02L, 5L)),
+    day_of_birth = c(rep(11L, 5L)),
+    gender_concept_id = c(rep(0L,5L)),
+    ethnicity_concept_id = c(rep(0L,5L)),
+    race_concept_id = c(rep(0L,5L))
   )
 
   cdm <- mockCohortSurvival(
@@ -1747,8 +1895,8 @@ test_that("minimum survival days", {
   skip_on_cran()
 
   exposure_cohort <- dplyr::tibble(
-    subject_id = c(1, 2, 3, 4, 5),
-    cohort_definition_id = c(1, 1, 1,1,1),
+    subject_id = c(1L, 2L, 3L, 4L, 5L),
+    cohort_definition_id = c(1L, 1L, 1L,1L,1L),
     cohort_start_date = c(
       as.Date("2008-01-01"),
       as.Date("2010-01-01"),
@@ -1767,8 +1915,8 @@ test_that("minimum survival days", {
   )
 
   outcome_cohort <- dplyr::tibble(
-    cohort_definition_id = c(1, 1, 1, 1, 1),
-    subject_id = c(1, 2, 2, 3, 3),
+    cohort_definition_id = c(1L, 1L, 1L, 1L, 1L),
+    subject_id = c(1L, 2L, 2L, 3L, 3L),
     cohort_start_date = c(
       as.Date("2020-01-10"),
       as.Date("2010-01-01"),
@@ -1786,8 +1934,8 @@ test_that("minimum survival days", {
   )
 
   competing_cohort <- dplyr::tibble(
-    cohort_definition_id = c(1, 1),
-    subject_id = c(4, 3),
+    cohort_definition_id = c(1L, 1L),
+    subject_id = c(4L, 3L),
     cohort_start_date = c(
       as.Date("2011-02-09"),
       as.Date("2000-01-01")
@@ -1799,8 +1947,8 @@ test_that("minimum survival days", {
   )
 
   observation_period <- dplyr::tibble(
-    observation_period_id = c(1, 2, 3,4,5),
-    person_id = c(1, 2, 3,4,5),
+    observation_period_id = c(1L, 2L, 3L,4L,5L),
+    person_id = c(1L, 2L, 3L,4L,5L),
     observation_period_start_date = c(
       as.Date("2007-03-21"),
       as.Date("2009-09-09"),
@@ -1815,17 +1963,17 @@ test_that("minimum survival days", {
       as.Date("2015-01-03"),
       as.Date("2015-01-05")
     ),
-    period_type_concept_id = c(rep(0,5))
+    period_type_concept_id = c(rep(0L,5L))
   )
 
   person <- dplyr::tibble(
-    person_id = c(1, 2, 3, 4, 5),
-    year_of_birth = c(rep(1990, 5)),
-    month_of_birth = c(rep(02, 5)),
-    day_of_birth = c(rep(11, 5)),
-    gender_concept_id = c(rep(0,5)),
-    ethnicity_concept_id = c(rep(0,5)),
-    race_concept_id = c(rep(0,5))
+    person_id = c(1L, 2L, 3L, 4L, 5L),
+    year_of_birth = c(rep(1990L, 5L)),
+    month_of_birth = c(rep(02L, 5L)),
+    day_of_birth = c(rep(11L, 5L)),
+    gender_concept_id = c(rep(0L,5L)),
+    ethnicity_concept_id = c(rep(0L,5L)),
+    race_concept_id = c(rep(0L,5L))
   )
 
   cdm <- mockCohortSurvival(
@@ -1876,8 +2024,8 @@ test_that("outcomeWashout", {
   skip_on_cran()
 
   exposure_cohort <- dplyr::tibble(
-    subject_id = c(1, 2, 3, 4, 5),
-    cohort_definition_id = c(1, 1, 1,1,1),
+    subject_id = c(1L, 2L, 3L, 4L, 5L),
+    cohort_definition_id = c(1L, 1L, 1L,1L,1L),
     cohort_start_date = c(
       as.Date("2008-01-01"),
       as.Date("2010-01-01"),
@@ -1895,8 +2043,8 @@ test_that("outcomeWashout", {
     sex = c("Female", "Male", "Female", "Male", "Male")
   )
   outcome_cohort <- dplyr::tibble(
-    cohort_definition_id = c(1, 1, 1, 1, 1),
-    subject_id = c(1, 2, 2, 3, 3),
+    cohort_definition_id = c(1L, 1L, 1L, 1L, 1L),
+    subject_id = c(1L, 2L, 2L, 3L, 3L),
     cohort_start_date = c(
       as.Date("2020-01-10"),
       as.Date("2009-01-01"),
@@ -1913,8 +2061,8 @@ test_that("outcomeWashout", {
     )
   )
   other_outcome_cohort <- dplyr::tibble(
-    cohort_definition_id = c(1,1),
-    subject_id = c(4,3),
+    cohort_definition_id = c(1L,1L),
+    subject_id = c(4L,3L),
     cohort_start_date = c(
       as.Date("2011-02-09"),
       as.Date("2000-01-01")
@@ -1925,8 +2073,8 @@ test_that("outcomeWashout", {
     )
   )
   observation_period <- dplyr::tibble(
-    observation_period_id = c(1, 2, 3,4,5),
-    person_id = c(1, 2, 3,4,5),
+    observation_period_id = c(1L, 2L, 3L,4L,5L),
+    person_id = c(1L, 2L, 3L,4L,5L),
     observation_period_start_date = c(
       as.Date("2007-03-21"),
       as.Date("2008-09-09"),
@@ -1941,17 +2089,17 @@ test_that("outcomeWashout", {
       as.Date("2015-01-03"),
       as.Date("2015-01-05")
     ),
-    period_type_concept_id = c(rep(0,5))
+    period_type_concept_id = c(rep(0L,5L))
   )
 
   person <- dplyr::tibble(
-    person_id = c(1, 2, 3, 4, 5),
-    year_of_birth = c(rep(1990, 5)),
-    month_of_birth = c(rep(02, 5)),
-    day_of_birth = c(rep(11, 5)),
-    gender_concept_id = c(rep(0,5)),
-    ethnicity_concept_id = c(rep(0,5)),
-    race_concept_id = c(rep(0,5))
+    person_id = c(1L, 2L, 3L, 4L, 5L),
+    year_of_birth = c(rep(1990L, 5L)),
+    month_of_birth = c(rep(02L, 5L)),
+    day_of_birth = c(rep(11L, 5L)),
+    gender_concept_id = c(rep(0L,5L)),
+    ethnicity_concept_id = c(rep(0L,5L)),
+    race_concept_id = c(rep(0L,5L))
   )
 
   cdm <- mockCohortSurvival(
@@ -1987,12 +2135,18 @@ test_that("outcomeWashout", {
                 dplyr::pull(n_events) ==
                 attr(surv, "summary") |>
                 dplyr::pull(n_events) + 1)
+  expect_true(any(attr(surv_w0, "attrition") |>
+                    dplyr::pull("reason") ==
+                    "No outcome event in washout period of 1 day"))
+  expect_true(any(attr(surv, "attrition") |>
+                    dplyr::pull("reason") ==
+                    "No outcome event in washout period of Inf days"))
 
   # Now let's make the previous outcome at exactly index date, with washout 0
   # Person 2 should be treated as having an outcome on day 0
   outcome_cohort <- dplyr::tibble(
-    cohort_definition_id = c(1, 1, 1, 1, 1),
-    subject_id = c(1, 2, 2, 3, 3),
+    cohort_definition_id = c(1L, 1L, 1L, 1L, 1L),
+    subject_id = c(1L, 2L, 2L, 3L, 3L),
     cohort_start_date = c(
       as.Date("2020-01-10"),
       as.Date("2010-01-01"),
@@ -2038,8 +2192,8 @@ test_that("outcomeWashout", {
 
   # This is not true if the event happens a day before
   outcome_cohort <- dplyr::tibble(
-    cohort_definition_id = c(1, 1, 1, 1, 1),
-    subject_id = c(1, 2, 2, 3, 3),
+    cohort_definition_id = c(1L, 1L, 1L, 1L, 1L),
+    subject_id = c(1L, 2L, 2L, 3L, 3L),
     cohort_start_date = c(
       as.Date("2020-01-10"),
       as.Date("2009-12-31"),
@@ -2164,12 +2318,13 @@ test_that("restrictedMeanFollowUp", {
 })
 
 test_that("mgus example: empty outcome tables or cohorts", {
+  skip_on_cran()
     cdm <- mockMGUS2cdm()
     cdm$death_c <- cdm$death_cohort |>
       dplyr::filter(cohort_definition_id == 2) |>
       dplyr::compute(name = "death_c")
     attr(cdm$death_c, "cohort_set") <- dplyr::tibble(
-      cohort_definition_id = 1,
+      cohort_definition_id = 1L,
       cohort_name = "death_c"
     )
     attr(cdm$death_c, "cohort_attrition") <- omopgenerics:::defaultCohortAttrition(cdm$death_c, attr(cdm$death_c, "cohort_set"))
@@ -2185,12 +2340,12 @@ test_that("mgus example: empty outcome tables or cohorts", {
 
     # Some empty cohortIds are just not calculated, for both primary and competing outcomes
     attr(cdm$death_cohort, "cohort_set") <- dplyr::tibble(
-      cohort_definition_id = c(1,3),
+      cohort_definition_id = c(1L,3L),
       cohort_name = c("death_cohort", "death_test_empty")
     )
     attr(cdm$death_cohort, "cohort_attrition") <- omopgenerics:::defaultCohortAttrition(cdm$death_cohort, attr(cdm$death_cohort, "cohort_set"))
     attr(cdm$progression, "cohort_set") <- dplyr::tibble(
-      cohort_definition_id = c(1,2),
+      cohort_definition_id = c(1L,2L),
       cohort_name = c("progression", "progression_fake_empty")
     )
     attr(cdm$progression, "cohort_attrition") <- omopgenerics:::defaultCohortAttrition(cdm$progression, attr(cdm$progression, "cohort_set"))
@@ -2213,7 +2368,7 @@ test_that("mgus example: empty outcome tables or cohorts", {
                   dplyr::select(variable_level) |>
                   dplyr::distinct() |>
                   dplyr::tally() |>
-                  dplyr::pull() == 2)
+                  dplyr::pull() == 3)
 
     PatientProfiles::mockDisconnect(cdm)
   })
@@ -2239,6 +2394,7 @@ test_that("n_censor", {
   })
 
 test_that("no outcomes among cohort", {
+  skip_on_cran()
     cdm <- mockMGUS2cdm()
     cdm$death_cohort <- cdm$death_cohort |>
       dplyr::filter(subject_id == 1)
@@ -2283,6 +2439,7 @@ test_that("no outcomes among cohort", {
   })
 
 test_that("tables from cdm do not change after estimation", {
+  skip_on_cran()
   cdm <- mockMGUS2cdm()
   old_cdm <- cdm
 
@@ -2304,6 +2461,7 @@ test_that("tables from cdm do not change after estimation", {
 })
 
 test_that("median survival is NA when it cannot be estimated completely", {
+  skip_on_cran()
   cdm <- mockMGUS2cdm()
   rows_allowed <- c(seq(1,1400,2))
   cdm$death_cohort <- cdm$death_cohort |>
@@ -2327,6 +2485,7 @@ test_that("median survival is NA when it cannot be estimated completely", {
 })
 
 test_that("empty input cohort after input filtering", {
+  skip_on_cran()
   cdm <- mockMGUS2cdm()
   expect_warning(surv <- estimateSingleEventSurvival(cdm, "mgus_diagnosis", "death_cohort",
                                               censorOnCohortExit = TRUE))
@@ -2351,7 +2510,7 @@ test_that("empty input cohort after input filtering", {
                       cohort_end_date = as.Date("2020-01-01"))
     )
   attr(cdm$mgus_diagnosis, "cohort_set") <- dplyr::tibble(
-    cohort_definition_id = c(1,2),
+    cohort_definition_id = c(1L,2L),
     cohort_name = c("mgus_diagnosis", "mgus_diagnosis_2020")
   )
   attr(cdm$mgus_diagnosis, "cohort_attrition") <- attr(cdm$mgus_diagnosis, "cohort_attrition") |>
@@ -2382,17 +2541,59 @@ test_that("empty input cohort after input filtering", {
 })
 
 test_that("empty input cohort before input filtering", {
+  skip_on_cran()
   cdm <- mockMGUS2cdm()
   cdm$mgus_diagnosis <- cdm$mgus_diagnosis |>
     dplyr::filter(cohort_definition_id == 10)
   expect_warning(surv <- estimateSingleEventSurvival(cdm, "mgus_diagnosis", "death_cohort"))
-expect_true(surv |>
-              dplyr::tally() |>
-              dplyr::pull() == 0)
+  expect_true(surv |>
+                dplyr::tally() |>
+                dplyr::pull() == 0)
+  expect_true(omopgenerics::settings(surv) |>
+                dplyr::pull("result_type") == "survival_estimates")
+  expect_true(omopgenerics::settings(surv) |>
+                dplyr::pull("outcome") == "death_cohort")
+  expect_true(omopgenerics::settings(surv) |>
+                dplyr::pull("competing_outcome") == "none")
+
+  expect_warning(survCR <- estimateCompetingRiskSurvival(
+    cdm, "mgus_diagnosis", "progression", "death_cohort"
+  ))
+  expect_true(survCR |>
+                dplyr::tally() |>
+                dplyr::pull() == 0)
+  expect_true(omopgenerics::settings(survCR) |>
+                dplyr::pull("result_type") == "survival_estimates")
+  expect_true(omopgenerics::settings(survCR) |>
+                dplyr::pull("analysis_type") == "competing_risk")
+  expect_true(omopgenerics::settings(survCR) |>
+                dplyr::pull("outcome") == "progression")
+  expect_true(omopgenerics::settings(survCR) |>
+                dplyr::pull("competing_outcome") == "death_cohort")
+
+  cdm$death_cohort <- cdm$death_cohort |>
+    dplyr::filter(subject_id == 0)
+  attr(cdm$death_cohort, "cohort_set") <- dplyr::tibble(
+    cohort_definition_id = 1L,
+    cohort_name = "death_cohort"
+  )
+  attr(cdm$death_cohort, "cohort_attrition") <- omopgenerics:::defaultCohortAttrition(
+    cdm$death_cohort, attr(cdm$death_cohort, "cohort_set")
+  )
+
+  expect_warning(survCRNoCompeting <- estimateCompetingRiskSurvival(
+    cdm, "mgus_diagnosis", "progression", "death_cohort"
+  ))
+  expect_true(survCRNoCompeting |>
+                dplyr::tally() |>
+                dplyr::pull() == 0)
+  expect_true(omopgenerics::settings(survCRNoCompeting) |>
+                dplyr::pull("outcome") == "progression")
   CDMConnector::cdmDisconnect(cdm)
 })
 
 test_that("multiple strata names", {
+  skip_on_cran()
   cdm <- mockMGUS2cdm()
   cdm$mgus_diagnosis <- cdm$mgus_diagnosis |>
     dplyr::mutate(

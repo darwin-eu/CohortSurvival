@@ -1,0 +1,200 @@
+---
+title: "Creating cohorts for survival analyses"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Creating cohorts for survival analyses}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE, warning = FALSE, message = FALSE,
+  out.width = "100%",
+  comment = "#>"
+)
+```
+
+## Set up
+
+Let us first load the packages required.
+
+```{r}
+library(CDMConnector)
+library(CohortSurvival)
+library(dplyr)
+```
+
+We will use the example MGUS2 survival dataset included in CohortSurvival. In practice you would create a CDM reference with CDMConnector and then add the target, outcome, and optional competing outcome cohorts needed for the analysis.
+
+```{r}
+cdm <- CohortSurvival::mockMGUS2cdm()
+```
+
+## Cohorts needed for survival
+
+A CohortSurvival analysis starts from OMOP cohort tables. Each cohort table needs the standard cohort columns:
+
+```{r}
+cdm$mgus_diagnosis |>
+  dplyr::select(cohort_definition_id, subject_id, cohort_start_date, cohort_end_date) |>
+  dplyr::glimpse()
+```
+
+The target cohort defines who is at risk and when follow-up starts. In most analyses, `cohort_start_date` is the index date. `cohort_end_date` can also matter: if `censorOnCohortExit = TRUE`, follow-up is censored at target cohort exit.
+
+The outcome cohort defines the event of interest. By default CohortSurvival uses `cohort_start_date` in the outcome cohort as the event date, but this can be changed with `outcomeDateVariable`.
+
+```{r}
+cdm$death_cohort |>
+  dplyr::select(cohort_definition_id, subject_id, cohort_start_date, cohort_end_date) |>
+  dplyr::glimpse()
+```
+
+For competing-risk analyses, a third cohort table defines the competing outcome. In this example, disease progression is the event of interest and death is the competing outcome.
+
+```{r}
+cdm$progression |>
+  dplyr::select(cohort_definition_id, subject_id, cohort_start_date, cohort_end_date) |>
+  dplyr::glimpse()
+```
+
+## Target cohort design
+
+The target cohort should represent the population and time origin for the study question. A common pattern is one record per person at first eligible diagnosis or treatment start, but repeated target cohort entries can be valid if the estimand is episode-based rather than person-based.
+
+When designing a target cohort, decide:
+
+| Question | Why it matters |
+| --- | --- |
+| What is the index date? | Survival time starts at target cohort entry. |
+| Are people allowed to enter more than once? | Repeated records change the interpretation from people to episodes. |
+| Is prior observation required? | Washout and baseline characteristics are only meaningful when prior observation is available. |
+| Should follow-up end at cohort exit? | This determines whether `censorOnCohortExit = TRUE` is appropriate. |
+| Which covariates are needed as strata or weights? | Strata and weights must be columns in the target cohort table before estimation. |
+
+For example, a target cohort for survival after MGUS diagnosis might require a first observed MGUS diagnosis after at least 365 days of prior observation. A target cohort for survival after treatment start might instead index on first treatment after diagnosis.
+
+## Outcome cohort design
+
+The outcome cohort should contain the first relevant event dates for the outcome definition you want to study. For a death outcome, you may need to create a cohort from the CDM death table. CohortConstructor provides helpers for this, for example:
+
+```{r, eval = FALSE}
+cdm <- CohortConstructor::deathCohort(
+  cdm = cdm,
+  name = "death_cohort",
+  subsetCohort = "mgus_diagnosis"
+)
+```
+
+For clinical outcomes, the outcome cohort is usually created from diagnosis, procedure, drug, measurement, or observation records. The exact cohort definition is study-specific, but the resulting table should be a normal OMOP cohort table.
+
+Outcome washout is applied relative to target cohort entry. With `outcomeWashout = Inf`, people with any prior outcome before index are excluded from the survival analysis. With `outcomeWashout = 0`, prior outcomes are not used to exclude target cohort records. A finite value, such as `outcomeWashout = 365`, excludes people with the outcome in that many days before index.
+
+```{r}
+estimateSingleEventSurvival(
+  cdm = cdm,
+  targetCohortTable = "mgus_diagnosis",
+  outcomeCohortTable = "death_cohort",
+  outcomeWashout = 365,
+  followUpDays = 365
+) |>
+  tableSurvival()
+```
+
+## Competing outcome design
+
+A competing outcome should be an event that prevents or changes the interpretation of the event of interest. Death is often a competing outcome for non-fatal clinical events. Competing outcome cohorts use the same cohort-table structure as outcome cohorts.
+
+Competing-risk analyses allow separate washout choices for the event of interest and competing outcome:
+
+```{r}
+estimateCompetingRiskSurvival(
+  cdm = cdm,
+  targetCohortTable = "mgus_diagnosis",
+  outcomeCohortTable = "progression",
+  competingOutcomeCohortTable = "death_cohort",
+  outcomeWashout = 365,
+  competingOutcomeWashout = 0,
+  followUpDays = 365
+) |>
+  tableSurvival()
+```
+
+Use separate washouts when prior history has a different meaning for the two event processes. For example, you may want to exclude people with prior disease progression but still allow people with prior non-fatal competing events, depending on the study question.
+
+## Adding strata
+
+Stratification variables must be present as columns in the target cohort table. In real studies these columns are often added with packages such as PatientProfiles before calling CohortSurvival.
+
+```{r, eval = FALSE}
+cdm$target <- cdm$target |>
+  PatientProfiles::addDemographics(
+    ageGroup = list(c(0, 64), c(65, 74), c(75, Inf)),
+    sex = TRUE,
+    name = "target"
+  )
+```
+
+The mock MGUS target cohort already contains several columns that can be used for strata.
+
+```{r}
+cdm$mgus_diagnosis |>
+  dplyr::select(subject_id, cohort_start_date, age, age_group, sex) |>
+  dplyr::glimpse()
+```
+
+Strata are passed as a list. Each element is one stratification requested by the user. The following estimates overall survival, survival by sex, and survival by the combination of age group and sex.
+
+```{r}
+estimateSingleEventSurvival(
+  cdm = cdm,
+  targetCohortTable = "mgus_diagnosis",
+  outcomeCohortTable = "death_cohort",
+  strata = list("sex", c("age_group", "sex")),
+  restrictedMeanFollowUp = 365
+) |>
+  tableSurvival()
+```
+
+Setting `restrictedMeanFollowUp` is especially important when comparing strata. If it is left as `NULL`, the restricted mean horizon is left to the underlying survival summary, which can use a common maximum follow-up time across fitted curves. A group with shorter observed follow-up may then have its last estimate carried forward beyond its own maximum follow-up, so the restricted mean can be larger than the observed follow-up time for that group. A common horizon, such as 365 days, makes the comparison refer to the same follow-up window for every group where that follow-up is available.
+
+## Multiple cohorts in one table
+
+CohortSurvival can estimate all combinations of selected target and outcome cohort IDs in one call, provided those cohorts are in the supplied cohort tables. When target or outcome cohorts live in separate tables, you can either run the analysis separately and bind the `summarised_result` objects, or create a combined cohort table before estimation.
+
+```{r, eval = FALSE}
+cdm <- omopgenerics::bind(
+  cdm$progression,
+  cdm$death_cohort,
+  name = "outcome_cohorts"
+)
+
+estimateSingleEventSurvival(
+  cdm = cdm,
+  targetCohortTable = "mgus_diagnosis",
+  outcomeCohortTable = "outcome_cohorts"
+)
+```
+
+When combining cohorts, check that the cohort set metadata identifies each `cohort_definition_id` clearly. This is what CohortSurvival uses to label outcomes in plots and tables.
+
+## Pre-analysis checklist
+
+Before running a survival analysis, check:
+
+- The target, outcome, and competing outcome tables are cohort tables in the same CDM reference.
+- The target cohort index date is the intended time zero.
+- The outcome date column is the intended event date.
+- Prior observation and washout choices match the estimand.
+- Censoring choices are explicit: observation period end, cohort exit, calendar date, and maximum follow-up.
+- Strata or weight variables are present in the target cohort table and have sensible missingness.
+- `restrictedMeanFollowUp` is set to a common horizon when restricted mean survival will be compared across groups.
+
+## Disconnect from the cdm database connection
+
+We finish by disconnecting from the cdm.
+
+```{r}
+cdmDisconnect(cdm)
+```

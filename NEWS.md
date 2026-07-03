@@ -1,3 +1,24 @@
+# CohortSurvival 1.1.2
+
+* Expand survival documentation and vignettes by @KimLopezGuell #415, #416
+* Move `DBI` to `Suggests` and check optional mock-CDM dependencies only when
+  the mock helpers are used by @KimLopezGuell #413
+* Fallback to single event survival output when a competing risk analysis has
+  no observed competing events by @KimLopezGuell #412
+* Improve handling of empty target and outcome cohorts by @KimLopezGuell #411
+* Improve survival table output, especially for competing risk results by @KimLopezGuell #409, #411
+
+
+# CohortSurvival 1.1.1
+
+* Remove duplicate outcome cohort validation by @KimLopezGuell #395
+* Add weighted Kaplan-Meier support to survival estimation by @KimLopezGuell #393
+* Allow `censorOnDate` to be supplied as a cohort column in `addCohortSurvival()` by @KimLopezGuell #392
+* Move `CDMConnector` to suggests by @KimLopezGuell #391
+* Allow `type = NULL` in `plotSurvival()` by @KimLopezGuell #390
+* Add BugReports by @catalamarti #383
+
+
 # CohortSurvival 1.1.0
 
 * Use "first" option in addCohortSurvival to remove warning by @KimLopezGuell #375

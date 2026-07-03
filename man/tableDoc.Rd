@@ -44,7 +44,7 @@ This argument can be provided in one of the following ways:
 See \code{tableStyle()} for available options.
 \item \strong{YAML file path:} Provide the path to an existing \code{.yml} file defining
 a new style.
-\item \strong{List of custome R code:} Supply a block of custom R code or a named list
+\item \strong{List of custom R code:} Supply a block of custom R code or a named list
 describing styles for each table section. This code must be specific to
 the selected table type.
 If \code{style = NULL}, the function will use global options

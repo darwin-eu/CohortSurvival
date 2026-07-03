@@ -18,6 +18,6 @@ These objects are imported from other packages. Follow the links
 below to see their documentation.
 
 \describe{
-  \item{omopgenerics}{\code{\link[omopgenerics]{attrition}}, \code{\link[omopgenerics]{bind}}, \code{\link[omopgenerics]{cohortCodelist}}, \code{\link[omopgenerics]{cohortCount}}, \code{\link[omopgenerics]{exportSummarisedResult}}, \code{\link[omopgenerics]{importSummarisedResult}}, \code{\link[omopgenerics]{settings}}, \code{\link[omopgenerics]{suppress}}}
+  \item{omopgenerics}{\code{\link[omopgenerics:attrition]{attrition()}}, \code{\link[omopgenerics:bind]{bind()}}, \code{\link[omopgenerics:cohortCodelist]{cohortCodelist()}}, \code{\link[omopgenerics:cohortCount]{cohortCount()}}, \code{\link[omopgenerics:exportSummarisedResult]{exportSummarisedResult()}}, \code{\link[omopgenerics:importSummarisedResult]{importSummarisedResult()}}, \code{\link[omopgenerics:settings]{settings()}}, \code{\link[omopgenerics:suppress]{suppress()}}}
 }}
 

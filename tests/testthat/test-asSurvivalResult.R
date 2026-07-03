@@ -15,6 +15,28 @@ test_that("validateSurvivalResult works correctly", {
   CDMConnector::cdmDisconnect(cdm)
 })
 
+test_that("survival attrition reason ids depend on the reasons present", {
+  expect_identical(
+    CohortSurvival:::survivalAttritionReasonId(c(
+      "Initial entry to cohort",
+      "No outcome event in washout period of 30 days",
+      "Survival days for outcome less than 30"
+    )),
+    c("1", "2", "4")
+  )
+
+  expect_identical(
+    CohortSurvival:::survivalAttritionReasonId(c(
+      "Initial entry to cohort",
+      "No outcome event in washout period of 30 days",
+      "No competing outcome event in washout period of 30 days",
+      "Survival days for outcome less than 30",
+      "Survival days for competing outcome less than 30"
+    )),
+    c("1", "2", "3", "4", "5")
+  )
+})
+
 test_that("asSurvivalResult works with filtered results", {
   skip_on_cran()
 

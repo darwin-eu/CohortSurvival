@@ -14,9 +14,20 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-#' A tidy implementation of the summarised_characteristics object.
+#' Convert survival summarised results to a survival-specific format
 #'
-#' @param result A summarised_characteristics object.
+#' Convert the long `omopgenerics::summarised_result` returned by
+#' `estimateSingleEventSurvival()` or `estimateCompetingRiskSurvival()` into a
+#' wider `survival_result` object that is easier to inspect manually. The main
+#' object contains time-specific estimates when available. Event counts,
+#' summary statistics, and attrition are stored as attributes named `"events"`,
+#' `"summary"`, and `"attrition"`.
+#'
+#' The plotting and table functions in CohortSurvival accept both formats. The
+#' original `summarised_result` is usually preferable for exporting, binding
+#' with other omopgenerics results, and reporting through visOmopResults.
+#'
+#' @param result A summarised_result object.
 #'
 #' @examples
 #' \donttest{
@@ -32,8 +43,7 @@
 #' asSurvivalResult()
 #' }
 #'
-#' @return A tibble with a tidy version of the summarised_characteristics
-#' object.
+#' @return A `survival_result` object.
 #' @export
 #'
 asSurvivalResult <- function(result) {
@@ -132,7 +142,7 @@ asSurvivalResult <- function(result) {
   if ("survival_attrition" %in% available_types) {
     attrition <- result |>
       dplyr::filter(.data$result_type == "survival_attrition") |>
-      dplyr::select(-dplyr::any_of(c("time", "eventgap", "result_id", "reason_id"))) |>
+      dplyr::select(-dplyr::any_of(c("time", "eventgap", "result_id"))) |>
       dplyr::select(-dplyr::starts_with("variable_level")) |>
       dplyr::relocate("outcome", .after = "target_cohort") |>
       dplyr::relocate("competing_outcome", .after = "outcome") |>
@@ -516,7 +526,14 @@ asSummarisedResult <- function(result) {
 
   # Process attrition attribute
   if (!is.null(attr(result, "attrition"))) {
-    attrition_result <- attr(result, "attrition") |>
+    attrition_data <- attr(result, "attrition")
+    reason_id <- if ("reason_id" %in% names(attrition_data)) {
+      as.character(attrition_data$reason_id)
+    } else {
+      survivalAttritionReasonId(attrition_data$reason)
+    }
+
+    attrition_result <- attrition_data |>
       # Attrition data is already in long format with variable_name containing the estimate names
       dplyr::mutate(
         estimate_name = "count",
@@ -531,13 +548,7 @@ asSummarisedResult <- function(result) {
         strata_level = .data$reason,
         variable_level = .data$outcome,
         additional_name = "reason_id",
-        additional_level = dplyr::if_else(
-          grepl("Initial", .data$reason), "1",
-                dplyr::if_else(
-                  grepl("washout", .data$reason), "2",
-                  dplyr::if_else(
-                    grepl("for outcome", .data$reason), "3", "4"))
-        )
+        additional_level = reason_id
       )
 
     all_results[["attrition"]] <- attrition_result
@@ -582,4 +593,31 @@ asSummarisedResult <- function(result) {
   final_result <- omopgenerics::newSummarisedResult(final_result, settings = original_settings)
 
   return(final_result)
+}
+
+survivalAttritionReasonId <- function(reason) {
+  reason <- as.character(reason)
+
+  has_competing_risk_reason <- any(
+    grepl("No competing outcome event|Survival days for competing outcome", reason),
+    na.rm = TRUE
+  )
+
+  if (has_competing_risk_reason) {
+    dplyr::case_when(
+      grepl("^Initial", reason) ~ "1",
+      grepl("No outcome event", reason) ~ "2",
+      grepl("No competing outcome event", reason) ~ "3",
+      grepl("Survival days for outcome", reason) ~ "4",
+      grepl("Survival days for competing outcome", reason) ~ "5",
+      TRUE ~ NA_character_
+    )
+  } else {
+    dplyr::case_when(
+      grepl("^Initial", reason) ~ "1",
+      grepl("No outcome event", reason) ~ "2",
+      grepl("Survival days for outcome", reason) ~ "4",
+      TRUE ~ NA_character_
+    )
+  }
 }

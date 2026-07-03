@@ -2,8 +2,8 @@ test_that("working example", {
   skip_on_cran()
   db <- DBI::dbConnect(duckdb::duckdb(), ":memory:")
   cohort <- dplyr::tibble(
-    cohort_definition_id = c(1,1,1),
-    subject_id = c(1,2,3),
+    cohort_definition_id = c(1L,1L,1L),
+    subject_id = c(1L,2L,3L),
     cohort_start_date = c(as.Date("2020-01-01"),
                           as.Date("2020-01-02"),
                           as.Date("2020-01-01")),
@@ -12,8 +12,8 @@ test_that("working example", {
                         as.Date("2020-03-01"))
   )
   observation_period <- dplyr::tibble(
-    observation_period_id = c(1,1,1),
-    person_id = c(1,2,3),
+    observation_period_id = c(1L,1L,1L),
+    person_id = c(1L,2L,3L),
     observation_period_start_date = c(as.Date("2000-01-01"),
                                       as.Date("2000-01-02"),
                                       as.Date("2000-01-01")),
@@ -21,16 +21,16 @@ test_that("working example", {
                                     as.Date("2023-05-02"),
                                     as.Date("2023-03-01")),
 
-    period_type_concept_id = c(rep(0,3))
+    period_type_concept_id = c(rep(0L,3L))
   )
   person <- dplyr::tibble(
-    person_id = c(1, 2, 3, 4, 5),
-    year_of_birth = c(rep(1990, 5)),
-    month_of_birth = c(rep(2, 5)),
-    day_of_birth = c(rep(11, 5)),
-    gender_concept_id = c(rep(0,5)),
-    ethnicity_concept_id = c(rep(0,5)),
-    race_concept_id = c(rep(0,5))
+    person_id = c(1L, 2L, 3L, 4L, 5L),
+    year_of_birth = c(rep(1990L, 5L)),
+    month_of_birth = c(rep(2L, 5L)),
+    day_of_birth = c(rep(11L, 5L)),
+    gender_concept_id = c(rep(0L,5L)),
+    ethnicity_concept_id = c(rep(0L,5L)),
+    race_concept_id = c(rep(0L,5L))
   )
 
   cdm <- mockCohortSurvival(
@@ -65,6 +65,92 @@ test_that("working example", {
                       "cohort_start_date", "cohort_end_date",
                       "days_to_exit", "status", "time"
                     )))
+
+  CDMConnector::cdmDisconnect(cdm)
+})
+
+test_that("censorOnDate accepts cohort column name", {
+  skip_on_cran()
+  db <- DBI::dbConnect(duckdb::duckdb(), ":memory:")
+
+  cohort <- dplyr::tibble(
+    cohort_definition_id = c(1L,1L,1L),
+    subject_id = c(1L,2L,3L),
+    cohort_start_date = c(as.Date("2020-01-01"),
+                          as.Date("2020-01-02"),
+                          as.Date("2021-01-01")),
+    cohort_end_date = c(as.Date("2020-04-01"),
+                        as.Date("2020-08-02"),
+                        as.Date("2021-03-01")),
+    censor_date = c(as.Date("2021-01-04"), as.Date("2021-01-04"), as.Date("2021-01-04")),
+    low_censor = c(as.Date("2020-01-04"), as.Date("2020-01-04"), as.Date("2020-01-04"))
+  )
+  events <- dplyr::tibble(
+    cohort_definition_id = c(1L,1L,1L),
+    subject_id = c(1L,2L,3L),
+    cohort_start_date = c(as.Date("2019-01-01"),
+                          as.Date("2020-01-05"),
+                          as.Date("2021-02-01")),
+    cohort_end_date = c(as.Date("2019-01-01"),
+                        as.Date("2020-01-05"),
+                        as.Date("2021-02-01")),
+  )
+  observation_period <- dplyr::tibble(
+    observation_period_id = c(1L,1L,1L),
+    person_id = c(1L,2L,3L),
+    observation_period_start_date = c(as.Date("2000-01-01"),
+                                      as.Date("2000-01-02"),
+                                      as.Date("2000-01-01")),
+    observation_period_end_date = c(as.Date("2023-04-01"),
+                                    as.Date("2023-05-02"),
+                                    as.Date("2023-03-01")),
+    period_type_concept_id = c(rep(0L,3L))
+  )
+  person <- dplyr::tibble(
+    person_id = c(1L, 2L, 3L, 4L, 5L),
+    year_of_birth = c(rep(1990L, 5L)),
+    month_of_birth = c(rep(2L, 5L)),
+    day_of_birth = c(rep(11L, 5L)),
+    gender_concept_id = c(rep(0L,5L)),
+    ethnicity_concept_id = c(rep(0L,5L)),
+    race_concept_id = c(rep(0L,5L))
+  )
+
+  cdm <- mockCohortSurvival(
+    tables = list(
+      person = person,
+      observation_period = observation_period
+    ),
+    cohortTables = list(
+      cohort1 = cohort,
+      cohort2 = events
+    ),
+    cdmName = "mock_es"
+  )
+
+  cohortCensorCol <- cdm$cohort1 |>
+    addCohortSurvival(
+      cdm = cdm,
+      outcomeCohortTable = "cohort2",
+      outcomeCohortId = 1,
+      censorOnDate = "censor_date"
+    ) |>
+    dplyr::arrange(subject_id)
+
+  expect_true(all(compareNA(sort(cohortCensorCol |>
+                                   dplyr::select(status) |>
+                                   dplyr::pull()),
+                            sort(c(NA, 1, 0)))))
+
+  expect_error(
+    cdm$cohort1 |>
+      addCohortSurvival(
+        cdm = cdm,
+        outcomeCohortTable = "cohort2",
+        outcomeCohortId = 1,
+        censorOnDate = "low_censor"
+      )
+  )
 
   CDMConnector::cdmDisconnect(cdm)
 })
@@ -161,8 +247,8 @@ test_that("censorOnCohortExit", {
   db <- DBI::dbConnect(duckdb::duckdb(), ":memory:")
 
   cohort <- dplyr::tibble(
-    cohort_definition_id = c(1,1,1),
-    subject_id = c(1,2,3),
+    cohort_definition_id = c(1L,1L,1L),
+    subject_id = c(1L,2L,3L),
     cohort_start_date = c(as.Date("2020-01-01"),
                           as.Date("2020-01-02"),
                           as.Date("2020-01-01")),
@@ -171,8 +257,8 @@ test_that("censorOnCohortExit", {
                         as.Date("2020-03-01"))
   )
   events <- dplyr::tibble(
-    cohort_definition_id = c(1,1,2),
-    subject_id = c(1,2,3),
+    cohort_definition_id = c(1L,1L,2L),
+    subject_id = c(1L,2L,3L),
     cohort_start_date = c(as.Date("2019-01-01"),
                           as.Date("2020-01-05"),
                           as.Date("2020-01-01")),
@@ -181,24 +267,24 @@ test_that("censorOnCohortExit", {
                         as.Date("2020-01-01")),
   )
   observation_period <- dplyr::tibble(
-    observation_period_id = c(1,1,1),
-    person_id = c(1,2,3),
+    observation_period_id = c(1L,1L,1L),
+    person_id = c(1L,2L,3L),
     observation_period_start_date = c(as.Date("2000-01-01"),
                                       as.Date("2000-01-02"),
                                       as.Date("2000-01-01")),
     observation_period_end_date = c(as.Date("2023-04-01"),
                                     as.Date("2023-05-02"),
                                     as.Date("2023-03-01")),
-    period_type_concept_id = c(rep(0,3))
+    period_type_concept_id = c(rep(0L,3L))
   )
   person <- dplyr::tibble(
-    person_id = c(1, 2, 3, 4, 5),
-    year_of_birth = c(rep(1990, 5)),
-    month_of_birth = c(rep(2, 5)),
-    day_of_birth = c(rep(11, 5)),
-    gender_concept_id = c(rep(0,5)),
-    ethnicity_concept_id = c(rep(0,5)),
-    race_concept_id = c(rep(0,5))
+    person_id = c(1L, 2L, 3L, 4L, 5L),
+    year_of_birth = c(rep(1990L, 5L)),
+    month_of_birth = c(rep(2L, 5L)),
+    day_of_birth = c(rep(11L, 5L)),
+    gender_concept_id = c(rep(0L,5L)),
+    ethnicity_concept_id = c(rep(0L,5L)),
+    race_concept_id = c(rep(0L,5L))
   )
 
   cdm <- mockCohortSurvival(
@@ -260,8 +346,8 @@ test_that("censorOnDate", {
   db <- DBI::dbConnect(duckdb::duckdb(), ":memory:")
 
   cohort <- dplyr::tibble(
-    cohort_definition_id = c(1,1,1),
-    subject_id = c(1,2,3),
+    cohort_definition_id = c(1L,1L,1L),
+    subject_id = c(1L,2L,3L),
     cohort_start_date = c(as.Date("2020-01-01"),
                           as.Date("2020-01-02"),
                           as.Date("2021-01-01")),
@@ -270,8 +356,8 @@ test_that("censorOnDate", {
                         as.Date("2021-03-01"))
   )
   events <- dplyr::tibble(
-    cohort_definition_id = c(1,1,1),
-    subject_id = c(1,2,3),
+    cohort_definition_id = c(1L,1L,1L),
+    subject_id = c(1L,2L,3L),
     cohort_start_date = c(as.Date("2019-01-01"),
                           as.Date("2020-01-05"),
                           as.Date("2021-02-01")),
@@ -280,24 +366,24 @@ test_that("censorOnDate", {
                         as.Date("2021-02-01")),
   )
   observation_period <- dplyr::tibble(
-    observation_period_id = c(1,1,1),
-    person_id = c(1,2,3),
+    observation_period_id = c(1L,1L,1L),
+    person_id = c(1L,2L,3L),
     observation_period_start_date = c(as.Date("2000-01-01"),
                                       as.Date("2000-01-02"),
                                       as.Date("2000-01-01")),
     observation_period_end_date = c(as.Date("2023-04-01"),
                                     as.Date("2023-05-02"),
                                     as.Date("2023-03-01")),
-    period_type_concept_id = c(rep(0,3))
+    period_type_concept_id = c(rep(0L,3L))
   )
   person <- dplyr::tibble(
-    person_id = c(1, 2, 3, 4, 5),
-    year_of_birth = c(rep(1990, 5)),
-    month_of_birth = c(rep(2, 5)),
-    day_of_birth = c(rep(11, 5)),
-    gender_concept_id = c(rep(0,5)),
-    ethnicity_concept_id = c(rep(0,5)),
-    race_concept_id = c(rep(0,5))
+    person_id = c(1L, 2L, 3L, 4L, 5L),
+    year_of_birth = c(rep(1990L, 5L)),
+    month_of_birth = c(rep(2L, 5L)),
+    day_of_birth = c(rep(11L, 5L)),
+    gender_concept_id = c(rep(0L,5L)),
+    ethnicity_concept_id = c(rep(0L,5L)),
+    race_concept_id = c(rep(0L,5L))
   )
 
   cdm <- mockCohortSurvival(
@@ -347,13 +433,30 @@ test_that("censorOnDate", {
   CDMConnector::cdmDisconnect(cdm)
 })
 
+test_that("checkCensorOnDate validates direct censor date inputs", {
+  cohort <- dplyr::tibble(
+    cohort_definition_id = c(1L, 1L),
+    subject_id = c(1L, 2L),
+    cohort_start_date = c(as.Date("2020-01-01"), as.Date("2020-01-02")),
+    cohort_end_date = c(as.Date("2020-01-10"), as.Date("2020-01-11")),
+    censor_date = c(as.Date("2020-01-05"), as.Date("2020-01-06")),
+    bad_censor = c("2020-01-05", "2020-01-06")
+  )
+
+  expect_silent(CohortSurvival:::checkCensorOnDate(cohort, as.Date("2020-01-12")))
+  expect_error(CohortSurvival:::checkCensorOnDate(cohort, as.Date("2019-12-31")))
+  expect_silent(CohortSurvival:::checkCensorOnDate(cohort, "censor_date"))
+  expect_error(CohortSurvival:::checkCensorOnDate(cohort, "bad_censor"))
+  expect_error(CohortSurvival:::checkCensorOnDate(cohort, "missing_column"))
+})
+
 test_that("followUpDays", {
   skip_on_cran()
   db <- DBI::dbConnect(duckdb::duckdb(), ":memory:")
 
   cohort <- dplyr::tibble(
-    cohort_definition_id = c(1,1,1),
-    subject_id = c(1,2,3),
+    cohort_definition_id = c(1L,1L,1L),
+    subject_id = c(1L,2L,3L),
     cohort_start_date = c(as.Date("2020-01-01"),
                           as.Date("2020-01-02"),
                           as.Date("2020-01-01")),
@@ -362,8 +465,8 @@ test_that("followUpDays", {
                         as.Date("2020-01-06"))
   )
   events <- dplyr::tibble(
-    cohort_definition_id = c(1,1,1),
-    subject_id = c(1,2,3),
+    cohort_definition_id = c(1L,1L,1L),
+    subject_id = c(1L,2L,3L),
     cohort_start_date = c(as.Date("2020-01-30"),
                           as.Date("2020-01-05"),
                           as.Date("2020-01-11")),
@@ -372,24 +475,24 @@ test_that("followUpDays", {
                         as.Date("2020-01-11")),
   )
   observation_period <- dplyr::tibble(
-    observation_period_id = c(1,1,1),
-    person_id = c(1,2,3),
+    observation_period_id = c(1L,1L,1L),
+    person_id = c(1L,2L,3L),
     observation_period_start_date = c(as.Date("2000-01-01"),
                                       as.Date("2000-01-02"),
                                       as.Date("2000-01-01")),
     observation_period_end_date = c(as.Date("2023-04-01"),
                                     as.Date("2023-05-02"),
                                     as.Date("2023-03-01")),
-    period_type_concept_id = c(rep(0,3))
+    period_type_concept_id = c(rep(0L,3L))
   )
   person <- dplyr::tibble(
-    person_id = c(1, 2, 3, 4, 5),
-    year_of_birth = c(rep(1990, 5)),
-    month_of_birth = c(rep(2, 5)),
-    day_of_birth = c(rep(11, 5)),
-    gender_concept_id = c(rep(0,5)),
-    ethnicity_concept_id = c(rep(0,5)),
-    race_concept_id = c(rep(0,5))
+    person_id = c(1L, 2L, 3L, 4L, 5L),
+    year_of_birth = c(rep(1990L, 5L)),
+    month_of_birth = c(rep(2L, 5L)),
+    day_of_birth = c(rep(11L, 5L)),
+    gender_concept_id = c(rep(0L,5L)),
+    ethnicity_concept_id = c(rep(0L,5L)),
+    race_concept_id = c(rep(0L,5L))
   )
 
   cdm <- mockCohortSurvival(
@@ -542,8 +645,8 @@ test_that("within cohort survival", {
   db <- DBI::dbConnect(duckdb::duckdb(), ":memory:")
 
   cohort <- dplyr::tibble(
-    cohort_definition_id = c(1,1,1),
-    subject_id = c(1,2,3),
+    cohort_definition_id = c(1L,1L,1L),
+    subject_id = c(1L,2L,3L),
     cohort_start_date = c(as.Date("2020-01-01"),
                           as.Date("2020-01-02"),
                           as.Date("2020-01-01")),
@@ -552,24 +655,24 @@ test_that("within cohort survival", {
                         as.Date("2021-03-01"))
   )
   observation_period <- dplyr::tibble(
-    observation_period_id = c(1,1,1),
-    person_id = c(1,2,3),
+    observation_period_id = c(1L,1L,1L),
+    person_id = c(1L,2L,3L),
     observation_period_start_date = c(as.Date("2000-01-01"),
                                       as.Date("2000-01-02"),
                                       as.Date("2000-01-01")),
     observation_period_end_date = c(as.Date("2023-04-01"),
                                     as.Date("2023-05-02"),
                                     as.Date("2023-03-01")),
-    period_type_concept_id = c(rep(0,3))
+    period_type_concept_id = c(rep(0L,3L))
   )
   person <- dplyr::tibble(
-    person_id = c(1, 2, 3, 4, 5),
-    year_of_birth = c(rep(1990, 5)),
-    month_of_birth = c(rep(2, 5)),
-    day_of_birth = c(rep(11, 5)),
-    gender_concept_id = c(rep(0,5)),
-    ethnicity_concept_id = c(rep(0,5)),
-    race_concept_id = c(rep(0,5))
+    person_id = c(1L, 2L, 3L, 4L, 5L),
+    year_of_birth = c(rep(1990L, 5L)),
+    month_of_birth = c(rep(2L, 5L)),
+    day_of_birth = c(rep(11L, 5L)),
+    gender_concept_id = c(rep(0L,5L)),
+    ethnicity_concept_id = c(rep(0L,5L)),
+    race_concept_id = c(rep(0L,5L))
   )
 
   cdm <- mockCohortSurvival(
@@ -634,8 +737,8 @@ test_that("allow overwrite of time and status", {
   db <- DBI::dbConnect(duckdb::duckdb(), ":memory:")
 
   cohort <- dplyr::tibble(
-    cohort_definition_id = c(1,1,1),
-    subject_id = c(1,2,3),
+    cohort_definition_id = c(1L,1L,1L),
+    subject_id = c(1L,2L,3L),
     cohort_start_date = c(as.Date("2020-01-01"),
                           as.Date("2020-01-02"),
                           as.Date("2020-01-01")),
@@ -644,24 +747,24 @@ test_that("allow overwrite of time and status", {
                         as.Date("2021-03-01"))
   )
   observation_period <- dplyr::tibble(
-    observation_period_id = c(1,1,1),
-    person_id = c(1,2,3),
+    observation_period_id = c(1L,1L,1L),
+    person_id = c(1L,2L,3L),
     observation_period_start_date = c(as.Date("2000-01-01"),
                                       as.Date("2000-01-02"),
                                       as.Date("2000-01-01")),
     observation_period_end_date = c(as.Date("2023-04-01"),
                                     as.Date("2023-05-02"),
                                     as.Date("2023-03-01")),
-    period_type_concept_id = c(rep(0,3))
+    period_type_concept_id = c(rep(0L,3L))
   )
   person <- dplyr::tibble(
-    person_id = c(1, 2, 3, 4, 5),
-    year_of_birth = c(rep(1990, 5)),
-    month_of_birth = c(rep(2, 5)),
-    day_of_birth = c(rep(11, 5)),
-    gender_concept_id = c(rep(0,5)),
-    ethnicity_concept_id = c(rep(0,5)),
-    race_concept_id = c(rep(0,5))
+    person_id = c(1L, 2L, 3L, 4L, 5L),
+    year_of_birth = c(rep(1990L, 5L)),
+    month_of_birth = c(rep(2L, 5L)),
+    day_of_birth = c(rep(11L, 5L)),
+    gender_concept_id = c(rep(0L,5L)),
+    ethnicity_concept_id = c(rep(0L,5L)),
+    race_concept_id = c(rep(0L,5L))
   )
 
   cdm <- mockCohortSurvival(
@@ -713,8 +816,8 @@ test_that("multiple records per person", {
   db <- DBI::dbConnect(duckdb::duckdb(), ":memory:")
 
   exposure_cohort <- dplyr::tibble(
-    subject_id = c(1, 1, 2, 2, 3),
-    cohort_definition_id = rep(1,5),
+    subject_id = c(1L, 1L, 2L, 2L, 3L),
+    cohort_definition_id = rep(1L,5L),
     cohort_start_date = c(
       as.Date("2010-01-01"),
       as.Date("2015-01-01"),
@@ -733,8 +836,8 @@ test_that("multiple records per person", {
   # outcome during first cohort entry for id 1
   # outcome during second cohort entry for id 2
   outcome_cohort <- dplyr::tibble(
-    cohort_definition_id = c(1, 1),
-    subject_id = c(1, 2),
+    cohort_definition_id = c(1L, 1L),
+    subject_id = c(1L, 2L),
     cohort_start_date = c(
       as.Date("2012-01-10"),
       as.Date("2017-01-10")
@@ -744,8 +847,8 @@ test_that("multiple records per person", {
       as.Date("2017-01-10")
     ))
   observation_period <- dplyr::tibble(
-    observation_period_id = c(1, 1, 1),
-    person_id = c(1, 2, 3),
+    observation_period_id = c(1L, 1L, 1L),
+    person_id = c(1L, 2L, 3L),
     observation_period_start_date = c(
       as.Date("2007-03-21"),
       as.Date("2006-09-09"),
@@ -756,16 +859,16 @@ test_that("multiple records per person", {
       as.Date("2023-01-03"),
       as.Date("2023-05-20")
     ),
-    period_type_concept_id = c(rep(0,3))
+    period_type_concept_id = c(rep(0L,3L))
   )
   person <- dplyr::tibble(
-    person_id = c(1, 2, 3, 4, 5),
-    year_of_birth = c(rep(1990, 5)),
-    month_of_birth = c(rep(2, 5)),
-    day_of_birth = c(rep(11, 5)),
-    gender_concept_id = c(rep(0,5)),
-    ethnicity_concept_id = c(rep(0,5)),
-    race_concept_id = c(rep(0,5))
+    person_id = c(1L, 2L, 3L, 4L, 5L),
+    year_of_birth = c(rep(1990L, 5L)),
+    month_of_birth = c(rep(2L, 5L)),
+    day_of_birth = c(rep(11L, 5L)),
+    gender_concept_id = c(rep(0L,5L)),
+    ethnicity_concept_id = c(rep(0L,5L)),
+    race_concept_id = c(rep(0L,5L))
   )
 
   cdm <- mockCohortSurvival(
@@ -811,11 +914,12 @@ test_that("multiple records per person", {
 })
 
 test_that("cohort id or cohort name", {
+  skip_on_cran()
   db <- DBI::dbConnect(duckdb::duckdb(), ":memory:")
 
   cohort <- dplyr::tibble(
-    cohort_definition_id = c(1,1,1),
-    subject_id = c(1,2,3),
+    cohort_definition_id = c(1L,1L,1L),
+    subject_id = c(1L,2L,3L),
     cohort_start_date = c(as.Date("2020-01-01"),
                           as.Date("2020-01-02"),
                           as.Date("2021-01-01")),
@@ -824,8 +928,8 @@ test_that("cohort id or cohort name", {
                         as.Date("2021-03-01"))
   )
   events <- dplyr::tibble(
-    cohort_definition_id = c(1,2,1),
-    subject_id = c(1,2,3),
+    cohort_definition_id = c(1L,2L,1L),
+    subject_id = c(1L,2L,3L),
     cohort_start_date = c(as.Date("2019-01-01"),
                           as.Date("2020-01-05"),
                           as.Date("2021-02-01")),
@@ -834,24 +938,24 @@ test_that("cohort id or cohort name", {
                         as.Date("2021-02-01")),
   )
   observation_period <- dplyr::tibble(
-    observation_period_id = c(1,1,1),
-    person_id = c(1,2,3),
+    observation_period_id = c(1L,1L,1L),
+    person_id = c(1L,2L,3L),
     observation_period_start_date = c(as.Date("2000-01-01"),
                                       as.Date("2000-01-02"),
                                       as.Date("2000-01-01")),
     observation_period_end_date = c(as.Date("2023-04-01"),
                                     as.Date("2023-05-02"),
                                     as.Date("2023-03-01")),
-    period_type_concept_id = c(rep(0,3))
+    period_type_concept_id = c(rep(0L,3L))
   )
   person <- dplyr::tibble(
-    person_id = c(1, 2, 3, 4, 5),
-    year_of_birth = c(rep(1990, 5)),
-    month_of_birth = c(rep(2, 5)),
-    day_of_birth = c(rep(11, 5)),
-    gender_concept_id = c(rep(0,5)),
-    ethnicity_concept_id = c(rep(0,5)),
-    race_concept_id = c(rep(0,5))
+    person_id = c(1L, 2L, 3L, 4L, 5L),
+    year_of_birth = c(rep(1990L, 5L)),
+    month_of_birth = c(rep(2L, 5L)),
+    day_of_birth = c(rep(11L, 5L)),
+    gender_concept_id = c(rep(0L,5L)),
+    ethnicity_concept_id = c(rep(0L,5L)),
+    race_concept_id = c(rep(0L,5L))
   )
 
   cdm <- mockCohortSurvival(

@@ -15,6 +15,10 @@
 # limitations under the License.
 
 mockCohortSurvival <- function(tables, cohortTables, cdmName = "mock") {
+  rlang::check_installed("DBI")
+  rlang::check_installed("duckdb")
+  rlang::check_installed("CDMConnector")
+
   db <- DBI::dbConnect(duckdb::duckdb(), ":memory:")
 
   cdm <- omopgenerics::cdmFromTables(

@@ -14,6 +14,7 @@ Estimate survival using data mapped to the Observational Medical Outcomes Partne
 Useful links:
 \itemize{
   \item \url{https://darwin-eu.github.io/CohortSurvival/}
+  \item Report bugs at \url{https://github.com/darwin-eu/CohortSurvival/issues}
 }
 
 }
@@ -22,6 +23,7 @@ Useful links:
 
 Authors:
 \itemize{
+  \item Kim López-Güell \email{kim.lopez@spc.ox.ac.uk} (\href{https://orcid.org/0000-0002-8462-8668}{ORCID})
   \item Edward Burn \email{edward.burn@ndorms.ox.ac.uk} (\href{https://orcid.org/0000-0002-9286-1128}{ORCID})
   \item Martí Català \email{marti.catalasabate@ndorms.ox.ac.uk} (\href{https://orcid.org/0000-0003-3308-9905}{ORCID})
   \item Xintong Li \email{xintong.li@ndorms.ox.ac.uk} (\href{https://orcid.org/0000-0002-6872-5804}{ORCID})
