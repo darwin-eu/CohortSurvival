@@ -1,6 +1,13 @@
-# A tidy implementation of the summarised_characteristics object.
+# Convert survival summarised results to a survival-specific format
 
-A tidy implementation of the summarised_characteristics object.
+Convert the long `omopgenerics::summarised_result` returned by
+[`estimateSingleEventSurvival()`](https://darwin-eu.github.io/CohortSurvival/reference/estimateSingleEventSurvival.md)
+or
+[`estimateCompetingRiskSurvival()`](https://darwin-eu.github.io/CohortSurvival/reference/estimateCompetingRiskSurvival.md)
+into a wider `survival_result` object that is easier to inspect
+manually. The main object contains time-specific estimates when
+available. Event counts, summary statistics, and attrition are stored as
+attributes named `"events"`, `"summary"`, and `"attrition"`.
 
 ## Usage
 
@@ -12,11 +19,18 @@ asSurvivalResult(result)
 
 - result:
 
-  A summarised_characteristics object.
+  A summarised_result object.
 
 ## Value
 
-A tibble with a tidy version of the summarised_characteristics object.
+A `survival_result` object.
+
+## Details
+
+The plotting and table functions in CohortSurvival accept both formats.
+The original `summarised_result` is usually preferable for exporting,
+binding with other omopgenerics results, and reporting through
+visOmopResults.
 
 ## Examples
 
@@ -40,11 +54,11 @@ surv <- estimateSingleEventSurvival(
   eventGap = 7
 ) |>
 asSurvivalResult()
-#> - Getting survival for target cohort 'mgus_diagnosis' and outcome cohort
-#> 'death_cohort'
+#> ℹ Getting survival for target cohort 'mgus_diagnosis' and outcome cohort
+#>   'death_cohort'
 #> Getting overall estimates
 #> `eventgap`, `outcome_washout`, `censor_on_cohort_exit`, `follow_up_days`, and
-#> `minimum_survival_days` casted to character.
+#> `minimum_survival_days` cast to character.
 #> Warning: eventgap column will be added to the survival result object to include all
 #> relevant information
 # }

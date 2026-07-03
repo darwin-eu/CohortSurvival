@@ -1,6 +1,13 @@
 # Table with survival summary
 
-Table with survival summary
+Create a formatted table from the summary and, optionally, time-specific
+estimate result types returned by
+[`estimateSingleEventSurvival()`](https://darwin-eu.github.io/CohortSurvival/reference/estimateSingleEventSurvival.md)
+or
+[`estimateCompetingRiskSurvival()`](https://darwin-eu.github.io/CohortSurvival/reference/estimateCompetingRiskSurvival.md).
+For single-event analyses, time-specific rows are survival
+probabilities. For competing-risk analyses, they are cumulative
+incidence probabilities for the outcome and competing outcome.
 
 ## Usage
 
@@ -23,16 +30,21 @@ tableSurvival(
 
 - x:
 
-  Result from estimateSingleEventSurvival or
-  estimateCompetingRiskSurvival
+  Result from
+  [`estimateSingleEventSurvival()`](https://darwin-eu.github.io/CohortSurvival/reference/estimateSingleEventSurvival.md)
+  or
+  [`estimateCompetingRiskSurvival()`](https://darwin-eu.github.io/CohortSurvival/reference/estimateCompetingRiskSurvival.md).
+  A `summarised_result` or `survival_result` is accepted.
 
 - times:
 
-  Times at which to report survival in the summary table
+  Times at which to report estimates in the summary table. These must
+  match available estimate times after applying `timeScale`; unavailable
+  times are omitted with a message.
 
 - timeScale:
 
-  Time unit to report survival in: days, months or years
+  Time unit to report survival in: days, months, or years.
 
 - header:
 
@@ -88,7 +100,7 @@ tableSurvival(
   2.  **YAML file path:** Provide the path to an existing `.yml` file
       defining a new style.
 
-  3.  **List of custome R code:** Supply a block of custom R code or a
+  3.  **List of custom R code:** Supply a block of custom R code or a
       named list describing styles for each table section. This code
       must be specific to the selected table type. If `style = NULL`,
       the function will use global options (see
@@ -104,7 +116,15 @@ tableSurvival(
 
 ## Value
 
-A tibble containing a summary of observed survival in the required units
+A formatted table containing a summary of observed survival or
+cumulative incidence in the required units.
+
+## Details
+
+Restricted mean survival is taken from the estimation output. Its
+interpretation depends on the `restrictedMeanFollowUp` value used when
+the survival result was estimated; use a common value there when
+comparing restricted means across groups or strata.
 
 ## Examples
 
@@ -122,58 +142,16 @@ cdm <- mockMGUS2cdm()
 surv <- estimateSingleEventSurvival(cdm,
                                     targetCohortTable = "mgus_diagnosis",
                                     outcomeCohortTable = "death_cohort")
-#> - Getting survival for target cohort 'mgus_diagnosis' and outcome cohort
-#> 'death_cohort'
+#> ℹ Getting survival for target cohort 'mgus_diagnosis' and outcome cohort
+#>   'death_cohort'
 #> Getting overall estimates
 #> `eventgap`, `outcome_washout`, `censor_on_cohort_exit`, `follow_up_days`, and
-#> `minimum_survival_days` casted to character.
+#> `minimum_survival_days` cast to character.
 tableSurvival(surv, times = c(50,100,365))
 
 
   
 
 
-CDM name
+Data source
 ```
-
-Target cohort
-
-Outcome name
-
-Estimate name
-
-Number records
-
-Number events
-
-Median survival (95% CI)
-
-Restricted mean survival (95% CI)
-
-50 days survival estimate
-
-100 days survival estimate
-
-365 days survival estimate
-
-mock
-
-mgus_diagnosis
-
-death_cohort
-
-1,384
-
-963
-
-98.00 (92.00, 103.00)
-
-133.00 (124.00, 141.00)
-
-69.67 (67.28, 72.13)
-
-48.50 (45.87, 51.29)
-
-6.84 (3.36, 13.92)
-
-\# }

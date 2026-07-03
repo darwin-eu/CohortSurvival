@@ -1,6 +1,13 @@
-# Plot survival results
+# Plot survival or cumulative incidence results
 
-Plot survival results
+Plot the time-specific estimates returned by
+[`estimateSingleEventSurvival()`](https://darwin-eu.github.io/CohortSurvival/reference/estimateSingleEventSurvival.md)
+or
+[`estimateCompetingRiskSurvival()`](https://darwin-eu.github.io/CohortSurvival/reference/estimateCompetingRiskSurvival.md).
+Single-event results are plotted as survival probabilities by default
+and can be displayed as cumulative failure with
+`cumulativeFailure = TRUE`. Competing-risk results are cumulative
+incidence estimates and therefore require `cumulativeFailure = TRUE`.
 
 ## Usage
 
@@ -15,6 +22,7 @@ plotSurvival(
   riskInterval = 30,
   logLog = FALSE,
   timeScale = "days",
+  type = NULL,
   style = NULL
 )
 ```
@@ -23,41 +31,50 @@ plotSurvival(
 
 - result:
 
-  Survival results
+  Survival results. A `summarised_result` or `survival_result` is
+  accepted.
 
 - ribbon:
 
-  If TRUE, the plot will join points using a ribbon
+  If TRUE, add a ribbon using the confidence interval columns.
 
 - facet:
 
-  Variables to use for facets
+  Variables to use for facets.
 
 - colour:
 
-  Variables to use for colours
+  Variables to use for colours.
 
 - cumulativeFailure:
 
-  whether to plot the cumulative failure probability instead of the
-  survival probability
+  Whether to plot the cumulative failure probability instead of the
+  survival probability.
 
 - riskTable:
 
-  Whether to print risk table below the plot
+  Whether to print risk table below the plot.
 
 - riskInterval:
 
-  Interval of time to print risk table below the plot
+  Interval of time to print risk table below the plot. This should be
+  compatible with the `eventGap` used when estimating the result.
 
 - logLog:
 
   If TRUE, the survival probabilities are transformed using the log-log
-  formula
+  formula.
 
 - timeScale:
 
-  The scale of time in the x-axis. Can be "days", "months", or "years"
+  The scale of time in the x-axis. Can be "days", "months", or "years".
+
+- type:
+
+  Character string specifying the desired plot type. See
+  [`visOmopResults::scatterPlot()`](https://darwin-eu.github.io/visOmopResults/reference/scatterPlot.html)
+  for supported types. If `type = NULL`, the default backend plot type
+  is used.
 
 - style:
 
@@ -70,7 +87,16 @@ plotSurvival(
 
 ## Value
 
-A plot of survival probabilities over time
+A plot of survival probabilities or cumulative incidence probabilities
+over time.
+
+## Details
+
+`facet` and `colour` should refer to columns available after converting
+the result with
+[`asSurvivalResult()`](https://darwin-eu.github.io/CohortSurvival/reference/asSurvivalResult.md),
+for example `target_cohort`, `outcome`, `competing_outcome`, `variable`,
+or strata columns such as `sex`.
 
 ## Examples
 
@@ -88,11 +114,11 @@ cdm <- mockMGUS2cdm()
 surv <- estimateSingleEventSurvival(cdm,
                                     targetCohortTable = "mgus_diagnosis",
                                     outcomeCohortTable = "death_cohort")
-#> - Getting survival for target cohort 'mgus_diagnosis' and outcome cohort
-#> 'death_cohort'
+#> ℹ Getting survival for target cohort 'mgus_diagnosis' and outcome cohort
+#>   'death_cohort'
 #> Getting overall estimates
 #> `eventgap`, `outcome_washout`, `censor_on_cohort_exit`, `follow_up_days`, and
-#> `minimum_survival_days` casted to character.
+#> `minimum_survival_days` cast to character.
 plotSurvival(surv)
 #> Warning: eventgap column will be added to the survival result object to include all
 #> relevant information

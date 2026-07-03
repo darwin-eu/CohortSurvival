@@ -5,6 +5,7 @@
 Let us first load the packages required.
 
 ``` r
+
 library(CDMConnector)
 library(CohortSurvival)
 library(dplyr)
@@ -16,6 +17,7 @@ dataset. In practice you would use the CDMConnector package to connect
 to your data mapped to the OMOP CDM.
 
 ``` r
+
 cdm <- CohortSurvival::mockMGUS2cdm()
 ```
 
@@ -34,7 +36,7 @@ have these cohorts available: `mgus_diagnosis` for our target cohort and
 
 If you have a target cohort and a death table in your cdm but not a
 death cohort per se, you can use the function
-\[deathCohort\]{<https://ohdsi.github.io/CohortConstructor/articles/a01_building_base_cohorts.html?q=death#death-cohort>}
+[`deathCohort()`](https://ohdsi.github.io/CohortConstructor/articles/a01_building_base_cohorts.html?q=death#death-cohort)
 from CohortConstructor to create it. The most efficient way to do so is
 to restrict the creation to your target cohort, by calling
 `deathCohort(cdm, name = "death_cohort", subsetCohort = "name_of_your_target_cohort_table")`.
@@ -46,11 +48,11 @@ stratification.
 Let us first take a quick look at the data we will be working with:
 
 ``` r
+
 cdm$mgus_diagnosis |> 
   glimpse()
 #> Rows: ??
 #> Columns: 10
-#> Database: DuckDB 1.5.2 [unknown@Linux 6.17.0-1011-azure:R 4.6.0/:memory:]
 #> $ cohort_definition_id <int> 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1…
 #> $ subject_id           <int> 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15…
 #> $ cohort_start_date    <date> 1981-01-01, 1968-01-01, 1980-01-01, 1977-01-01, …
@@ -66,7 +68,6 @@ cdm$death_cohort |>
   glimpse()
 #> Rows: ??
 #> Columns: 4
-#> Database: DuckDB 1.5.2 [unknown@Linux 6.17.0-1011-azure:R 4.6.0/:memory:]
 #> $ cohort_definition_id <int> 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1…
 #> $ subject_id           <int> 1, 2, 3, 4, 5, 6, 7, 8, 10, 11, 12, 13, 14, 15, 1…
 #> $ cohort_start_date    <date> 1981-01-31, 1968-01-26, 1980-02-16, 1977-04-03, …
@@ -97,6 +98,7 @@ of the target and outcome cohorts, which must be cohort tables in the
 cdm provided.
 
 ``` r
+
 MGUS_death <- estimateSingleEventSurvival(
   cdm,
   targetCohortTable = "mgus_diagnosis",
@@ -133,14 +135,15 @@ different result types available. We can check this with the
 function from `omopgenerics`.
 
 ``` r
+
 settings(MGUS_death)
 #> # A tibble: 4 × 17
 #>   result_id result_type     package_name package_version group strata additional
 #>       <int> <chr>           <chr>        <chr>           <chr> <chr>  <chr>     
-#> 1         1 survival_estim… CohortSurvi… 1.1.0           targ… ""     "time"    
-#> 2         2 survival_events CohortSurvi… 1.1.0           targ… ""     "time"    
-#> 3         3 survival_summa… CohortSurvi… 1.1.0           targ… ""     ""        
-#> 4         4 survival_attri… CohortSurvi… 1.1.0           targ… "reas… "reason_i…
+#> 1         1 survival_estim… CohortSurvi… 1.1.2           targ… ""     "time"    
+#> 2         2 survival_events CohortSurvi… 1.1.2           targ… ""     "time"    
+#> 3         3 survival_summa… CohortSurvi… 1.1.2           targ… ""     ""        
+#> 4         4 survival_attri… CohortSurvi… 1.1.2           targ… "reas… "reason_i…
 #> # ℹ 10 more variables: min_cell_count <chr>, analysis_type <chr>,
 #> #   censor_on_cohort_exit <chr>, competing_outcome <chr>, eventgap <chr>,
 #> #   follow_up_days <chr>, minimum_survival_days <chr>, outcome <chr>,
@@ -157,6 +160,7 @@ The main visualisation functions in the package also work on this
 survival estimates we can run the following line of code:
 
 ``` r
+
 plotSurvival(MGUS_death)
 ```
 
@@ -166,6 +170,7 @@ We can also decide to add a basic risk table underneath the plot, by
 setting the argument `riskTable = TRUE`.
 
 ``` r
+
 plotSurvival(MGUS_death, riskTable = TRUE)
 ```
 
@@ -178,12 +183,14 @@ the plotting options in
 [`?plotSurvival`](https://darwin-eu.github.io/CohortSurvival/reference/plotSurvival.md).
 
 ``` r
+
 plotSurvival(MGUS_death, ribbon = FALSE)
 ```
 
 ![](a01_Single_event_of_interest_files/figure-html/unnamed-chunk-9-1.png)
 
 ``` r
+
 plotSurvival(MGUS_death, cumulativeFailure = TRUE)
 ```
 
@@ -195,6 +202,7 @@ lines of code to the plot itself. For instance, we can switch the plot
 axes:
 
 ``` r
+
 plotSurvival(MGUS_death) + theme_bw() + ggtitle("Plot survival") + coord_flip()
 ```
 
@@ -204,12 +212,14 @@ If we want the time in the x axis in another unit (years or months), you
 can use the parameter `timeScale` from the function:
 
 ``` r
+
 plotSurvival(MGUS_death, timeScale = "years")
 ```
 
 ![](a01_Single_event_of_interest_files/figure-html/unnamed-chunk-11-1.png)
 
 ``` r
+
 plotSurvival(MGUS_death, timeScale = "months")
 ```
 
@@ -233,6 +243,7 @@ combinations of target and outcome cohorts and stratifications available
 in the result.
 
 ``` r
+
 tableSurvival(MGUS_death)
 ```
 
@@ -242,22 +253,29 @@ Note that if less than 50% of the people in the target cohort experience
 the event, the median survival will not be reported (i.e. the output
 will be `NA(NA,NA)`).
 
-Note, additionally, that restricted mean survival is reported for the
-whole study period (as long as follow up is available) by default,
-unless asked otherwise. Therefore, `restrictedMeanFollowUp = NULL` will
-provide this result for follow up as long as available. This parameter
-can be changed in the main estimation function, if the user wants to. If
-this parameter is set to a number greater than the follow up available,
-the summary table will display `NA` for this value. For instance, if we
-ask for a restricted mean follow up of 2 years in a target cohort that
-we can only follow for 300 days, `tableSurvival` will report a
-Restricted mean survival of `NA`.
+Restricted mean survival is the area under the survival curve up to a
+chosen follow-up horizon. It can be useful when median survival is not
+reached, and it can also be easier to compare than survival at a single
+time point. By default, `restrictedMeanFollowUp = NULL`, which leaves
+the restricted mean horizon to the underlying survival summary. In
+stratified analyses, this can use a common maximum follow-up time across
+the fitted curves. As a result, a stratum with shorter observed
+follow-up may have its last survival estimate carried forward and
+integrated beyond its own maximum follow-up. This means the restricted
+mean survival can be larger than the observed follow-up time for that
+stratum, and comparisons across strata may be misleading. When comparing
+groups, it is usually better to set `restrictedMeanFollowUp` to a common
+clinically meaningful horizon that is supported by follow-up in all
+groups, such as 365 days or 5 years. If a requested
+`restrictedMeanFollowUp` is greater than the available follow-up for a
+curve, CohortSurvival reports the restricted mean as `NA`.
 
 This summary table function can also report survival at requested times.
 For instance, we might want to know the survival estimates for the
 cohort at 30, 90 and 180 days. We would do that as such:
 
 ``` r
+
 tableSurvival(MGUS_death, times = c(30,90,180))
 ```
 
@@ -268,6 +286,7 @@ will not return it. For instance, in this case, follow up is not
 available after 500 days, so:
 
 ``` r
+
 tableSurvival(MGUS_death, times = c(30,90,180, 500))
 ```
 
@@ -275,17 +294,19 @@ tableSurvival(MGUS_death, times = c(30,90,180, 500))
 
 Other options of this table include giving the estimates in years
 instead of days, or changing its style (we can either manually ask for
-the aesthetic we want ot use one of the predefined ones). Check
+the aesthetic we want or use one of the predefined ones). Check
 [`?tableSurvival`](https://darwin-eu.github.io/CohortSurvival/reference/tableSurvival.md)
 for additional options included in the function parameters.
 
 ``` r
+
 tableSurvival(MGUS_death, times = c(1,2), timeScale = "years")
 ```
 
 [TABLE]
 
 ``` r
+
 
 tableSurvival(MGUS_death, times = c(1,2), style = "darwin")
 ```
@@ -297,6 +318,7 @@ to ask for a variety of additional formatting choices. To see the list
 of options, we can call `optionsTableSurvival` :
 
 ``` r
+
 optionsTableSurvival()
 #> $decimals
 #>    integer percentage    numeric proportion 
@@ -343,6 +365,7 @@ So, for instance, if we want to add a title to the table and also change
 the decimal mark to “,” and the big mark to “.”, we would call:
 
 ``` r
+
 tableSurvival(MGUS_death, .options = list(title = "Survival summary",
                                           decimalMark = ",",
                                           bigMark = "."))
@@ -360,6 +383,7 @@ stage if we want aggregated events at a smaller or bigger interval.
 Other options for this table are similar to the ones of `tableSurvival`.
 
 ``` r
+
 riskTable(MGUS_death)
 ```
 
@@ -378,6 +402,7 @@ table containing the estimates and the information on events, summary
 and attrition being stored as attributes.
 
 ``` r
+
 # Transforming the output to a survival result format
 MGUS_death_survresult <- MGUS_death |> 
   asSurvivalResult() 
@@ -450,13 +475,14 @@ attr(MGUS_death_survresult,"summary") |>
 attr(MGUS_death_survresult,"attrition") |>
   glimpse()
 #> Rows: 12
-#> Columns: 8
+#> Columns: 9
 #> $ cdm_name          <chr> "mock", "mock", "mock", "mock", "mock", "mock", "moc…
 #> $ target_cohort     <chr> "mgus_diagnosis_1", "mgus_diagnosis_1", "mgus_diagno…
 #> $ outcome           <chr> "death_cohort", "death_cohort", "death_cohort", "dea…
 #> $ competing_outcome <chr> "none", "none", "none", "none", "none", "none", "non…
 #> $ reason            <chr> "Initial qualifying events", "Initial qualifying eve…
 #> $ variable_name     <chr> "number_records", "number_subjects", "excluded_recor…
+#> $ reason_id         <chr> "1", "1", "1", "1", "2", "2", "2", "2", "3", "3", "3…
 #> $ result_type       <chr> "survival_attrition", "survival_attrition", "surviva…
 #> $ count             <int> 1384, 1384, 0, 0, 1384, 1384, 0, 0, 1384, 1384, 0, 0
 ```
@@ -465,6 +491,7 @@ We can now directly check all estimates for times 10 to 15, for
 instance, like this:
 
 ``` r
+
 MGUS_death_survresult |>
   filter(time %in% c(10:15))
 #> # A tibble: 6 × 10
@@ -511,6 +538,20 @@ default is set to `minimumSurvivalDays = 1`) or cutting the follow-up at
 a certain amount of time (the default is set to `followUpDays = Inf`,
 i.e. as much follow up as available).
 
+The main time-related parameters control different parts of the
+analysis:
+
+| Parameter | What it changes |
+|----|----|
+| `outcomeWashout` | Excludes target cohort records with an outcome in the washout window before cohort entry. `Inf` means any prior outcome and `0` means no pre-index washout. |
+| `followUpDays` | Censors everyone after a fixed number of days from target cohort entry. |
+| `censorOnCohortExit` | Censors follow-up at the target cohort end date. |
+| `censorOnDate` | Censors follow-up at one calendar date, or at a date column in the target cohort. |
+| `minimumSurvivalDays` | Removes records that do not contribute at least this many survival days. |
+| `eventGap` | Sets the width of intervals used for event and risk table counts. |
+| `estimateGap` | Sets the spacing between survival probability estimates. |
+| `restrictedMeanFollowUp` | Sets the common horizon used to calculate restricted mean survival. |
+
 We might want to retrieve event information at a smaller interval than
 the default, which is every 30 days. Note that if we use the usual
 exporting functions from `omopgenerics`, small numbers will be
@@ -524,6 +565,7 @@ change it in the plot accordingly (with either the same `eventGap`
 number or a multiple, like we do in the following plot).
 
 ``` r
+
 MGUS_death_gap7 <- estimateSingleEventSurvival(cdm, "mgus_diagnosis", "death_cohort", eventGap = 7)
 plotSurvival(MGUS_death_gap7, riskTable = TRUE, riskInterval = 14)
 ```
@@ -538,6 +580,7 @@ display all results with the required variables. Let us see that by
 estimating survival with a specific date censoring.
 
 ``` r
+
 MGUS_death_fu <- estimateSingleEventSurvival(
   cdm,
   targetCohortTable = "mgus_diagnosis",
@@ -573,12 +616,14 @@ as we would expect. Let us now see that both the `tableSurvival` and
 `plotSurvival` functions display all required information.
 
 ``` r
+
 plotSurvival(MGUS_death_all, facet = "follow_up_days")
 ```
 
 ![](a01_Single_event_of_interest_files/figure-html/unnamed-chunk-23-1.png)
 
 ``` r
+
 
 tableSurvival(MGUS_death_all)
 ```
@@ -599,6 +644,7 @@ added to our diagnosis cohort. If we want to stratify by age group, by
 sex, and by both at the same time, we would do the following:
 
 ``` r
+
 MGUS_death_strata <- estimateSingleEventSurvival(cdm,
   targetCohortTable = "mgus_diagnosis",
   outcomeCohortTable = "death_cohort",
@@ -614,6 +660,7 @@ can get the summary table using `tableSurvival`, with now a row for each
 strata:
 
 ``` r
+
 tableSurvival(MGUS_death_strata)
 ```
 
@@ -626,6 +673,7 @@ can use the function
 as mentioned before.
 
 ``` r
+
 availableSurvivalGrouping(MGUS_death_strata)
 #> [1] "age_group"           "sex"                 "time"               
 #> [4] "estimate"            "estimate_95CI_lower" "estimate_95CI_upper"
@@ -637,6 +685,7 @@ is to separate the plots into sex and display different age groups in
 each one of them:
 
 ``` r
+
 plotSurvival(MGUS_death_strata,
              facet = "sex",
              colour = "age_group")
@@ -647,6 +696,7 @@ plotSurvival(MGUS_death_strata,
 We can add the respective risk tables under each plot as well.
 
 ``` r
+
 plotSurvival(MGUS_death_strata,
              colour = c("age_group", "sex"),
              riskTable = TRUE)
@@ -664,6 +714,7 @@ customise facets. Next we show the default facets obtained for
 “age_group” and “sex” levels.
 
 ``` r
+
 plotSurvival(MGUS_death_strata, facet = c("age_group", "sex"))
 ```
 
@@ -673,6 +724,7 @@ Next, we create customised facets by using functions from the ggplot2
 package. We set “age_group” to columns and “sex” to rows:
 
 ``` r
+
 plotSurvival(MGUS_death_strata) +
   facet_grid(rows = vars(sex), cols = vars(age_group))
 ```
@@ -695,6 +747,7 @@ survival in a separate call and group the results a posteriori using the
 function `bind` from `omopgenerics`:
 
 ``` r
+
 MM_death <- estimateSingleEventSurvival(cdm, "progression", "death_cohort")
 MGUS_MM_death <- bind(MGUS_death, MM_death)
 ```
@@ -704,14 +757,15 @@ can see in the settings table. We can check the summary table and plot
 the estimates coloured by target cohort like this:
 
 ``` r
+
 settings(MGUS_MM_death)
 #> # A tibble: 4 × 17
 #>   result_id result_type     package_name package_version group strata additional
 #>       <int> <chr>           <chr>        <chr>           <chr> <chr>  <chr>     
-#> 1         1 survival_estim… CohortSurvi… 1.1.0           targ… ""     "time"    
-#> 2         2 survival_events CohortSurvi… 1.1.0           targ… ""     "time"    
-#> 3         3 survival_summa… CohortSurvi… 1.1.0           targ… ""     ""        
-#> 4         4 survival_attri… CohortSurvi… 1.1.0           targ… "reas… "reason_i…
+#> 1         1 survival_estim… CohortSurvi… 1.1.2           targ… ""     "time"    
+#> 2         2 survival_events CohortSurvi… 1.1.2           targ… ""     "time"    
+#> 3         3 survival_summa… CohortSurvi… 1.1.2           targ… ""     ""        
+#> 4         4 survival_attri… CohortSurvi… 1.1.2           targ… "reas… "reason_i…
 #> # ℹ 10 more variables: min_cell_count <chr>, analysis_type <chr>,
 #> #   censor_on_cohort_exit <chr>, competing_outcome <chr>, eventgap <chr>,
 #> #   follow_up_days <chr>, minimum_survival_days <chr>, outcome <chr>,
@@ -722,6 +776,7 @@ tableSurvival(MGUS_MM_death)
 [TABLE]
 
 ``` r
+
 plotSurvival(MGUS_MM_death, colour = "target_cohort")
 ```
 
@@ -740,6 +795,7 @@ and death. We need to unite both outcome tables into one, which we can
 do manually or using the function `bind` from `omopgenerics`:
 
 ``` r
+
 cdm <- bind(cdm$progression, cdm$death_cohort, name = "outcome_cohorts")
 ```
 
@@ -748,6 +804,7 @@ we will get results for both analyses. Likewise, we can check the
 summary and plot for both outcomes:
 
 ``` r
+
 MGUS_death_prog <- estimateSingleEventSurvival(cdm, "mgus_diagnosis", "outcome_cohorts")
 tableSurvival(MGUS_death_prog)
 ```
@@ -755,6 +812,7 @@ tableSurvival(MGUS_death_prog)
 [TABLE]
 
 ``` r
+
 plotSurvival(MGUS_death_prog, colour = "outcome")
 ```
 
@@ -769,6 +827,7 @@ plot to visually assess the proportionality. With the aforementioned new
 for `death` and `progression`:
 
 ``` r
+
 plotSurvival(MGUS_death_prog, colour = "outcome", logLog = TRUE)
 ```
 
@@ -782,11 +841,13 @@ exportable functions in this package. Therefore, to export the main
 output, with the usual parameters, we need to do the following:
 
 ``` r
+
 x <- tempdir()
 exportSummarisedResult(MGUS_death, path = x, fileName = "result.csv")
 ```
 
 ``` r
+
 MGUS_death_imported <- importSummarisedResult(path = file.path(x, "result.csv"))
 ```
 
@@ -803,6 +864,7 @@ exporting and importing. Note the difference between the following risk
 table and the one we plotted at the beginning of this vignette:
 
 ``` r
+
 plotSurvival(MGUS_death_imported, riskTable = TRUE)
 ```
 
@@ -813,5 +875,6 @@ plotSurvival(MGUS_death_imported, riskTable = TRUE)
 We finish by disconnecting from the cdm.
 
 ``` r
+
 cdmDisconnect(cdm)
 ```

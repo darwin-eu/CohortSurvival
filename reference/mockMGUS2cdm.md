@@ -26,8 +26,8 @@ cdm <- mockMGUS2cdm()
 #> Uploading table progression (115 rows) - [6/7]
 #> Uploading table progression_type (230 rows) - [7/7]
 cdm$person
-#> # Source:   table<person> [?? x 7]
-#> # Database: DuckDB 1.5.2 [unknown@Linux 6.17.0-1011-azure:R 4.6.0/:memory:]
+#> # A query:  ?? x 7
+#> # Database: DuckDB 1.5.4 [unknown@Linux 6.17.0-1018-azure:R 4.6.1/:memory:]
 #>    person_id gender_concept_id year_of_birth month_of_birth day_of_birth
 #>        <int>             <int>         <int>          <int>        <int>
 #>  1         1              8532          1980             10            5

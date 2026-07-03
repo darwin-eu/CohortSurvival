@@ -18,14 +18,17 @@
 
 ## Citation
 
+Source:
+[`DESCRIPTION`](https://github.com/darwin-eu/CohortSurvival/blob/main/DESCRIPTION)
+
 López-Güell K, Burn E, Català M, Li X, Newby D, Mercade-Besora N (2026).
 *CohortSurvival: Estimate Survival from Common Data Model Cohorts*. R
-package version 1.1.0, <https://darwin-eu.github.io/CohortSurvival/>.
+package version 1.1.2, <https://darwin-eu.github.io/CohortSurvival/>.
 
     @Manual{,
       title = {CohortSurvival: Estimate Survival from Common Data Model Cohorts},
       author = {Kim López-Güell and Edward Burn and Martí Català and Xintong Li and Danielle Newby and Nuria Mercade-Besora},
       year = {2026},
-      note = {R package version 1.1.0},
+      note = {R package version 1.1.2},
       url = {https://darwin-eu.github.io/CohortSurvival/},
     }

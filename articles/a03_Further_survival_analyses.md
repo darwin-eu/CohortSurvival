@@ -5,6 +5,7 @@
 Let us first load the packages required.
 
 ``` r
+
 library(CDMConnector)
 library(CohortSurvival)
 library(dplyr)
@@ -16,25 +17,32 @@ We will create a cdm reference to use our example MGUS2 survival
 dataset.
 
 ``` r
+
 cdm <- CohortSurvival::mockMGUS2cdm()
 ```
 
-The CohortSurvival package does not have implemented functionality to do
-more complex survival analyses than Kaplar Meier curves, like Cox
-Proportional Hazards modelling. However, the format the data has to be
-in to be inputted to well-known modelling functions from packages like
-`survival` or `cmprsk`can be retrieved from OMOP data with some in-built
-functions in this package. Let us see how to do it in both single event
-and competing risk survival settings.
+The CohortSurvival package focuses on Kaplan-Meier survival estimates
+and cumulative incidence in a competing-risk setting. It does not fit
+more complex models, such as Cox proportional hazards or Fine and Gray
+models, directly. However, the format the data has to be in to be
+inputted to well-known modelling functions from packages like `survival`
+or `cmprsk` can be retrieved from OMOP data with
+[`addCohortSurvival()`](https://darwin-eu.github.io/CohortSurvival/reference/addCohortSurvival.md).
+Let us see how to do it in both single-event and competing-risk survival
+settings.
 
 ## Further analysis with single event survival
 
 To get the `time` and `status` information we need for the `coxph`
 function in the package `survival`, for instance, we only need to call
-`addCohortSurvival`. The stratification variables need to be columns
-previously added to the cohort by the user.
+[`addCohortSurvival()`](https://darwin-eu.github.io/CohortSurvival/reference/addCohortSurvival.md).
+The stratification variables need to be columns previously added to the
+cohort by the user. `status` is `1` for people with the outcome event
+and `0` for people censored before the event. `time` is the number of
+days from cohort entry to the event or censoring.
 
 ``` r
+
 input_survival_single <- cdm$mgus_diagnosis |>
        addCohortSurvival(
        cdm = cdm,
@@ -46,7 +54,6 @@ input_survival_single |>
   glimpse()
 #> Rows: ??
 #> Columns: 13
-#> Database: DuckDB 1.5.2 [unknown@Linux 6.17.0-1011-azure:R 4.6.0/:memory:]
 #> $ cohort_definition_id <int> 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1…
 #> $ subject_id           <int> 1, 2, 3, 4, 5, 6, 7, 8, 10, 11, 12, 13, 14, 15, 1…
 #> $ cohort_start_date    <date> 1981-01-01, 1968-01-01, 1980-01-01, 1977-01-01, …
@@ -63,15 +70,16 @@ input_survival_single |>
 ```
 
 We can decide to change some of the default parameters in this function.
-Information on all these can be found
+Information on all these can be found in
 [`?addCohortSurvival`](https://darwin-eu.github.io/CohortSurvival/reference/addCohortSurvival.md).
 For instance, we can choose to exclude people with an outcome only 180
 days before index date, instead of anytime, and follow them up for only
-one year. We can also decide to use `cohort_end_date` as their outcome
-variable and censor them at a particular date, for instance, the 1st of
-January of 1994. We see how that gives us different results:
+one year. We can also decide to use `cohort_end_date` as the outcome
+date variable and censor them at a particular date, for instance, the
+1st of January of 1994. We see how that gives us different results:
 
 ``` r
+
 cdm$mgus_diagnosis |>
        addCohortSurvival(
        cdm = cdm,
@@ -83,7 +91,6 @@ cdm$mgus_diagnosis |>
   glimpse()
 #> Rows: ??
 #> Columns: 13
-#> Database: DuckDB 1.5.2 [unknown@Linux 6.17.0-1011-azure:R 4.6.0/:memory:]
 #> $ cohort_definition_id <int> 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1…
 #> $ subject_id           <int> 213, 671, 941, 1245, 1248, 1340, 1374, 1376, 1380…
 #> $ cohort_start_date    <date> 1994-01-01, 1994-01-01, 1994-01-01, 1994-01-01, …
@@ -108,7 +115,6 @@ cdm$mgus_diagnosis |>
   glimpse()
 #> Rows: ??
 #> Columns: 13
-#> Database: DuckDB 1.5.2 [unknown@Linux 6.17.0-1011-azure:R 4.6.0/:memory:]
 #> $ cohort_definition_id <int> 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1…
 #> $ subject_id           <int> 213, 671, 941, 1245, 1248, 1340, 1374, 1376, 1380…
 #> $ cohort_start_date    <date> 1994-01-01, 1994-01-01, 1994-01-01, 1994-01-01, …
@@ -129,6 +135,7 @@ enough to call any advanced function, like the aforementioned Cox
 Proportional Hazards model:
 
 ``` r
+
 survival::coxph(survival::Surv(time, status) ~ age + sex, data = input_survival_single)
 #> Call:
 #> survival::coxph(formula = survival::Surv(time, status) ~ age + 
@@ -154,14 +161,17 @@ survival::survdiff(survival::Surv(time, status) ~ sex, data = input_survival_sin
 
 ## Further analysis with competing risk survival
 
-For competing risk settings, we need to use the same function that adds
-`time` and `status` information, but twice. We first need to add time
-and status information for the outcome, then for the competing outcome.
-Then we leverage all those variables to get what outcome (if any) to
-count per individual so that we can feed the result to subsequent
-models.
+For competing-risk settings, we need to use the same function that adds
+`time` and `status` information, but twice. We first add time and status
+information for the outcome, then for the competing outcome. Then we
+combine those variables to identify which outcome, if any, happened
+first for each individual so that we can feed the result to subsequent
+models. In the coding below, `status = 0` means censored, `status = 1`
+means the event of interest, and `status = 2` means the competing
+outcome.
 
 ``` r
+
 
 # Add all status and time information for both outcomes
   input_survival_cr <- cdm$mgus_diagnosis |>
@@ -176,7 +186,7 @@ models.
       "competing_outcome_status" = "status"
     )
   
-  # Collect and 
+  # Collect and combine the two event processes
   input_survival_cr <- input_survival_cr |>
     dplyr::collect() |>
     dplyr::mutate(
@@ -192,6 +202,7 @@ competing risk data. We first change our `sex` covariate to numeric, and
 then we can run the analysis:
 
 ``` r
+
 input_survival_cr <- input_survival_cr |>
   dplyr::mutate(sex = dplyr::if_else(sex == "M", 0, 1))
 
@@ -227,5 +238,6 @@ summary(cmprsk::crr(ftime = input_survival_cr$time,
 We finish by disconnecting from the cdm database connection.
 
 ``` r
+
 cdmDisconnect(cdm)
 ```

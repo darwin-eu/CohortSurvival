@@ -63,7 +63,7 @@ Helper for consistent documentation of `tables`.
   2.  **YAML file path:** Provide the path to an existing `.yml` file
       defining a new style.
 
-  3.  **List of custome R code:** Supply a block of custom R code or a
+  3.  **List of custom R code:** Supply a block of custom R code or a
       named list describing styles for each table section. This code
       must be specific to the selected table type. If `style = NULL`,
       the function will use global options (see

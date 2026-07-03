@@ -12,8 +12,8 @@
 <link rel="icon" sizes="any" href="../favicon.ico">
 <link rel="manifest" href="../site.webmanifest">
 <script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
-<script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
+<link href="../deps/bootstrap-5.3.8/bootstrap.min.css" rel="stylesheet">
+<script src="../deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
 <script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Further survival analyses">
 </head>
@@ -25,7 +25,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">CohortSurvival</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.1.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.1.2</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -38,14 +38,17 @@
 <li class="active nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
-<li><a class="dropdown-item" href="../articles/a01_Single_event_of_interest.html">Single outcome event of interest</a></li>
+<li><a class="dropdown-item" href="../articles/a00_Creating_cohorts_for_survival.html">Creating cohorts for survival analyses</a></li>
+    <li><a class="dropdown-item" href="../articles/a01_Single_event_of_interest.html">Single outcome event of interest</a></li>
     <li><a class="dropdown-item" href="../articles/a02_Competing_risk_survival.html">Competing risk survival</a></li>
     <li><a class="dropdown-item" href="../articles/a03_Further_survival_analyses.html">Further survival analyses</a></li>
   </ul>
 </li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
       </ul>
-<ul class="navbar-nav"></ul>
+<ul class="navbar-nav">
+<li class="nav-item"><a class="external-link nav-link" href="https://github.com/darwin-eu/CohortSurvival/" aria-label="GitHub"><span class="fa fab fa-github fa-lg"></span></a></li>
+      </ul>
 </div>
 
 
@@ -60,7 +63,7 @@
       <img src="../logo.png" class="logo" alt=""><h1>Further survival analyses</h1>
             
       
-
+      <small class="dont-index">Source: <a href="https://github.com/darwin-eu/CohortSurvival/blob/main/vignettes/a03_Further_survival_analyses.Rmd" class="external-link"><code>vignettes/a03_Further_survival_analyses.Rmd</code></a></small>
       <div class="d-none name"><code>a03_Further_survival_analyses.Rmd</code></div>
     </div>
 
@@ -80,13 +83,14 @@
 dataset.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">cdm</span> <span class="op">&lt;-</span> <span class="fu">CohortSurvival</span><span class="fu">::</span><span class="fu"><a href="../reference/mockMGUS2cdm.html">mockMGUS2cdm</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
-<p>The CohortSurvival package does not have implemented functionality to
-do more complex survival analyses than Kaplar Meier curves, like Cox
-Proportional Hazards modelling. However, the format the data has to be
-in to be inputted to well-known modelling functions from packages like
-<code>survival</code> or <code>cmprsk</code>can be retrieved from OMOP
-data with some in-built functions in this package. Let us see how to do
-it in both single event and competing risk survival settings.</p>
+<p>The CohortSurvival package focuses on Kaplan-Meier survival estimates
+and cumulative incidence in a competing-risk setting. It does not fit
+more complex models, such as Cox proportional hazards or Fine and Gray
+models, directly. However, the format the data has to be in to be
+inputted to well-known modelling functions from packages like
+<code>survival</code> or <code>cmprsk</code> can be retrieved from OMOP
+data with <code><a href="../reference/addCohortSurvival.html">addCohortSurvival()</a></code>. Let us see how to do it in
+both single-event and competing-risk survival settings.</p>
 </div>
 <div class="section level2">
 <h2 id="further-analysis-with-single-event-survival">Further analysis with single event survival<a class="anchor" aria-label="anchor" href="#further-analysis-with-single-event-survival"></a>
@@ -94,8 +98,12 @@ it in both single event and competing risk survival settings.</p>
 <p>To get the <code>time</code> and <code>status</code> information we
 need for the <code>coxph</code> function in the package
 <code>survival</code>, for instance, we only need to call
-<code>addCohortSurvival</code>. The stratification variables need to be
-columns previously added to the cohort by the user.</p>
+<code><a href="../reference/addCohortSurvival.html">addCohortSurvival()</a></code>. The stratification variables need to
+be columns previously added to the cohort by the user.
+<code>status</code> is <code>1</code> for people with the outcome event
+and <code>0</code> for people censored before the event.
+<code>time</code> is the number of days from cohort entry to the event
+or censoring.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">input_survival_single</span> <span class="op">&lt;-</span> <span class="va">cdm</span><span class="op">$</span><span class="va">mgus_diagnosis</span> <span class="op">|&gt;</span></span>
 <span>       <span class="fu"><a href="../reference/addCohortSurvival.html">addCohortSurvival</a></span><span class="op">(</span></span>
@@ -108,7 +116,6 @@ columns previously added to the cohort by the user.</p>
 <span>  <span class="fu"><a href="https://pillar.r-lib.org/reference/glimpse.html" class="external-link">glimpse</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Rows: ??</span></span>
 <span><span class="co">#&gt; Columns: 13</span></span>
-<span><span class="co">#&gt; Database: DuckDB 1.5.2 [unknown@Linux 6.17.0-1011-azure:R 4.6.0/:memory:]</span></span>
 <span><span class="co">#&gt; $ cohort_definition_id <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> 1<span style="color: #949494;">, </span>1<span style="color: #949494;">, </span>1<span style="color: #949494;">, </span>1<span style="color: #949494;">, </span>1<span style="color: #949494;">, </span>1<span style="color: #949494;">, </span>1<span style="color: #949494;">, </span>1<span style="color: #949494;">, </span>1<span style="color: #949494;">, </span>1<span style="color: #949494;">, </span>1<span style="color: #949494;">, </span>1<span style="color: #949494;">, </span>1<span style="color: #949494;">, </span>1<span style="color: #949494;">, </span>1<span style="color: #949494;">, </span>1<span style="color: #949494;">, </span>1…</span></span>
 <span><span class="co">#&gt; $ subject_id           <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> 1<span style="color: #949494;">, </span>2<span style="color: #949494;">, </span>3<span style="color: #949494;">, </span>4<span style="color: #949494;">, </span>5<span style="color: #949494;">, </span>6<span style="color: #949494;">, </span>7<span style="color: #949494;">, </span>8<span style="color: #949494;">, </span>10<span style="color: #949494;">, </span>11<span style="color: #949494;">, </span>12<span style="color: #949494;">, </span>13<span style="color: #949494;">, </span>14<span style="color: #949494;">, </span>15<span style="color: #949494;">, </span>1…</span></span>
 <span><span class="co">#&gt; $ cohort_start_date    <span style="color: #949494; font-style: italic;">&lt;date&gt;</span> 1981-01-01<span style="color: #949494;">, </span>1968-01-01<span style="color: #949494;">, </span>1980-01-01<span style="color: #949494;">, </span>1977-01-01<span style="color: #949494;">, </span>…</span></span>
@@ -123,13 +130,13 @@ columns previously added to the cohort by the user.</p>
 <span><span class="co">#&gt; $ status               <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> 1<span style="color: #949494;">, </span>1<span style="color: #949494;">, </span>1<span style="color: #949494;">, </span>1<span style="color: #949494;">, </span>1<span style="color: #949494;">, </span>1<span style="color: #949494;">, </span>1<span style="color: #949494;">, </span>1<span style="color: #949494;">, </span>1<span style="color: #949494;">, </span>1<span style="color: #949494;">, </span>1<span style="color: #949494;">, </span>1<span style="color: #949494;">, </span>1<span style="color: #949494;">, </span>1<span style="color: #949494;">, </span>1<span style="color: #949494;">, </span>1<span style="color: #949494;">, </span>1…</span></span>
 <span><span class="co">#&gt; $ time                 <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> 30<span style="color: #949494;">, </span>25<span style="color: #949494;">, </span>46<span style="color: #949494;">, </span>92<span style="color: #949494;">, </span>8<span style="color: #949494;">, </span>4<span style="color: #949494;">, </span>151<span style="color: #949494;">, </span>2<span style="color: #949494;">, </span>136<span style="color: #949494;">, </span>2<span style="color: #949494;">, </span>108<span style="color: #949494;">, </span>10<span style="color: #949494;">, </span>14…</span></span></code></pre></div>
 <p>We can decide to change some of the default parameters in this
-function. Information on all these can be found
+function. Information on all these can be found in
 <code><a href="../reference/addCohortSurvival.html">?addCohortSurvival</a></code>. For instance, we can choose to exclude
 people with an outcome only 180 days before index date, instead of
 anytime, and follow them up for only one year. We can also decide to use
-<code>cohort_end_date</code> as their outcome variable and censor them
-at a particular date, for instance, the 1st of January of 1994. We see
-how that gives us different results:</p>
+<code>cohort_end_date</code> as the outcome date variable and censor
+them at a particular date, for instance, the 1st of January of 1994. We
+see how that gives us different results:</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">cdm</span><span class="op">$</span><span class="va">mgus_diagnosis</span> <span class="op">|&gt;</span></span>
 <span>       <span class="fu"><a href="../reference/addCohortSurvival.html">addCohortSurvival</a></span><span class="op">(</span></span>
@@ -142,7 +149,6 @@ how that gives us different results:</p>
 <span>  <span class="fu"><a href="https://pillar.r-lib.org/reference/glimpse.html" class="external-link">glimpse</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Rows: ??</span></span>
 <span><span class="co">#&gt; Columns: 13</span></span>
-<span><span class="co">#&gt; Database: DuckDB 1.5.2 [unknown@Linux 6.17.0-1011-azure:R 4.6.0/:memory:]</span></span>
 <span><span class="co">#&gt; $ cohort_definition_id <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> 1<span style="color: #949494;">, </span>1<span style="color: #949494;">, </span>1<span style="color: #949494;">, </span>1<span style="color: #949494;">, </span>1<span style="color: #949494;">, </span>1<span style="color: #949494;">, </span>1<span style="color: #949494;">, </span>1<span style="color: #949494;">, </span>1<span style="color: #949494;">, </span>1<span style="color: #949494;">, </span>1<span style="color: #949494;">, </span>1<span style="color: #949494;">, </span>1<span style="color: #949494;">, </span>1<span style="color: #949494;">, </span>1<span style="color: #949494;">, </span>1<span style="color: #949494;">, </span>1…</span></span>
 <span><span class="co">#&gt; $ subject_id           <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> 213<span style="color: #949494;">, </span>671<span style="color: #949494;">, </span>941<span style="color: #949494;">, </span>1245<span style="color: #949494;">, </span>1248<span style="color: #949494;">, </span>1340<span style="color: #949494;">, </span>1374<span style="color: #949494;">, </span>1376<span style="color: #949494;">, </span>1380…</span></span>
 <span><span class="co">#&gt; $ cohort_start_date    <span style="color: #949494; font-style: italic;">&lt;date&gt;</span> 1994-01-01<span style="color: #949494;">, </span>1994-01-01<span style="color: #949494;">, </span>1994-01-01<span style="color: #949494;">, </span>1994-01-01<span style="color: #949494;">, </span>…</span></span>
@@ -167,7 +173,6 @@ how that gives us different results:</p>
 <span>  <span class="fu"><a href="https://pillar.r-lib.org/reference/glimpse.html" class="external-link">glimpse</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Rows: ??</span></span>
 <span><span class="co">#&gt; Columns: 13</span></span>
-<span><span class="co">#&gt; Database: DuckDB 1.5.2 [unknown@Linux 6.17.0-1011-azure:R 4.6.0/:memory:]</span></span>
 <span><span class="co">#&gt; $ cohort_definition_id <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> 1<span style="color: #949494;">, </span>1<span style="color: #949494;">, </span>1<span style="color: #949494;">, </span>1<span style="color: #949494;">, </span>1<span style="color: #949494;">, </span>1<span style="color: #949494;">, </span>1<span style="color: #949494;">, </span>1<span style="color: #949494;">, </span>1<span style="color: #949494;">, </span>1<span style="color: #949494;">, </span>1<span style="color: #949494;">, </span>1<span style="color: #949494;">, </span>1<span style="color: #949494;">, </span>1<span style="color: #949494;">, </span>1<span style="color: #949494;">, </span>1<span style="color: #949494;">, </span>1…</span></span>
 <span><span class="co">#&gt; $ subject_id           <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> 213<span style="color: #949494;">, </span>671<span style="color: #949494;">, </span>941<span style="color: #949494;">, </span>1245<span style="color: #949494;">, </span>1248<span style="color: #949494;">, </span>1340<span style="color: #949494;">, </span>1374<span style="color: #949494;">, </span>1376<span style="color: #949494;">, </span>1380…</span></span>
 <span><span class="co">#&gt; $ cohort_start_date    <span style="color: #949494; font-style: italic;">&lt;date&gt;</span> 1994-01-01<span style="color: #949494;">, </span>1994-01-01<span style="color: #949494;">, </span>1994-01-01<span style="color: #949494;">, </span>1994-01-01<span style="color: #949494;">, </span>…</span></span>
@@ -210,12 +215,15 @@ aforementioned Cox Proportional Hazards model:</p>
 <div class="section level2">
 <h2 id="further-analysis-with-competing-risk-survival">Further analysis with competing risk survival<a class="anchor" aria-label="anchor" href="#further-analysis-with-competing-risk-survival"></a>
 </h2>
-<p>For competing risk settings, we need to use the same function that
+<p>For competing-risk settings, we need to use the same function that
 adds <code>time</code> and <code>status</code> information, but twice.
-We first need to add time and status information for the outcome, then
-for the competing outcome. Then we leverage all those variables to get
-what outcome (if any) to count per individual so that we can feed the
-result to subsequent models.</p>
+We first add time and status information for the outcome, then for the
+competing outcome. Then we combine those variables to identify which
+outcome, if any, happened first for each individual so that we can feed
+the result to subsequent models. In the coding below,
+<code>status = 0</code> means censored, <code>status = 1</code> means
+the event of interest, and <code>status = 2</code> means the competing
+outcome.</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
 <span><span class="co"># Add all status and time information for both outcomes</span></span>
@@ -231,7 +239,7 @@ result to subsequent models.</p>
 <span>      <span class="st">"competing_outcome_status"</span> <span class="op">=</span> <span class="st">"status"</span></span>
 <span>    <span class="op">)</span></span>
 <span>  </span>
-<span>  <span class="co"># Collect and </span></span>
+<span>  <span class="co"># Collect and combine the two event processes</span></span>
 <span>  <span class="va">input_survival_cr</span> <span class="op">&lt;-</span> <span class="va">input_survival_cr</span> <span class="op">|&gt;</span></span>
 <span>    <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/compute.html" class="external-link">collect</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>    <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span></span>

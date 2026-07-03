@@ -1,6 +1,8 @@
 # Table with survival events
 
-Table with survival events
+Create a formatted table of the number at risk, number of events, and
+number censored by time interval. The available intervals are controlled
+by `eventGap` when the survival result is estimated.
 
 ## Usage
 
@@ -76,7 +78,7 @@ tableSurvivalEvents(
   2.  **YAML file path:** Provide the path to an existing `.yml` file
       defining a new style.
 
-  3.  **List of custome R code:** Supply a block of custom R code or a
+  3.  **List of custom R code:** Supply a block of custom R code or a
       named list describing styles for each table section. This code
       must be specific to the selected table type. If `style = NULL`,
       the function will use global options (see
@@ -111,200 +113,16 @@ cdm <- mockMGUS2cdm()
 surv <- estimateSingleEventSurvival(cdm,
                                     targetCohortTable = "mgus_diagnosis",
                                     outcomeCohortTable = "death_cohort")
-#> - Getting survival for target cohort 'mgus_diagnosis' and outcome cohort
-#> 'death_cohort'
+#> ℹ Getting survival for target cohort 'mgus_diagnosis' and outcome cohort
+#>   'death_cohort'
 #> Getting overall estimates
 #> `eventgap`, `outcome_washout`, `censor_on_cohort_exit`, `follow_up_days`, and
-#> `minimum_survival_days` casted to character.
+#> `minimum_survival_days` cast to character.
 tableSurvivalEvents(surv)
 
 
   
 
 
-CDM name
+Data source
 ```
-
-Target cohort
-
-Outcome name
-
-Time
-
-Event gap
-
-Estimate name
-
-Number at risk
-
-Number events
-
-Number censored
-
-mock
-
-mgus_diagnosis
-
-death_cohort
-
-0
-
-30
-
-1,384
-
-0
-
-0
-
-30
-
-30
-
-1,104
-
-285
-
-3
-
-60
-
-30
-
-895
-
-182
-
-27
-
-90
-
-30
-
-652
-
-167
-
-79
-
-120
-
-30
-
-438
-
-131
-
-74
-
-150
-
-30
-
-299
-
-86
-
-54
-
-180
-
-30
-
-187
-
-57
-
-54
-
-210
-
-30
-
-109
-
-20
-
-58
-
-240
-
-30
-
-61
-
-15
-
-33
-
-270
-
-30
-
-31
-
-11
-
-18
-
-300
-
-30
-
-16
-
-4
-
-10
-
-330
-
-30
-
-7
-
-3
-
-6
-
-360
-
-30
-
-3
-
-1
-
-3
-
-390
-
-30
-
-2
-
-0
-
-1
-
-420
-
-30
-
-1
-
-0
-
-1
-
-424
-
-30
-
-1
-
-1
-
-0
-
-\# }

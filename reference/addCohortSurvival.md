@@ -1,6 +1,10 @@
-# Add survival information to a cohort table
+# Add time and event status to a cohort table
 
-Add survival information to a cohort table
+Add the columns needed by standard survival modelling functions, such as
+[`survival::Surv()`](https://rdrr.io/pkg/survival/man/Surv.html), to an
+OMOP cohort table. This is a lower-level helper: it creates `time` and
+`status` but does not fit a Kaplan-Meier curve or return a
+`summarised_result`.
 
 ## Usage
 
@@ -23,15 +27,15 @@ addCohortSurvival(
 
 - x:
 
-  cohort table to add survival information
+  Cohort table to add survival information to.
 
 - cdm:
 
-  CDM reference
+  CDM reference created by CDMConnector.
 
 - outcomeCohortTable:
 
-  The outcome cohort table of interest.
+  Name of the cohort table containing the outcome of interest.
 
 - outcomeCohortId:
 
@@ -41,27 +45,30 @@ addCohortSurvival(
 
 - outcomeDateVariable:
 
-  Variable containing date of outcome event
+  Variable containing date of outcome event. This is usually
+  `"cohort_start_date"`.
 
 - outcomeWashout:
 
   Washout time in days for the outcome. If an individual has an outcome
-  during the washout period, status and time will be set to NA
+  during the washout period before target cohort entry, `status` and
+  `time` will be set to `NA`. Use `Inf` for any prior outcome and `0`
+  for no pre-index washout.
 
 - censorOnCohortExit:
 
-  If TRUE, an individual's follow up will be censored at their cohort
-  exit
+  If TRUE, an individual's follow up will be censored at their target
+  cohort exit.
 
 - censorOnDate:
 
-  if not NULL, an individual's follow up will be censored at the given
-  date
+  If not NULL, an individual's follow up will be censored at the given
+  date. This can be a scalar Date or the name of a date column in `x`.
 
 - followUpDays:
 
   Number of days to follow up individuals (lower bound 1, upper bound
-  Inf)
+  Inf). Follow-up is censored at this value.
 
 - name:
 
@@ -69,10 +76,19 @@ addCohortSurvival(
 
 ## Value
 
-Two additional columns will be added to x. The "time" column will
-contain number of days to censoring. The "status" column will indicate
-whether the patient had the event (value: 1), or did not have the event
-(value: 0)
+A cohort table with two additional columns. The `time` column contains
+the number of days to event or censoring. The `status` column indicates
+whether the patient had the event (`1`) or was censored (`0`).
+
+## Details
+
+`time` is the number of days from target cohort entry to the first
+applicable event or censoring date. Censoring can occur at the end of
+observation, at target cohort exit when `censorOnCohortExit = TRUE`, at
+`censorOnDate`, or at `followUpDays`. `status` is `1` for people with
+the outcome event and `0` for censored records. Records with an outcome
+in the washout window are kept in the table with `time` and `status` set
+to `NA`, so they can be removed by downstream analyses.
 
 ## Examples
 
@@ -80,6 +96,9 @@ whether the patient had the event (value: 1), or did not have the event
 # \donttest{
 
 cdm <- mockMGUS2cdm()
+#> duckdb: caching downloaded extensions in the package library:
+#> ℹ /home/runner/work/_temp/Library/duckdb/extensions
+#> ℹ This is removed when the package is re-installed; see `?duckdb_storage` to choose a different location.
 #> Creating a new cdm
 #> Uploading table person (1384 rows) - [1/7]
 #> Uploading table observation_period (1384 rows) - [2/7]
@@ -94,5 +113,23 @@ cdm$mgus_diagnosis <- cdm$mgus_diagnosis |>
     outcomeCohortTable = "death_cohort",
     outcomeCohortId = 1
   )
-  # }
+
+cdm$mgus_diagnosis |>
+  dplyr::select(subject_id, cohort_start_date, time, status) |>
+  dplyr::collect()
+#> # A tibble: 1,384 × 4
+#>    subject_id cohort_start_date  time status
+#>         <int> <date>            <dbl>  <dbl>
+#>  1          1 1981-01-01           30      1
+#>  2          2 1968-01-01           25      1
+#>  3          3 1980-01-01           46      1
+#>  4          4 1977-01-01           92      1
+#>  5          5 1973-01-01            8      1
+#>  6          6 1990-01-01            4      1
+#>  7          7 1974-01-01          151      1
+#>  8          8 1974-01-01            2      1
+#>  9         10 1981-01-01          136      1
+#> 10         11 1972-01-01            2      1
+#> # ℹ 1,374 more rows
+# }
 ```

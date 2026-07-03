@@ -35,11 +35,11 @@ cdm <- mockMGUS2cdm()
 surv <- estimateSingleEventSurvival(cdm,
                                     targetCohortTable = "mgus_diagnosis",
                                     outcomeCohortTable = "death_cohort")
-#> - Getting survival for target cohort 'mgus_diagnosis' and outcome cohort
-#> 'death_cohort'
+#> ℹ Getting survival for target cohort 'mgus_diagnosis' and outcome cohort
+#>   'death_cohort'
 #> Getting overall estimates
 #> `eventgap`, `outcome_washout`, `censor_on_cohort_exit`, `follow_up_days`, and
-#> `minimum_survival_days` casted to character.
+#> `minimum_survival_days` cast to character.
 availableSurvivalGrouping(surv)
 #> Warning: eventgap column will be added to the survival result object to include all
 #> relevant information

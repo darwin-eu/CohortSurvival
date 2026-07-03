@@ -13,6 +13,7 @@ survival data using the OMOP common data model.
 You can install CohortSurvival like so:
 
 ``` r
+
 install.packages("CohortSurvival")
 ```
 
@@ -32,6 +33,7 @@ significance (MGUS). For more information see
 [`?survival::mgus2`](https://rdrr.io/pkg/survival/man/mgus2.html).
 
 ``` r
+
 library(CDMConnector)
 library(CohortSurvival)
 library(dplyr)
@@ -44,6 +46,7 @@ In our cdm reference we have three cohort tables of interest: 1) MGUS
 diagnosis cohort
 
 ``` r
+
 cdm$mgus_diagnosis |>
   glimpse()
 #> Rows: ??
@@ -64,6 +67,7 @@ cdm$mgus_diagnosis |>
 2.  MGUS progression to multiple myeloma cohort
 
 ``` r
+
 cdm$progression |>
   glimpse()
 #> Rows: ??
@@ -78,6 +82,7 @@ cdm$progression |>
 3.  Death cohort
 
 ``` r
+
 cdm$death_cohort |>
   glimpse()
 #> Rows: ??
@@ -95,6 +100,7 @@ We can get survival estimates for death following MGUS diagnosis like
 so:
 
 ``` r
+
 MGUS_death <- estimateSingleEventSurvival(cdm,
   targetCohortTable = "mgus_diagnosis",
   outcomeCohortTable = "death_cohort"
@@ -122,6 +128,7 @@ Now that we have our results, we can quickly create a plot summarising
 survival over time.
 
 ``` r
+
 plotSurvival(MGUS_death)
 ```
 
@@ -131,6 +138,7 @@ Among others, we can check the survival summary of our target and
 outcome cohorts of interest:
 
 ``` r
+
 tableSurvival(MGUS_death, times = c(30,60,180))
 ```
 
@@ -141,6 +149,7 @@ estimate survival by strata. These strata are based on variables that
 have been added to our target cohort previously as columns.
 
 ``` r
+
 MGUS_death <- estimateSingleEventSurvival(cdm,
   targetCohortTable = "mgus_diagnosis",
   outcomeCohortTable = "death_cohort",
@@ -164,6 +173,7 @@ on events or summarise the estimates in the same way we did for the
 single event survival analysis.
 
 ``` r
+
 MGUS_death_prog <- estimateCompetingRiskSurvival(cdm,
   targetCohortTable = "mgus_diagnosis",
   outcomeCohortTable = "progression",
@@ -180,6 +190,7 @@ As with single event survival, we can stratify our competing risk
 analysis.
 
 ``` r
+
 MGUS_death_prog <-  estimateCompetingRiskSurvival(cdm,
   targetCohortTable = "mgus_diagnosis",
   outcomeCohortTable = "progression",
@@ -199,6 +210,7 @@ plotSurvival(MGUS_death_prog  |>
 ### Disconnect from the cdm database connection
 
 ``` r
+
 cdmDisconnect(cdm)
 ```
 
@@ -212,11 +224,9 @@ You can check additional functionality of the package on its
 ### Estimate survival
 
 - [`estimateSingleEventSurvival()`](https://darwin-eu.github.io/CohortSurvival/reference/estimateSingleEventSurvival.md)
-  : Estimate survival for a given event of interest using cohorts in the
-  OMOP Common Data Model
+  : Estimate survival for a single event of interest
 - [`estimateCompetingRiskSurvival()`](https://darwin-eu.github.io/CohortSurvival/reference/estimateCompetingRiskSurvival.md)
-  : Estimate survival for a given event and competing risk of interest
-  using cohorts in the OMOP Common Data Model
+  : Estimate cumulative incidence with a competing outcome
 
 ### Tabulate results
 
@@ -234,14 +244,14 @@ You can check additional functionality of the package on its
 ### Plot results
 
 - [`plotSurvival()`](https://darwin-eu.github.io/CohortSurvival/reference/plotSurvival.md)
-  : Plot survival results
+  : Plot survival or cumulative incidence results
 - [`availableSurvivalGrouping()`](https://darwin-eu.github.io/CohortSurvival/reference/availableSurvivalGrouping.md)
   : Variables that can be used for faceting and colouring survival plots
 
 ### Tidy results
 
 - [`asSurvivalResult()`](https://darwin-eu.github.io/CohortSurvival/reference/asSurvivalResult.md)
-  : A tidy implementation of the summarised_characteristics object.
+  : Convert survival summarised results to a survival-specific format
 
 ### Mock data
 
@@ -251,12 +261,14 @@ You can check additional functionality of the package on its
 ### Add survival data to a cohort
 
 - [`addCohortSurvival()`](https://darwin-eu.github.io/CohortSurvival/reference/addCohortSurvival.md)
-  : Add survival information to a cohort table
+  : Add time and event status to a cohort table
 
 # Articles
 
 ### All vignettes
 
+- [Creating cohorts for survival
+  analyses](https://darwin-eu.github.io/CohortSurvival/articles/a00_Creating_cohorts_for_survival.md):
 - [Single outcome event of
   interest](https://darwin-eu.github.io/CohortSurvival/articles/a01_Single_event_of_interest.md):
 - [Competing risk

@@ -2,6 +2,8 @@
 
 ### All vignettes
 
+- [Creating cohorts for survival
+  analyses](https://darwin-eu.github.io/CohortSurvival/articles/a00_Creating_cohorts_for_survival.md):
 - [Single outcome event of
   interest](https://darwin-eu.github.io/CohortSurvival/articles/a01_Single_event_of_interest.md):
 - [Competing risk

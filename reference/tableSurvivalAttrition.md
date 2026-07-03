@@ -71,7 +71,7 @@ tableSurvivalAttrition(
   2.  **YAML file path:** Provide the path to an existing `.yml` file
       defining a new style.
 
-  3.  **List of custome R code:** Supply a block of custom R code or a
+  3.  **List of custom R code:** Supply a block of custom R code or a
       named list describing styles for each table section. This code
       must be specific to the selected table type. If `style = NULL`,
       the function will use global options (see
@@ -110,11 +110,11 @@ surv <- estimateSingleEventSurvival(
   targetCohortTable = "mgus_diagnosis",
   outcomeCohortTable = "death_cohort"
 )
-#> - Getting survival for target cohort 'mgus_diagnosis' and outcome cohort
-#> 'death_cohort'
+#> ℹ Getting survival for target cohort 'mgus_diagnosis' and outcome cohort
+#>   'death_cohort'
 #> Getting overall estimates
 #> `eventgap`, `outcome_washout`, `censor_on_cohort_exit`, `follow_up_days`, and
-#> `minimum_survival_days` casted to character.
+#> `minimum_survival_days` cast to character.
 
 tableSurvivalAttrition(surv)
 
@@ -124,55 +124,3 @@ tableSurvivalAttrition(surv)
 
 Reason id
 ```
-
-Reason
-
-Variable name
-
-number_records
-
-number_subjects
-
-excluded_records
-
-excluded_subjects
-
-mock; mgus_diagnosis_1; death_cohort
-
-1
-
-Initial qualifying events
-
-1,384
-
-1,384
-
-0
-
-0
-
-2
-
-No outcome event in washout period
-
-1,384
-
-1,384
-
-0
-
-0
-
-3
-
-Survival days for outcome less than 1
-
-1,384
-
-1,384
-
-0
-
-0
-
-\# }

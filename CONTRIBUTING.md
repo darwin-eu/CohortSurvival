@@ -19,6 +19,7 @@ do it.
 Run the below to update and check package documentation:
 
 ``` r
+
 devtools::document()
 devtools::run_examples()
 devtools::build_readme()
@@ -41,6 +42,7 @@ the current tests and any you add continue to pass. All package tests
 can be run together with:
 
 ``` r
+
 devtools::test()
 ```
 
@@ -48,6 +50,7 @@ Code to add new functionality should be accompanied by tests. Code
 coverage can be checked using:
 
 ``` r
+
 # note, you may first have to detach the package
 # detach("package:CohortSurvival", unload=TRUE)
 devtools::test_coverage()
@@ -60,6 +63,7 @@ restyle any code unrelated to your pull request as this will make code
 review more difficult.
 
 ``` r
+
 lintr::lint_package(".",
                     linters = lintr::linters_with_defaults(
                       lintr::object_name_linter(styles = "camelCase")
@@ -72,6 +76,7 @@ lintr::lint_package(".",
 Before opening any pull request please make sure to run:
 
 ``` r
+
 devtools::check()
 ```
 

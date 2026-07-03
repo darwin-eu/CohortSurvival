@@ -3,11 +3,9 @@
 ### Estimate survival
 
 - [`estimateSingleEventSurvival()`](https://darwin-eu.github.io/CohortSurvival/reference/estimateSingleEventSurvival.md)
-  : Estimate survival for a given event of interest using cohorts in the
-  OMOP Common Data Model
+  : Estimate survival for a single event of interest
 - [`estimateCompetingRiskSurvival()`](https://darwin-eu.github.io/CohortSurvival/reference/estimateCompetingRiskSurvival.md)
-  : Estimate survival for a given event and competing risk of interest
-  using cohorts in the OMOP Common Data Model
+  : Estimate cumulative incidence with a competing outcome
 
 ### Tabulate results
 
@@ -25,14 +23,14 @@
 ### Plot results
 
 - [`plotSurvival()`](https://darwin-eu.github.io/CohortSurvival/reference/plotSurvival.md)
-  : Plot survival results
+  : Plot survival or cumulative incidence results
 - [`availableSurvivalGrouping()`](https://darwin-eu.github.io/CohortSurvival/reference/availableSurvivalGrouping.md)
   : Variables that can be used for faceting and colouring survival plots
 
 ### Tidy results
 
 - [`asSurvivalResult()`](https://darwin-eu.github.io/CohortSurvival/reference/asSurvivalResult.md)
-  : A tidy implementation of the summarised_characteristics object.
+  : Convert survival summarised results to a survival-specific format
 
 ### Mock data
 
@@ -42,4 +40,4 @@
 ### Add survival data to a cohort
 
 - [`addCohortSurvival()`](https://darwin-eu.github.io/CohortSurvival/reference/addCohortSurvival.md)
-  : Add survival information to a cohort table
+  : Add time and event status to a cohort table
