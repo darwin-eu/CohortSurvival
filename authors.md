@@ -19,7 +19,7 @@
 ## Citation
 
 Source:
-[`DESCRIPTION`](https://github.com/darwin-eu/CohortSurvival/blob/main/DESCRIPTION)
+[`DESCRIPTION`](https://github.com/darwin-eu/CohortSurvival/blob/v1.1.2/DESCRIPTION)
 
 López-Güell K, Burn E, Català M, Li X, Newby D, Mercade-Besora N (2026).
 *CohortSurvival: Estimate Survival from Common Data Model Cohorts*. R

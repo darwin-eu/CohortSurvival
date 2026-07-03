@@ -96,9 +96,6 @@ to `NA`, so they can be removed by downstream analyses.
 # \donttest{
 
 cdm <- mockMGUS2cdm()
-#> duckdb: caching downloaded extensions in the package library:
-#> ℹ /home/runner/work/_temp/Library/duckdb/extensions
-#> ℹ This is removed when the package is re-installed; see `?duckdb_storage` to choose a different location.
 #> Creating a new cdm
 #> Uploading table person (1384 rows) - [1/7]
 #> Uploading table observation_period (1384 rows) - [2/7]
