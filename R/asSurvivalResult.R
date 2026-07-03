@@ -14,9 +14,20 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-#' A tidy implementation of the summarised_characteristics object.
+#' Convert survival summarised results to a survival-specific format
 #'
-#' @param result A summarised_characteristics object.
+#' Convert the long `omopgenerics::summarised_result` returned by
+#' `estimateSingleEventSurvival()` or `estimateCompetingRiskSurvival()` into a
+#' wider `survival_result` object that is easier to inspect manually. The main
+#' object contains time-specific estimates when available. Event counts,
+#' summary statistics, and attrition are stored as attributes named `"events"`,
+#' `"summary"`, and `"attrition"`.
+#'
+#' The plotting and table functions in CohortSurvival accept both formats. The
+#' original `summarised_result` is usually preferable for exporting, binding
+#' with other omopgenerics results, and reporting through visOmopResults.
+#'
+#' @param result A summarised_result object.
 #'
 #' @examples
 #' \donttest{
@@ -32,8 +43,7 @@
 #' asSurvivalResult()
 #' }
 #'
-#' @return A tibble with a tidy version of the summarised_characteristics
-#' object.
+#' @return A `survival_result` object.
 #' @export
 #'
 asSurvivalResult <- function(result) {

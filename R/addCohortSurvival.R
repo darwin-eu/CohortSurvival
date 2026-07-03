@@ -14,28 +14,46 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-#' Add survival information to a cohort table
-#' @param x cohort table to add survival information
-#' @param cdm CDM reference
-#' @param outcomeCohortTable The outcome cohort table of interest.
+#' Add time and event status to a cohort table
+#'
+#' Add the columns needed by standard survival modelling functions, such as
+#' `survival::Surv()`, to an OMOP cohort table. This is a lower-level helper:
+#' it creates `time` and `status` but does not fit a Kaplan-Meier curve or
+#' return a `summarised_result`.
+#'
+#' `time` is the number of days from target cohort entry to the first applicable
+#' event or censoring date. Censoring can occur at the end of observation, at
+#' target cohort exit when `censorOnCohortExit = TRUE`, at `censorOnDate`, or at
+#' `followUpDays`. `status` is `1` for people with the outcome event and `0`
+#' for censored records. Records with an outcome in the washout window are kept
+#' in the table with `time` and `status` set to `NA`, so they can be removed by
+#' downstream analyses.
+#'
+#' @param x Cohort table to add survival information to.
+#' @param cdm CDM reference created by CDMConnector.
+#' @param outcomeCohortTable Name of the cohort table containing the outcome of
+#' interest.
 #' @param outcomeCohortId ID of event cohorts to include. Only one outcome
 #' (and so one ID) can be considered. It can either be a
 #' cohort_definition_id value or a cohort_name.
-#' @param outcomeDateVariable Variable containing date of outcome event
-#' @param outcomeWashout Washout time in days for the outcome. If an individual has
-#' an outcome during the washout period, status and time will be set to NA
+#' @param outcomeDateVariable Variable containing date of outcome event. This is
+#' usually `"cohort_start_date"`.
+#' @param outcomeWashout Washout time in days for the outcome. If an individual
+#' has an outcome during the washout period before target cohort entry, `status`
+#' and `time` will be set to `NA`. Use `Inf` for any prior outcome and `0` for
+#' no pre-index washout.
 #' @param censorOnCohortExit If TRUE, an individual's follow up will be
-#' censored at their cohort exit
-#' @param censorOnDate if not NULL, an individual's follow up will be censored
-#' at the given date
+#' censored at their target cohort exit.
+#' @param censorOnDate If not NULL, an individual's follow up will be censored
+#' at the given date. This can be a scalar Date or the name of a date column in
+#' `x`.
 #' @param followUpDays Number of days to follow up individuals (lower bound 1,
-#' upper bound Inf)
+#' upper bound Inf). Follow-up is censored at this value.
 #' @param name Name of the new table, if NULL a temporary table is returned.
 #'
-#' @return Two additional columns will be added to x. The "time" column will
-#' contain number of days to censoring. The "status" column will indicate
-#' whether the patient had the event (value: 1), or did not have the event
-#' (value: 0)
+#' @return A cohort table with two additional columns. The `time` column
+#' contains the number of days to event or censoring. The `status` column
+#' indicates whether the patient had the event (`1`) or was censored (`0`).
 #' @export
 #'
 #' @examples
@@ -48,7 +66,11 @@
 #'     outcomeCohortTable = "death_cohort",
 #'     outcomeCohortId = 1
 #'   )
-#'   }
+#'
+#' cdm$mgus_diagnosis |>
+#'   dplyr::select(subject_id, cohort_start_date, time, status) |>
+#'   dplyr::collect()
+#' }
 #'
 addCohortSurvival <- function(x,
                               cdm,

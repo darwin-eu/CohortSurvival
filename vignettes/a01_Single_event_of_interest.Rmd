@@ -36,7 +36,7 @@ The mgus2 dataset contains survival data of 1341 sequential patients with monocl
 
 In this vignette we will first estimate survival following a diagnosis of MGUS, with death being our primary outcome of interest. In a study we would typically need to first define study cohorts ourselves, before starting the analysis, but in the case of our example data we already have these cohorts available: `mgus_diagnosis` for our target cohort and `death_cohort` for our outcome cohort.
 
-If you have a target cohort and a death table in your cdm but not a death cohort per se, you can use the function [deathCohort]{https://ohdsi.github.io/CohortConstructor/articles/a01_building_base_cohorts.html?q=death#death-cohort} from CohortConstructor to create it. The most efficient way to do so is to restrict the creation to your target cohort, by calling `deathCohort(cdm, name = "death_cohort", subsetCohort = "name_of_your_target_cohort_table")`.
+If you have a target cohort and a death table in your cdm but not a death cohort per se, you can use the function [`deathCohort()`](https://ohdsi.github.io/CohortConstructor/articles/a01_building_base_cohorts.html?q=death#death-cohort) from CohortConstructor to create it. The most efficient way to do so is to restrict the creation to your target cohort, by calling `deathCohort(cdm, name = "death_cohort", subsetCohort = "name_of_your_target_cohort_table")`.
 
 In our target cohort we also have a number of additional features (age or sex of the patients, for instance) recorded, which we will use for stratification.
 
@@ -123,7 +123,7 @@ tableSurvival(MGUS_death)
 
 Note that if less than 50% of the people in the target cohort experience the event, the median survival will not be reported (i.e. the output will be `NA(NA,NA)`).
 
-Note, additionally, that restricted mean survival is reported for the whole study period (as long as follow up is available) by default, unless asked otherwise. Therefore, `restrictedMeanFollowUp = NULL` will provide this result for follow up as long as available. This parameter can be changed in the main estimation function, if the user wants to. If this parameter is set to a number greater than the follow up available, the summary table will display `NA` for this value. For instance, if we ask for a restricted mean follow up of 2 years in a target cohort that we can only follow for 300 days, `tableSurvival` will report a Restricted mean survival of `NA`.
+Restricted mean survival is the area under the survival curve up to a chosen follow-up horizon. It can be useful when median survival is not reached, and it can also be easier to compare than survival at a single time point. By default, `restrictedMeanFollowUp = NULL`, which leaves the restricted mean horizon to the underlying survival summary. In stratified analyses, this can use a common maximum follow-up time across the fitted curves. As a result, a stratum with shorter observed follow-up may have its last survival estimate carried forward and integrated beyond its own maximum follow-up. This means the restricted mean survival can be larger than the observed follow-up time for that stratum, and comparisons across strata may be misleading. When comparing groups, it is usually better to set `restrictedMeanFollowUp` to a common clinically meaningful horizon that is supported by follow-up in all groups, such as 365 days or 5 years. If a requested `restrictedMeanFollowUp` is greater than the available follow-up for a curve, CohortSurvival reports the restricted mean as `NA`.
 
 This summary table function can also report survival at requested times. For instance, we might want to know the survival estimates for the cohort at 30, 90 and 180 days. We would do that as such:
 
@@ -137,7 +137,7 @@ If we ask for a survival estimate which is not available, the function will not 
 tableSurvival(MGUS_death, times = c(30,90,180, 500))
 ```
 
-Other options of this table include giving the estimates in years instead of days, or changing its style (we can either manually ask for the aesthetic we want ot use one of the predefined ones). Check `?tableSurvival` for additional options included in the function parameters.
+Other options of this table include giving the estimates in years instead of days, or changing its style (we can either manually ask for the aesthetic we want or use one of the predefined ones). Check `?tableSurvival` for additional options included in the function parameters.
 
 ```{r}
 tableSurvival(MGUS_death, times = c(1,2), timeScale = "years")
@@ -204,6 +204,19 @@ The main function, `estimateSingleEventSurvival()`, has many input parameters th
 By default, `outcomeWashout` is set to Inf, which means that we only include people who have not had the outcome before index date (as defined by their entry to the target cohort). We can change that and ask, for instance, for people to only be excluded from the estimation for a 30 day washout period instead. In this case, we would write `estimateSingleEventSurvival(cdm, "mgus_diagnosis", "death_cohort", outcomeWashout = 30)`.
 
 Other options include requiring a minimum number of survival days (the default is set to `minimumSurvivalDays = 1`) or cutting the follow-up at a certain amount of time (the default is set to `followUpDays = Inf`, i.e. as much follow up as available).
+
+The main time-related parameters control different parts of the analysis:
+
+| Parameter | What it changes |
+| --- | --- |
+| `outcomeWashout` | Excludes target cohort records with an outcome in the washout window before cohort entry. `Inf` means any prior outcome and `0` means no pre-index washout. |
+| `followUpDays` | Censors everyone after a fixed number of days from target cohort entry. |
+| `censorOnCohortExit` | Censors follow-up at the target cohort end date. |
+| `censorOnDate` | Censors follow-up at one calendar date, or at a date column in the target cohort. |
+| `minimumSurvivalDays` | Removes records that do not contribute at least this many survival days. |
+| `eventGap` | Sets the width of intervals used for event and risk table counts. |
+| `estimateGap` | Sets the spacing between survival probability estimates. |
+| `restrictedMeanFollowUp` | Sets the common horizon used to calculate restricted mean survival. |
 
 We might want to retrieve event information at a smaller interval than the default, which is every 30 days. Note that if we use the usual exporting functions from `omopgenerics`, small numbers will be suppressed. This can be changed, but it is likely that you cannot report small counts anyway. Bigger intervals allow for aggregated counts which tend to be bigger.
 

@@ -14,18 +14,32 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-#' Plot survival results
+#' Plot survival or cumulative incidence results
 #'
-#' @param result Survival results
-#' @param ribbon If TRUE, the plot will join points using a ribbon
-#' @param facet Variables to use for facets
-#' @param colour Variables to use for colours
-#' @param cumulativeFailure whether to plot the cumulative failure probability
-#' instead of the survival probability
-#' @param riskTable Whether to print risk table below the plot
-#' @param riskInterval Interval of time to print risk table below the plot
-#' @param logLog If TRUE, the survival probabilities are transformed using the log-log formula
-#' @param timeScale The scale of time in the x-axis. Can be "days", "months", or "years"
+#' Plot the time-specific estimates returned by `estimateSingleEventSurvival()`
+#' or `estimateCompetingRiskSurvival()`. Single-event results are plotted as
+#' survival probabilities by default and can be displayed as cumulative failure
+#' with `cumulativeFailure = TRUE`. Competing-risk results are cumulative
+#' incidence estimates and therefore require `cumulativeFailure = TRUE`.
+#'
+#' `facet` and `colour` should refer to columns available after converting the
+#' result with `asSurvivalResult()`, for example `target_cohort`, `outcome`,
+#' `competing_outcome`, `variable`, or strata columns such as `sex`.
+#'
+#' @param result Survival results. A `summarised_result` or `survival_result`
+#' is accepted.
+#' @param ribbon If TRUE, add a ribbon using the confidence interval columns.
+#' @param facet Variables to use for facets.
+#' @param colour Variables to use for colours.
+#' @param cumulativeFailure Whether to plot the cumulative failure probability
+#' instead of the survival probability.
+#' @param riskTable Whether to print risk table below the plot.
+#' @param riskInterval Interval of time to print risk table below the plot. This
+#' should be compatible with the `eventGap` used when estimating the result.
+#' @param logLog If TRUE, the survival probabilities are transformed using the
+#' log-log formula.
+#' @param timeScale The scale of time in the x-axis. Can be "days", "months",
+#' or "years".
 #' @param type Character string specifying the desired plot type.
 #' See `visOmopResults::scatterPlot()` for supported types.
 #' If `type = NULL`, the default backend plot type is used.
@@ -35,7 +49,8 @@
 #' for all available style pre-defined themes. For further customization, you can always
 #' modify the returned ggplot object directly.
 #'
-#' @return A plot of survival probabilities over time
+#' @return A plot of survival probabilities or cumulative incidence
+#' probabilities over time.
 #' @export
 #'
 #' @examples
@@ -115,7 +130,7 @@ plotSurvival <- function(result,
       )
   }
 
-  # Only plot resuts for which all estimates are not NA
+  # Only plot results for which all estimates are not NA
   result <- result |>
     dplyr::filter(
       !is.na(.data$estimate),

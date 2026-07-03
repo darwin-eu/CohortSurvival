@@ -48,7 +48,7 @@
 #' See `tableStyle()` for available options.
 #' 2. **YAML file path:** Provide the path to an existing `.yml` file defining
 #' a new style.
-#' 3. **List of custome R code:** Supply a block of custom R code or a named list
+#' 3. **List of custom R code:** Supply a block of custom R code or a named list
 #' describing styles for each table section. This code must be specific to
 #' the selected table type.
 #' If `style = NULL`, the function will use global options
@@ -64,16 +64,32 @@ NULL
 
 #' Table with survival summary
 #'
-#' @param x Result from estimateSingleEventSurvival or estimateCompetingRiskSurvival
-#' @param times Times at which to report survival in the summary table
-#' @param timeScale Time unit to report survival in: days, months or years
+#' Create a formatted table from the summary and, optionally, time-specific
+#' estimate result types returned by `estimateSingleEventSurvival()` or
+#' `estimateCompetingRiskSurvival()`. For single-event analyses, time-specific
+#' rows are survival probabilities. For competing-risk analyses, they are
+#' cumulative incidence probabilities for the outcome and competing outcome.
+#'
+#' Restricted mean survival is taken from the estimation output. Its
+#' interpretation depends on the `restrictedMeanFollowUp` value used when the
+#' survival result was estimated; use a common value there when comparing
+#' restricted means across groups or strata.
+#'
+#' @param x Result from `estimateSingleEventSurvival()` or
+#' `estimateCompetingRiskSurvival()`. A `summarised_result` or `survival_result`
+#' is accepted.
+#' @param times Times at which to report estimates in the summary table. These
+#' must match available estimate times after applying `timeScale`; unavailable
+#' times are omitted with a message.
+#' @param timeScale Time unit to report survival in: days, months, or years.
 #' @param estimates Character vector specifying which estimates to include in the table.
 #' Options include: "median_survival", "restricted_mean_survival", "q0_survival",
 #' "q05_survival", "q25_survival", "q75_survival", "q95_survival", "q100_survival".
 #' By default it includes c("median_survival", "restricted_mean_survival").
 #' @inheritParams tableDoc
 #'
-#' @return A tibble containing a summary of observed survival in the required units
+#' @return A formatted table containing a summary of observed survival or
+#' cumulative incidence in the required units.
 #' @export
 #'
 #' @examples
@@ -101,6 +117,7 @@ tableSurvival <- function(x,
   omopgenerics::assertCharacter(timeScale, length = 1)
   omopgenerics::assertChoice(timeScale, c("days", "months", "years"))
   omopgenerics::assertCharacter(estimates)
+  hide <- normaliseTableSurvivalHide(hide)
 
   # Convert survival result to summarised_result if needed
   if (inherits(x, "survival_result")) {
@@ -230,6 +247,12 @@ tableSurvival <- function(x,
     }
 
     if (nrow(summary_times) > 0) {
+      timeEstimateLabel <- if (any(summary_times$competing_outcome != "none", na.rm = TRUE)) {
+        " cumulative incidence estimate"
+      } else {
+        " survival estimate"
+      }
+
       summary_times <- summary_times |>
         dplyr::mutate(
           estimate_value = as.character(as.numeric(.data$estimate_value)*100)
@@ -240,9 +263,10 @@ tableSurvival <- function(x,
           bigMark = .options$bigMark
         ) |>
         visOmopResults::formatEstimateName(
-          estimateName =
-            c(" survival estimate" =
-                "<estimate> (<estimate_95CI_lower>, <estimate_95CI_upper>)")
+          estimateName = stats::setNames(
+            "<estimate> (<estimate_95CI_lower>, <estimate_95CI_upper>)",
+            timeEstimateLabel
+          )
         ) |>
         dplyr::left_join(times_final, by = c("time" = "value")) |>
         dplyr::mutate(
@@ -370,7 +394,7 @@ tableSurvival <- function(x,
       "Outcome name" = "variable_level"
     )
     formatEstimateName <- c("Restricted mean survival" = "<restricted_mean_survival>")
-    hide <- c("time", "reason_id", "reason")
+    hide <- c(hide, "time", "reason_id", "reason")
   } else {
     hide <- c(hide, "variable_name","time", "reason_id", "reason")
     renameCols <- c("Outcome name" = "variable_level")
@@ -453,7 +477,26 @@ optionsTableSurvival <- function() {
   return(default)
 }
 
+normaliseTableSurvivalHide <- function(hide) {
+  if (is.null(hide)) {
+    return(hide)
+  }
+
+  hide <- stringr::str_replace_all(tolower(hide), "\\s+", "_")
+  aliases <- c(
+    "data_source" = "cdm_name",
+    "target_cohort" = "group_level",
+    "outcome_type" = "variable_name",
+    "outcome_name" = "variable_level"
+  )
+  hide <- dplyr::recode(hide, !!!aliases, .default = hide)
+  return(unname(hide))
+}
+
 #' Table with survival events
+#'
+#' `riskTable()` is kept for backwards compatibility. Use
+#' `tableSurvivalEvents()` in new code.
 #'
 #' @param x Result from estimateSingleEventSurvival or estimateCompetingRiskSurvival.
 #' @param eventGap Event gap defining the times at which to report the risk table
@@ -498,6 +541,10 @@ riskTable <- function(x,
 }
 
 #' Table with survival events
+#'
+#' Create a formatted table of the number at risk, number of events, and number
+#' censored by time interval. The available intervals are controlled by
+#' `eventGap` when the survival result is estimated.
 #'
 #' @param x Result from estimateSingleEventSurvival or estimateCompetingRiskSurvival.
 #' @param eventGap Event gap defining the times at which to report the risk table
@@ -714,4 +761,3 @@ tableSurvivalAttrition <- function(result,
     )
   )
 }
-

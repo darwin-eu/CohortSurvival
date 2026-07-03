@@ -2,7 +2,7 @@
 % Please edit documentation in R/addCohortSurvival.R
 \name{addCohortSurvival}
 \alias{addCohortSurvival}
-\title{Add survival information to a cohort table}
+\title{Add time and event status to a cohort table}
 \usage{
 addCohortSurvival(
   x,
@@ -18,40 +18,56 @@ addCohortSurvival(
 )
 }
 \arguments{
-\item{x}{cohort table to add survival information}
+\item{x}{Cohort table to add survival information to.}
 
-\item{cdm}{CDM reference}
+\item{cdm}{CDM reference created by CDMConnector.}
 
-\item{outcomeCohortTable}{The outcome cohort table of interest.}
+\item{outcomeCohortTable}{Name of the cohort table containing the outcome of
+interest.}
 
 \item{outcomeCohortId}{ID of event cohorts to include. Only one outcome
 (and so one ID) can be considered. It can either be a
 cohort_definition_id value or a cohort_name.}
 
-\item{outcomeDateVariable}{Variable containing date of outcome event}
+\item{outcomeDateVariable}{Variable containing date of outcome event. This is
+usually \code{"cohort_start_date"}.}
 
-\item{outcomeWashout}{Washout time in days for the outcome. If an individual has
-an outcome during the washout period, status and time will be set to NA}
+\item{outcomeWashout}{Washout time in days for the outcome. If an individual
+has an outcome during the washout period before target cohort entry, \code{status}
+and \code{time} will be set to \code{NA}. Use \code{Inf} for any prior outcome and \code{0} for
+no pre-index washout.}
 
 \item{censorOnCohortExit}{If TRUE, an individual's follow up will be
-censored at their cohort exit}
+censored at their target cohort exit.}
 
-\item{censorOnDate}{if not NULL, an individual's follow up will be censored
-at the given date}
+\item{censorOnDate}{If not NULL, an individual's follow up will be censored
+at the given date. This can be a scalar Date or the name of a date column in
+\code{x}.}
 
 \item{followUpDays}{Number of days to follow up individuals (lower bound 1,
-upper bound Inf)}
+upper bound Inf). Follow-up is censored at this value.}
 
 \item{name}{Name of the new table, if NULL a temporary table is returned.}
 }
 \value{
-Two additional columns will be added to x. The "time" column will
-contain number of days to censoring. The "status" column will indicate
-whether the patient had the event (value: 1), or did not have the event
-(value: 0)
+A cohort table with two additional columns. The \code{time} column
+contains the number of days to event or censoring. The \code{status} column
+indicates whether the patient had the event (\code{1}) or was censored (\code{0}).
 }
 \description{
-Add survival information to a cohort table
+Add the columns needed by standard survival modelling functions, such as
+\code{survival::Surv()}, to an OMOP cohort table. This is a lower-level helper:
+it creates \code{time} and \code{status} but does not fit a Kaplan-Meier curve or
+return a \code{summarised_result}.
+}
+\details{
+\code{time} is the number of days from target cohort entry to the first applicable
+event or censoring date. Censoring can occur at the end of observation, at
+target cohort exit when \code{censorOnCohortExit = TRUE}, at \code{censorOnDate}, or at
+\code{followUpDays}. \code{status} is \code{1} for people with the outcome event and \code{0}
+for censored records. Records with an outcome in the washout window are kept
+in the table with \code{time} and \code{status} set to \code{NA}, so they can be removed by
+downstream analyses.
 }
 \examples{
 \donttest{
@@ -63,6 +79,10 @@ cdm$mgus_diagnosis <- cdm$mgus_diagnosis |>
     outcomeCohortTable = "death_cohort",
     outcomeCohortId = 1
   )
-  }
+
+cdm$mgus_diagnosis |>
+  dplyr::select(subject_id, cohort_start_date, time, status) |>
+  dplyr::collect()
+}
 
 }

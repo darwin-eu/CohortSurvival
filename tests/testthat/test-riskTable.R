@@ -21,7 +21,7 @@ test_that("survival events", {
                 dplyr::tally() == 182)
   expect_true(all(
     colnames(res) ==
-      c('CDM name', 'Target cohort', 'Sex', 'Outcome name', 'Time', 'Event gap',
+      c('Data source', 'Target cohort', 'Sex', 'Outcome name', 'Time', 'Event gap',
         '[header_name]Estimate name\n[header_level]Number at risk',
         '[header_name]Estimate name\n[header_level]Number events',
         '[header_name]Estimate name\n[header_level]Number censored')))
@@ -30,7 +30,7 @@ test_that("survival events", {
                 dplyr::tally() == 32)
   expect_true(all(
     colnames(resCR) ==
-      c('CDM name', 'Target cohort', 'Outcome type', 'Outcome name', 'Time', 'Event gap',
+      c('Data source', 'Target cohort', 'Outcome type', 'Outcome name', 'Time', 'Event gap',
         '[header_name]Estimate name\n[header_level]Number at risk',
         '[header_name]Estimate name\n[header_level]Number events',
         '[header_name]Estimate name\n[header_level]Number censored')))

@@ -14,13 +14,16 @@ test_that("survival summary", {
               dplyr::tally() == 1)
    expect_true(all(
      colnames(res) ==
-       c('CDM name', 'Target cohort', 'Outcome name',
+       c('Data source', 'Target cohort', 'Outcome name',
          '[header_name]Estimate name\n[header_level]Number records',
          '[header_name]Estimate name\n[header_level]Number events',
          '[header_name]Estimate name\n[header_level]Median survival (95% CI)',
          '[header_name]Estimate name\n[header_level]Restricted mean survival (95% CI)',
          '[header_name]Estimate name\n[header_level]100 days survival estimate',
          '[header_name]Estimate name\n[header_level]200 days survival estimate')))
+
+  res_hidden <- tableSurvival(surv, times = c(100,200), hide = "outcome_name", type = "tibble")
+  expect_false("Outcome name" %in% colnames(res_hidden))
 
    expect_no_error(tableSurvival(surv |>
                                    omopgenerics::filterSettings(result_type == "survival_summary")))
@@ -38,18 +41,18 @@ test_that("survival summary", {
   expect_true(gt1$`_data` |> dplyr::tally() == 2)
    expect_true(all(
      colnames(gt1$`_data`) ==
-       c('CDM name', 'Target cohort', 'Outcome type', 'Outcome name',
+       c('Data source', 'Target cohort', 'Outcome type', 'Outcome name',
          '[header_name]Estimate name\n[header_level]Number records',
          '[header_name]Estimate name\n[header_level]Number events',
          '[header_name]Estimate name\n[header_level]Restricted mean survival (95% CI)',
-         '[header_name]Estimate name\n[header_level]100 days survival estimate',
-         '[header_name]Estimate name\n[header_level]200 days survival estimate')))
+         '[header_name]Estimate name\n[header_level]100 days cumulative incidence estimate',
+         '[header_name]Estimate name\n[header_level]200 days cumulative incidence estimate')))
 
   fx1 <- tableSurvival(survCR, type = "flextable")
   expect_true(fx1$body$dataset |> dplyr::tally() == 2)
    expect_true(all(
      colnames(fx1$body$dataset ) ==
-       c('CDM name', 'Target cohort', 'Outcome type', 'Outcome name',
+       c('Data source', 'Target cohort', 'Outcome type', 'Outcome name',
          'Estimate name\nNumber records', 'Estimate name\nNumber events',
          'Estimate name\nRestricted mean survival (95% CI)')))
 
@@ -65,7 +68,7 @@ test_that("survival summary", {
   gt2 <- tableSurvival(survsex)
    expect_true(all(
      colnames(gt2$`_data`) ==
-       c('CDM name', 'Target cohort', 'Sex', 'Outcome name',
+       c('Data source', 'Target cohort', 'Sex', 'Outcome name',
          '[header_name]Estimate name\n[header_level]Number records',
          '[header_name]Estimate name\n[header_level]Number events',
          '[header_name]Estimate name\n[header_level]Median survival (95% CI)',
@@ -75,7 +78,7 @@ test_that("survival summary", {
    expect_true(all(
     colnames(gt3$`_data`) ==
        c('Sex', 'Outcome name', 'Estimate name',
-         '[header_name]CDM name\n[header_level]mock\n[header_name]Target cohort\n[header_level]mgus_diagnosis')))
+         '[header_name]Data source\n[header_level]mock\n[header_name]Target cohort\n[header_level]mgus_diagnosis')))
 
   # In years
   expect_true(all(tableSurvival(surv, times = c(365,420), type = "tibble") |>
@@ -103,10 +106,14 @@ test_that("expected errors", {
   expect_error(tableSurvival("surv"))
   expect_error(tableSurvival(surv, times = "a"))
   expect_error(tableSurvival(surv, times = c(1,2,3), timeScale = "day"))
-  expect_warning(tableSurvival(surv |>
-                               omopgenerics::filterSettings(result_type == "survival_attrition")))
-  expect_warning(tableSurvival(surv |>
-                               omopgenerics::filterSettings(result_type == "survival_events")))
+  expect_warning(empty_attrition <- tableSurvival(surv |>
+                               omopgenerics::filterSettings(result_type == "survival_attrition"),
+                             type = "tibble"))
+  expect_true(nrow(empty_attrition) == 0)
+  expect_warning(empty_events <- tableSurvival(surv |>
+                               omopgenerics::filterSettings(result_type == "survival_events"),
+                             type = "tibble"))
+  expect_true(nrow(empty_events) == 0)
   expect_warning(tableSurvival(surv |>
                                omopgenerics::filterSettings(result_type == "survival_summary"), times = c(1)))
 
@@ -123,16 +130,16 @@ test_that("timeScale months", {
   tabmonths <- tableSurvival(surv, times = c(1,6,12,24), timeScale = "months", type = "tibble")
   tabyears <- tableSurvival(surv, times = c(0.5,1,2), timeScale = "years", type = "tibble")
 
-  expect_true(all(tabdays |> dplyr::pull("[header_name]Estimate name\n[header_level]30 days survival estimate") ==
-                  tabmonths |> dplyr::pull("[header_name]Estimate name\n[header_level]1 months survival estimate")))
-  expect_true(all(tabdays |> dplyr::pull("[header_name]Estimate name\n[header_level]183 days survival estimate") ==
-                    tabmonths |> dplyr::pull("[header_name]Estimate name\n[header_level]6 months survival estimate")))
-  expect_true(all(tabdays |> dplyr::pull("[header_name]Estimate name\n[header_level]365 days survival estimate") ==
-                    tabmonths |> dplyr::pull("[header_name]Estimate name\n[header_level]12 months survival estimate")))
-  expect_true(all(tabyears |> dplyr::pull("[header_name]Estimate name\n[header_level]0.5 years survival estimate") ==
-                    tabmonths |> dplyr::pull("[header_name]Estimate name\n[header_level]6 months survival estimate")))
-  expect_true(all(tabyears |> dplyr::pull("[header_name]Estimate name\n[header_level]1 years survival estimate") ==
-                    tabmonths |> dplyr::pull("[header_name]Estimate name\n[header_level]12 months survival estimate")))
+  expect_true(all(tabdays |> dplyr::pull("[header_name]Estimate name\n[header_level]30 days cumulative incidence estimate") ==
+                  tabmonths |> dplyr::pull("[header_name]Estimate name\n[header_level]1 months cumulative incidence estimate")))
+  expect_true(all(tabdays |> dplyr::pull("[header_name]Estimate name\n[header_level]183 days cumulative incidence estimate") ==
+                    tabmonths |> dplyr::pull("[header_name]Estimate name\n[header_level]6 months cumulative incidence estimate")))
+  expect_true(all(tabdays |> dplyr::pull("[header_name]Estimate name\n[header_level]365 days cumulative incidence estimate") ==
+                    tabmonths |> dplyr::pull("[header_name]Estimate name\n[header_level]12 months cumulative incidence estimate")))
+  expect_true(all(tabyears |> dplyr::pull("[header_name]Estimate name\n[header_level]0.5 years cumulative incidence estimate") ==
+                    tabmonths |> dplyr::pull("[header_name]Estimate name\n[header_level]6 months cumulative incidence estimate")))
+  expect_true(all(tabyears |> dplyr::pull("[header_name]Estimate name\n[header_level]1 years cumulative incidence estimate") ==
+                    tabmonths |> dplyr::pull("[header_name]Estimate name\n[header_level]12 months cumulative incidence estimate")))
 
   CDMConnector::cdmDisconnect(cdm)
 })

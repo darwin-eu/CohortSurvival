@@ -2,8 +2,7 @@
 % Please edit documentation in R/estimateSurvival.R
 \name{estimateCompetingRiskSurvival}
 \alias{estimateCompetingRiskSurvival}
-\title{Estimate survival for a given event and competing risk of interest using
-cohorts in the OMOP Common Data Model}
+\title{Estimate cumulative incidence with a competing outcome}
 \usage{
 estimateCompetingRiskSurvival(
   cdm,
@@ -29,44 +28,62 @@ estimateCompetingRiskSurvival(
 )
 }
 \arguments{
-\item{cdm}{CDM reference}
+\item{cdm}{A CDM reference created by CDMConnector.}
 
-\item{targetCohortTable}{The target cohort table of interest.}
+\item{targetCohortTable}{Name of the cohort table containing the target
+cohorts. The table must be present in \code{cdm} and contain standard OMOP cohort
+columns.}
 
-\item{outcomeCohortTable}{The outcome cohort table of interest.}
+\item{outcomeCohortTable}{Name of the cohort table containing the outcome of
+interest.}
 
-\item{competingOutcomeCohortTable}{The competing outcome cohort table of interest.}
+\item{competingOutcomeCohortTable}{Name of the cohort table containing the
+competing outcome.}
 
 \item{targetCohortId}{Target cohorts to include. It can either be a
-cohort_definition_id value or a cohort_name. Multiple ids are allowed.}
+cohort_definition_id value or a cohort_name. Multiple ids are allowed. If
+\code{NULL}, all non-empty cohorts in \code{targetCohortTable} are used.}
 
 \item{outcomeCohortId}{Outcome cohorts to include. It can either be a
-cohort_definition_id value or a cohort_name. Multiple ids are allowed.}
+cohort_definition_id value or a cohort_name. Multiple ids are allowed. If
+\code{NULL}, all outcome cohorts in \code{outcomeCohortTable} are used.}
 
-\item{outcomeDateVariable}{Variable containing date of outcome event}
+\item{outcomeDateVariable}{Variable containing the outcome event date. This
+is usually \code{"cohort_start_date"}, but another date column in the outcome
+cohort can be used.}
 
-\item{outcomeWashout}{Washout time in days for the outcome}
+\item{outcomeWashout}{Number of days before target cohort entry used to
+exclude people with a prior outcome. \code{Inf} excludes people with any prior
+outcome before index; \code{0} applies no pre-index washout.}
 
 \item{competingOutcomeCohortId}{Competing outcome cohorts to include. It can either be a
-cohort_definition_id value or a cohort_name. Multiple ids are allowed.}
+cohort_definition_id value or a cohort_name. Multiple ids are allowed. If
+\code{NULL}, all competing outcome cohorts in \code{competingOutcomeCohortTable} are
+used.}
 
-\item{competingOutcomeDateVariable}{Variable containing date of competing outcome event}
+\item{competingOutcomeDateVariable}{Variable containing the competing outcome
+event date.}
 
-\item{competingOutcomeWashout}{Washout time in days for the competing outcome}
+\item{competingOutcomeWashout}{Number of days before target cohort entry used
+to exclude people with a prior competing outcome. \code{Inf} excludes people with
+any prior competing outcome before index; \code{0} applies no pre-index washout.}
 
 \item{censorOnCohortExit}{If TRUE, an individual's follow up will be
-censored at their cohort exit}
+censored at their target cohort exit date.}
 
-\item{censorOnDate}{if not NULL, an individual's follow up will be censored
-at the given date}
+\item{censorOnDate}{If not NULL, an individual's follow up will be censored
+at the given date. This can be a scalar Date or the name of a date column in
+the target cohort table.}
 
-\item{weight}{if not NULL, the name of a column in the target cohort table
-containing observation weights to use in the Kaplan-Meier estimation}
+\item{weight}{If not NULL, the name of a numeric column in the target cohort
+table containing observation weights.}
 
 \item{followUpDays}{Number of days to follow up individuals (lower bound 1,
-upper bound Inf)}
+upper bound Inf). Follow-up is censored at this value.}
 
-\item{strata}{strata}
+\item{strata}{A list of target cohort column names to stratify by. Each
+element can be one column name or a character vector of column names for a
+combined stratum, for example \code{list("sex", c("age_group", "sex"))}.}
 
 \item{eventGap}{Days between time points for which to report survival
 events, which are grouped into the specified intervals.}
@@ -74,23 +91,46 @@ events, which are grouped into the specified intervals.}
 \item{estimateGap}{Days between time points for which to report survival
 estimates. First day will be day zero with risk estimates provided
 for times up to the end of follow-up, with a gap in days equivalent
-to eventGap.}
+to estimateGap.}
 
-\item{restrictedMeanFollowUp}{number of days of follow-up to take into account
-when calculating restricted mean for all cohorts}
+\item{restrictedMeanFollowUp}{Number of days of follow-up to use when
+calculating restricted mean summaries. See Details.}
 
 \item{minimumSurvivalDays}{Minimum number of days required for the main cohort
-to have survived}
+to contribute to the analysis.}
 }
 \value{
-tibble with survival information for desired cohort, including:
-time, people at risk, survival probability, cumulative incidence,
-95 CIs, strata and outcome. A tibble with the number of events is
-outputted as an attribute of the output
+An \code{omopgenerics::summarised_result} object with result types
+\code{survival_estimates}, \code{survival_events}, \code{survival_summary}, and
+\code{survival_attrition} when available.
 }
 \description{
-Estimate survival for a given event and competing risk of interest using
-cohorts in the OMOP Common Data Model
+Estimate time-to-event probabilities for one or more target cohorts when an
+event of interest can be precluded by a competing outcome. The target cohort
+defines the population at risk and the index date for follow-up. The outcome
+cohort defines the event of interest and the competing outcome cohort defines
+the event that prevents the event of interest from subsequently occurring.
+}
+\details{
+The estimates from competing-risk analyses should be interpreted as
+cumulative incidence probabilities for the outcome and competing outcome, not
+as ordinary Kaplan-Meier survival probabilities. The returned object is an
+\code{omopgenerics::summarised_result} containing cumulative incidence estimates,
+event counts, summary statistics, and attrition. Use \code{asSurvivalResult()} for
+a wider, survival-specific view.
+
+\code{restrictedMeanFollowUp} defines the time horizon used for the restricted
+mean summary. If \code{restrictedMeanFollowUp = NULL}, the horizon is left to the
+underlying survival summary. In stratified analyses, this can use a common
+maximum follow-up time across the fitted curves. A stratum with shorter
+observed follow-up may therefore have its last estimate carried forward and
+integrated beyond its own maximum follow-up. This means restricted mean
+summaries can be larger than the observed follow-up time for that stratum,
+and comparisons across strata may be misleading. Set a common clinically
+meaningful value that is supported by follow-up in all groups when restricted
+means will be compared across cohorts or strata. If the requested horizon is
+beyond the available follow-up for a curve, the restricted mean is reported
+as missing.
 }
 \examples{
 \donttest{

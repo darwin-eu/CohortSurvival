@@ -15,41 +15,77 @@
 # limitations under the License.
 
 
-#' Estimate survival for a given event of interest using cohorts in the OMOP Common Data Model
+#' Estimate survival for a single event of interest
 #'
-#' @param cdm CDM reference
-#' @param targetCohortTable targetCohortTable
-#' @param outcomeCohortTable The outcome cohort table of interest.
+#' Estimate Kaplan-Meier survival for one or more target cohorts and outcome
+#' cohorts in an OMOP Common Data Model reference. The target cohort defines
+#' the population at risk and the index date for follow-up. The outcome cohort
+#' defines the event of interest.
+#'
+#' The returned object is an `omopgenerics::summarised_result` containing
+#' survival estimates, event counts, summary statistics, and attrition. Use
+#' `asSurvivalResult()` when you want a wider, survival-specific view for manual
+#' inspection or downstream modelling.
+#'
+#' `restrictedMeanFollowUp` defines the time horizon used for the restricted
+#' mean survival time. It is calculated as the area under the survival curve up
+#' to that horizon. If `restrictedMeanFollowUp = NULL`, the horizon is left to
+#' the underlying survival summary. In stratified analyses, this can use a
+#' common maximum follow-up time across the fitted curves. A stratum with
+#' shorter observed follow-up may therefore have its last survival estimate
+#' carried forward and integrated beyond its own maximum follow-up. This means
+#' restricted mean survival can be larger than the observed follow-up time for
+#' that stratum, and comparisons across strata may be misleading. Set a common
+#' clinically meaningful value that is supported by follow-up in all groups when
+#' restricted mean survival will be compared across cohorts or strata. If the
+#' requested horizon is beyond the available follow-up for a curve, the
+#' restricted mean is reported as missing.
+#'
+#' @param cdm A CDM reference created by CDMConnector.
+#' @param targetCohortTable Name of the cohort table containing the target
+#' cohorts. The table must be present in `cdm` and contain standard OMOP cohort
+#' columns.
+#' @param outcomeCohortTable Name of the cohort table containing the outcome
+#' cohorts. The table must be present in `cdm` and contain standard OMOP cohort
+#' columns.
 #' @param targetCohortId Target cohorts to include. It can either be a
-#' cohort_definition_id value or a cohort_name. Multiple ids are allowed.
+#' cohort_definition_id value or a cohort_name. Multiple ids are allowed. If
+#' `NULL`, all non-empty cohorts in `targetCohortTable` are used.
 #' @param outcomeCohortId Outcome cohorts to include. It can either be a
-#' cohort_definition_id value or a cohort_name. Multiple ids are allowed.
-#' @param outcomeDateVariable  Variable containing date of outcome event
-#' @param outcomeWashout Washout time in days for the outcome
+#' cohort_definition_id value or a cohort_name. Multiple ids are allowed. If
+#' `NULL`, all outcome cohorts in `outcomeCohortTable` are used.
+#' @param outcomeDateVariable Variable containing the outcome event date. This
+#' is usually `"cohort_start_date"`, but another date column in the outcome
+#' cohort can be used.
+#' @param outcomeWashout Number of days before target cohort entry used to
+#' exclude people with a prior outcome. `Inf` excludes people with any prior
+#' outcome before index; `0` applies no pre-index washout.
 #' @param censorOnCohortExit If TRUE, an individual's follow up will be
-#' censored at their cohort exit
-#' @param censorOnDate if not NULL, an individual's follow up will be censored
-#' at the given date
-#' @param weight if not NULL, the name of a column in the target cohort table
-#' containing observation weights to use in the Kaplan-Meier estimation
+#' censored at their target cohort exit date.
+#' @param censorOnDate If not NULL, an individual's follow up will be censored
+#' at the given date. This can be a scalar Date or the name of a date column in
+#' the target cohort table.
+#' @param weight If not NULL, the name of a numeric column in the target cohort
+#' table containing observation weights to use in the Kaplan-Meier estimation.
 #' @param followUpDays Number of days to follow up individuals (lower bound 1,
-#' upper bound Inf)
-#' @param strata strata
+#' upper bound Inf). Follow-up is censored at this value.
+#' @param strata A list of target cohort column names to stratify by. Each
+#' element can be one column name or a character vector of column names for a
+#' combined stratum, for example `list("sex", c("age_group", "sex"))`.
 #' @param eventGap Days between time points for which to report survival
 #' events, which are grouped into the specified intervals.
 #' @param estimateGap Days between time points for which to report survival
 #' estimates. First day will be day zero with risk estimates provided
 #' for times up to the end of follow-up, with a gap in days equivalent
-#' to eventGap.
-#' @param restrictedMeanFollowUp number of days of follow-up to take into account
-#' when calculating restricted mean for all cohorts
+#' to estimateGap.
+#' @param restrictedMeanFollowUp Number of days of follow-up to use when
+#' calculating restricted mean survival. See Details.
 #' @param minimumSurvivalDays Minimum number of days required for the main cohort
-#' to have survived
+#' to contribute to the analysis.
 #'
-#' @return tibble with survival information for desired cohort, including:
-#' time, people at risk, survival probability, cumulative incidence,
-#' 95 CIs, strata and outcome. A tibble with the number of events is
-#' outputted as an attribute of the output
+#' @return An `omopgenerics::summarised_result` object with result types
+#' `survival_estimates`, `survival_events`, `survival_summary`, and
+#' `survival_attrition` when available.
 #' @export
 #'
 #' @examples
@@ -113,12 +149,12 @@ estimateSingleEventSurvival <- function(cdm,
     cli::cli_warn("Target cohort{?s} {emptyTargetnames} {?is/are} empty")
   }
 
-  targetCohortId <- targetCohortId[!(targetCohortId %in% emptyTargets)]
+  targetCohortId <- targetCohortId[!(targetCohortId %in% emptyTargets$cohort_definition_id)]
 
-  if(length(outcomeCohortId > 0)) {
+  if(length(outcomeCohortId) > 0) {
     outcomeCohortId <- omopgenerics::validateCohortIdArgument(outcomeCohortId, cdm[[outcomeCohortTable]])
   }
-  if(length(targetCohortId > 0)) {
+  if(length(targetCohortId) > 0) {
     targetCohortId <- omopgenerics::validateCohortIdArgument(targetCohortId, cdm[[targetCohortTable]])
   }
 
@@ -135,7 +171,7 @@ estimateSingleEventSurvival <- function(cdm,
       working_outcome <- omopgenerics::settings(cdm[[outcomeCohortTable]]) |>
         dplyr::filter(.data$cohort_definition_id == working_outcome_id) |>
         dplyr::pull("cohort_name")
-      cli::cli_inform("- Getting survival for target cohort '{working_target}' and outcome cohort '{working_outcome}'")
+      cli::cli_inform(c("i" = "Getting survival for target cohort '{working_target}' and outcome cohort '{working_outcome}'"))
 
       # Estimate survival and collect results
       surv <- estimateSurvival(
@@ -377,53 +413,111 @@ estimateSingleEventSurvival <- function(cdm,
                                                         settings = settings)
   } else {
     complete_results <- omopgenerics::emptySummarisedResult()
-    surv_estimates <- omopgenerics::newSummarisedResult(complete_results)
+    surv_estimates <- emptySurvivalResult(
+      complete_results = complete_results,
+      cdm = cdm,
+      outcomeCohortTable = outcomeCohortTable,
+      outcomeCohortId = outcomeCohortId,
+      competingOutcomeCohortTable = NULL,
+      competingOutcomeCohortId = NULL,
+      analysisType = "single_event",
+      eventGap = eventGap,
+      outcomeDateVariable = outcomeDateVariable,
+      outcomeWashout = outcomeWashout,
+      censorOnCohortExit = censorOnCohortExit,
+      censorOnDate = censorOnDate,
+      followUpDays = followUpDays,
+      restrictedMeanFollowUp = restrictedMeanFollowUp,
+      minimumSurvivalDays = minimumSurvivalDays
+    )
   }
 
   return(surv_estimates)
 }
 
-#' Estimate survival for a given event and competing risk of interest using
-#' cohorts in the OMOP Common Data Model
+#' Estimate cumulative incidence with a competing outcome
 #'
-#' @param cdm CDM reference
-#' @param targetCohortTable The target cohort table of interest.
-#' @param outcomeCohortTable The outcome cohort table of interest.
-#' @param competingOutcomeCohortTable The competing outcome cohort table of interest.
+#' Estimate time-to-event probabilities for one or more target cohorts when an
+#' event of interest can be precluded by a competing outcome. The target cohort
+#' defines the population at risk and the index date for follow-up. The outcome
+#' cohort defines the event of interest and the competing outcome cohort defines
+#' the event that prevents the event of interest from subsequently occurring.
+#'
+#' The estimates from competing-risk analyses should be interpreted as
+#' cumulative incidence probabilities for the outcome and competing outcome, not
+#' as ordinary Kaplan-Meier survival probabilities. The returned object is an
+#' `omopgenerics::summarised_result` containing cumulative incidence estimates,
+#' event counts, summary statistics, and attrition. Use `asSurvivalResult()` for
+#' a wider, survival-specific view.
+#'
+#' `restrictedMeanFollowUp` defines the time horizon used for the restricted
+#' mean summary. If `restrictedMeanFollowUp = NULL`, the horizon is left to the
+#' underlying survival summary. In stratified analyses, this can use a common
+#' maximum follow-up time across the fitted curves. A stratum with shorter
+#' observed follow-up may therefore have its last estimate carried forward and
+#' integrated beyond its own maximum follow-up. This means restricted mean
+#' summaries can be larger than the observed follow-up time for that stratum,
+#' and comparisons across strata may be misleading. Set a common clinically
+#' meaningful value that is supported by follow-up in all groups when restricted
+#' means will be compared across cohorts or strata. If the requested horizon is
+#' beyond the available follow-up for a curve, the restricted mean is reported
+#' as missing.
+#'
+#' @param cdm A CDM reference created by CDMConnector.
+#' @param targetCohortTable Name of the cohort table containing the target
+#' cohorts. The table must be present in `cdm` and contain standard OMOP cohort
+#' columns.
+#' @param outcomeCohortTable Name of the cohort table containing the outcome of
+#' interest.
+#' @param competingOutcomeCohortTable Name of the cohort table containing the
+#' competing outcome.
 #' @param targetCohortId Target cohorts to include. It can either be a
-#' cohort_definition_id value or a cohort_name. Multiple ids are allowed.
+#' cohort_definition_id value or a cohort_name. Multiple ids are allowed. If
+#' `NULL`, all non-empty cohorts in `targetCohortTable` are used.
 #' @param outcomeCohortId Outcome cohorts to include. It can either be a
-#' cohort_definition_id value or a cohort_name. Multiple ids are allowed.
-#' @param outcomeDateVariable  Variable containing date of outcome event
-#' @param outcomeWashout Washout time in days for the outcome
+#' cohort_definition_id value or a cohort_name. Multiple ids are allowed. If
+#' `NULL`, all outcome cohorts in `outcomeCohortTable` are used.
+#' @param outcomeDateVariable Variable containing the outcome event date. This
+#' is usually `"cohort_start_date"`, but another date column in the outcome
+#' cohort can be used.
+#' @param outcomeWashout Number of days before target cohort entry used to
+#' exclude people with a prior outcome. `Inf` excludes people with any prior
+#' outcome before index; `0` applies no pre-index washout.
 #' @param competingOutcomeCohortId Competing outcome cohorts to include. It can either be a
-#' cohort_definition_id value or a cohort_name. Multiple ids are allowed.
-#' @param competingOutcomeDateVariable Variable containing date of competing outcome event
-#' @param competingOutcomeWashout Washout time in days for the competing outcome
+#' cohort_definition_id value or a cohort_name. Multiple ids are allowed. If
+#' `NULL`, all competing outcome cohorts in `competingOutcomeCohortTable` are
+#' used.
+#' @param competingOutcomeDateVariable Variable containing the competing outcome
+#' event date.
+#' @param competingOutcomeWashout Number of days before target cohort entry used
+#' to exclude people with a prior competing outcome. `Inf` excludes people with
+#' any prior competing outcome before index; `0` applies no pre-index washout.
 #' @param censorOnCohortExit If TRUE, an individual's follow up will be
-#' censored at their cohort exit
-#' @param censorOnDate if not NULL, an individual's follow up will be censored
-#' at the given date
-#' @param weight if not NULL, the name of a column in the target cohort table
-#' containing observation weights to use in the Kaplan-Meier estimation
+#' censored at their target cohort exit date.
+#' @param censorOnDate If not NULL, an individual's follow up will be censored
+#' at the given date. This can be a scalar Date or the name of a date column in
+#' the target cohort table.
+#' @param weight If not NULL, the name of a numeric column in the target cohort
+#' table containing observation weights.
 #' @param followUpDays Number of days to follow up individuals (lower bound 1,
-#' upper bound Inf)
-#' @param strata strata
+#' upper bound Inf). Follow-up is censored at this value.
+#' @param strata A list of target cohort column names to stratify by. Each
+#' element can be one column name or a character vector of column names for a
+#' combined stratum, for example `list("sex", c("age_group", "sex"))`.
 #' @param eventGap Days between time points for which to report survival
 #' events, which are grouped into the specified intervals.
 #' @param estimateGap Days between time points for which to report survival
 #' estimates. First day will be day zero with risk estimates provided
 #' for times up to the end of follow-up, with a gap in days equivalent
-#' to eventGap.
-#' @param restrictedMeanFollowUp number of days of follow-up to take into account
-#' when calculating restricted mean for all cohorts
+#' to estimateGap.
+#' @param restrictedMeanFollowUp Number of days of follow-up to use when
+#' calculating restricted mean summaries. See Details.
 #' @param minimumSurvivalDays Minimum number of days required for the main cohort
-#' to have survived
+#' to contribute to the analysis.
 #'
-#' @return tibble with survival information for desired cohort, including:
-#' time, people at risk, survival probability, cumulative incidence,
-#' 95 CIs, strata and outcome. A tibble with the number of events is
-#' outputted as an attribute of the output
+#' @return An `omopgenerics::summarised_result` object with result types
+#' `survival_estimates`, `survival_events`, `survival_summary`, and
+#' `survival_attrition` when available.
 #' @export
 #'
 #' @examples
@@ -510,15 +604,15 @@ estimateCompetingRiskSurvival <- function(cdm,
     cli::cli_warn("Target cohort{?s} {emptyTargetnames} {?is/are} empty")
   }
 
-  targetCohortId <- targetCohortId[!(targetCohortId %in% emptyTargets)]
+  targetCohortId <- targetCohortId[!(targetCohortId %in% emptyTargets$cohort_definition_id)]
 
-  if(length(outcomeCohortId > 0)) {
+  if(length(outcomeCohortId) > 0) {
     outcomeCohortId <- omopgenerics::validateCohortIdArgument(outcomeCohortId, cdm[[outcomeCohortTable]])
   }
-  if(length(targetCohortId > 0)) {
+  if(length(targetCohortId) > 0) {
     targetCohortId <- omopgenerics::validateCohortIdArgument(targetCohortId, cdm[[targetCohortTable]])
   }
-  if(length(competingOutcomeCohortId > 0)) {
+  if(length(competingOutcomeCohortId) > 0) {
     competingOutcomeCohortId <- omopgenerics::validateCohortIdArgument(competingOutcomeCohortId, cdm[[competingOutcomeCohortTable]])
   }
 
@@ -540,8 +634,7 @@ estimateCompetingRiskSurvival <- function(cdm,
       working_competing_outcome <- omopgenerics::settings(cdm[[competingOutcomeCohortTable]]) |>
         dplyr::filter(.data$cohort_definition_id == working_competing_outcome_id) |>
         dplyr::pull("cohort_name")
-      cli::cli_inform("- Getting survival for target cohort '{working_target}', outcome cohort '{working_outcome}' and
-                      competing outcome cohort '{working_competing_outcome}'")
+      cli::cli_inform(c("i" = "Getting survival for target cohort '{working_target}', outcome cohort '{working_outcome}' and competing outcome cohort '{working_competing_outcome}'"))
 
       # Estimate survival and collect results
       surv <- estimateSurvival(
@@ -569,9 +662,11 @@ estimateCompetingRiskSurvival <- function(cdm,
 
       # Extract attrition, events, and summary
       if(!is.null(attr(surv, "cohort_attrition"))) {
+        fallback_to_single_event <- isTRUE(attr(surv, "fallback_to_single_event"))
         attrition <- attr(surv, "cohort_attrition") |>
           dplyr::mutate(target_cohort = working_target, outcome = working_outcome,
-                        competing_outcome = working_competing_outcome) |>
+                        competing_outcome = working_competing_outcome,
+                        fallback_to_single_event = fallback_to_single_event) |>
           dplyr::collect() |>
           dplyr::filter(.data$cohort_definition_id == working_target_id)
       } else {
@@ -613,7 +708,11 @@ estimateCompetingRiskSurvival <- function(cdm,
         result_type = "survival_attrition",
         group_name = "target_cohort",
         variable_level = .data$outcome,
-        analysis_type = "competing_risk",
+        analysis_type = dplyr::if_else(
+          .data$fallback_to_single_event,
+          "single_event",
+          "competing_risk"
+        ),
         estimate_name = "count"
       ) |>
       tidyr::pivot_longer(
@@ -789,7 +888,23 @@ estimateCompetingRiskSurvival <- function(cdm,
                                                         settings = settings)
   } else {
     complete_results <- omopgenerics::emptySummarisedResult()
-    surv_estimates <- omopgenerics::newSummarisedResult(complete_results)
+    surv_estimates <- emptySurvivalResult(
+      complete_results = complete_results,
+      cdm = cdm,
+      outcomeCohortTable = outcomeCohortTable,
+      outcomeCohortId = outcomeCohortId,
+      competingOutcomeCohortTable = competingOutcomeCohortTable,
+      competingOutcomeCohortId = competingOutcomeCohortId,
+      analysisType = "competing_risk",
+      eventGap = eventGap,
+      outcomeDateVariable = outcomeDateVariable,
+      outcomeWashout = outcomeWashout,
+      censorOnCohortExit = censorOnCohortExit,
+      censorOnDate = censorOnDate,
+      followUpDays = followUpDays,
+      restrictedMeanFollowUp = restrictedMeanFollowUp,
+      minimumSurvivalDays = minimumSurvivalDays
+    )
   }
 
   return(surv_estimates)
@@ -873,7 +988,9 @@ estimateSurvival <- function(cdm,
                     !is.na(.data$outcome_status)) |>
     dplyr::compute(temporary = FALSE,
                    logPrefix = "CohortSurvival_estimateSurvival_remove_na") |>
-    omopgenerics::recordCohortAttrition(reason = "No outcome event in washout period")
+    omopgenerics::recordCohortAttrition(
+      reason = washoutAttritionReason("outcome", outcomeWashout)
+    )
 
   if (!is.null(competingOutcomeCohortTable)) {
     workingExposureTable <- workingExposureTable |>
@@ -881,12 +998,14 @@ estimateSurvival <- function(cdm,
                       !is.na(.data$competing_risk_status)) |>
       dplyr::compute(temporary = FALSE,
                      logPrefix = "CohortSurvival_estimateSurvival_remove_na_cr") |>
-      omopgenerics::recordCohortAttrition(reason = "No competing outcome event in washout period")
+      omopgenerics::recordCohortAttrition(
+        reason = washoutAttritionReason("competing outcome", competingOutcomeWashout)
+      )
   }
 
   workingExposureTable <- workingExposureTable |>
     dplyr::filter(.data$outcome_time >= .env$minimumSurvivalDays) |>
-  omopgenerics::recordCohortAttrition(reason = paste0("Survival days for outcome less than ", minimumSurvivalDays))
+    omopgenerics::recordCohortAttrition(reason = paste0("Survival days for outcome less than ", minimumSurvivalDays))
 
   if (!is.null(competingOutcomeCohortTable)) {
     workingExposureTable <- workingExposureTable |>
@@ -902,6 +1021,25 @@ estimateSurvival <- function(cdm,
       status1 = "outcome_status", time2 = "competing_risk_time",
       status2 = "competing_risk_status", nameOutTime = "outcome_or_competing_time",
       nameOutStatus = "outcome_or_competing_status")
+  }
+
+  fallbackToSingleEvent <- FALSE
+  if (!is.null(competingOutcomeCohortTable) &&
+      !2L %in% as.integer(as.character(survData$outcome_or_competing_status))) {
+    fallbackToSingleEvent <- TRUE
+    cli::cli_inform(c(
+      "i" = "No competing outcome events observed; estimating single-event survival instead."
+    ))
+  }
+  analysisCompetingOutcomeCohortTable <- if (fallbackToSingleEvent) {
+    NULL
+  } else {
+    competingOutcomeCohortTable
+  }
+  analysisCompetingOutcomeCohortId <- if (fallbackToSingleEvent) {
+    NULL
+  } else {
+    competingOutcomeCohortId
   }
 
   # Validate weight column is numeric after data has been collected
@@ -925,14 +1063,9 @@ estimateSurvival <- function(cdm,
     working_competing_outcome <- omopgenerics::settings(cdm[[competingOutcomeCohortTable]]) |>
       dplyr::filter(.data$cohort_definition_id == competingOutcomeCohortId) |>
       dplyr::pull("cohort_name")
-      cli::cli_warn("Survival estimation is not possible as there are no individuals
-                  available for target {working_target}, outcome
-                  {working_outcome} and competing outcome {working_competing_outcome}.
-                    Only attrition returned.")
+      cli::cli_warn("Survival estimation is not possible as there are no individuals available for target {working_target}, outcome {working_outcome} and competing outcome {working_competing_outcome}. Only attrition returned.")
     } else {
-      cli::cli_warn("Survival estimation is not possible as there are no individuals
-                  available for target {working_target} and outcome
-                  {working_outcome}. Only attrition returned.")
+      cli::cli_warn("Survival estimation is not possible as there are no individuals available for target {working_target} and outcome {working_outcome}. Only attrition returned.")
     }
     surv <- empty_estimates()
     attr(surv, "cohort_attrition") <- attr(workingExposureTable, "cohort_attrition")
@@ -940,7 +1073,7 @@ estimateSurvival <- function(cdm,
     }
 
   # fit survival, with strata
-  if (is.null(competingOutcomeCohortTable)) {
+  if (is.null(analysisCompetingOutcomeCohortTable)) {
     surv <- singleEventSurvival(survData, timepoints, strata, eventGap, restrictedMeanFollowUp, weight)
   } else {
     surv <- competingRiskSurvival(survData, timepoints, strata, eventGap, restrictedMeanFollowUp, weight)
@@ -949,7 +1082,7 @@ estimateSurvival <- function(cdm,
   # process and summarise results
   if (nrow(surv) > 0) {
     survivalEstimates <- addCohortDetails(surv, cdm, targetCohortId, targetCohortTable,
-      outcomeCohortId, outcomeCohortTable, competingOutcomeCohortId, competingOutcomeCohortTable,
+      outcomeCohortId, outcomeCohortTable, analysisCompetingOutcomeCohortId, analysisCompetingOutcomeCohortTable,
       "survival") |>
       tidyr::pivot_longer(cols = "outcome", names_to = "variable_name",
         values_to = "variable_level") |>
@@ -966,10 +1099,10 @@ estimateSurvival <- function(cdm,
           dplyr::pull("cohort_name")
       )
 
-    if(!is.null(competingOutcomeCohortTable)) {
+    if(!is.null(analysisCompetingOutcomeCohortTable)) {
       survivalEstimates <- survivalEstimates |>
-        dplyr::mutate(competing_outcome = omopgenerics::settings(cdm[[competingOutcomeCohortTable]]) |>
-                                         dplyr::filter(.data$cohort_definition_id == .env$competingOutcomeCohortId) |>
+        dplyr::mutate(competing_outcome = omopgenerics::settings(cdm[[analysisCompetingOutcomeCohortTable]]) |>
+                                         dplyr::filter(.data$cohort_definition_id == .env$analysisCompetingOutcomeCohortId) |>
                                          dplyr::pull("cohort_name"))
     } else {
       survivalEstimates <- survivalEstimates |>
@@ -983,7 +1116,7 @@ estimateSurvival <- function(cdm,
 
     attr(survivalEstimates, "events") <- addCohortDetails(events, cdm,
       targetCohortId, targetCohortTable, outcomeCohortId,
-      outcomeCohortTable, competingOutcomeCohortId, competingOutcomeCohortTable,
+      outcomeCohortTable, analysisCompetingOutcomeCohortId, analysisCompetingOutcomeCohortTable,
       "survival_events") |>
       dplyr::select(!"variable_type") |>
       tidyr::pivot_longer(cols = c("n_risk", "n_events", "n_censor"),
@@ -999,10 +1132,10 @@ estimateSurvival <- function(cdm,
                       dplyr::pull("cohort_name")) |>
       dplyr::rename("eventgap" = "eventGap")
 
-    if(!is.null(competingOutcomeCohortTable)) {
+    if(!is.null(analysisCompetingOutcomeCohortTable)) {
       attr(survivalEstimates, "events") <- attr(survivalEstimates, "events") |>
-        dplyr::mutate(competing_outcome = omopgenerics::settings(cdm[[competingOutcomeCohortTable]]) |>
-                        dplyr::filter(.data$cohort_definition_id == .env$competingOutcomeCohortId) |>
+        dplyr::mutate(competing_outcome = omopgenerics::settings(cdm[[analysisCompetingOutcomeCohortTable]]) |>
+                        dplyr::filter(.data$cohort_definition_id == .env$analysisCompetingOutcomeCohortId) |>
                         dplyr::pull("cohort_name"))
     } else {
       attr(survivalEstimates, "events") <- attr(survivalEstimates, "events") |>
@@ -1010,8 +1143,9 @@ estimateSurvival <- function(cdm,
     }
 
     attr(survivalEstimates, "cohort_attrition") <- attr(workingExposureTable, "cohort_attrition")
+    attr(survivalEstimates, "fallback_to_single_event") <- fallbackToSingleEvent
 
-    if (is.null(competingOutcomeCohortTable)) {
+    if (is.null(analysisCompetingOutcomeCohortTable)) {
       summary <- addCohortDetails(
         x = attr(surv, "summary"), cdm, targetCohortId, targetCohortTable,
         outcomeCohortId, outcomeCohortTable, resultType = "survival_summary"
@@ -1023,8 +1157,8 @@ estimateSurvival <- function(cdm,
 
       summary <- addCohortDetails(
         x = attr(surv, "summary"), cdm, targetCohortId, targetCohortTable,
-        outcomeCohortId, outcomeCohortTable, competingOutcomeCohortId,
-        competingOutcomeCohortTable, "survival_summary"
+        outcomeCohortId, outcomeCohortTable, analysisCompetingOutcomeCohortId,
+        analysisCompetingOutcomeCohortTable, "survival_summary"
       ) |>
         dplyr::mutate(analysis_type = "competing_risk")
     }
@@ -1054,10 +1188,10 @@ estimateSurvival <- function(cdm,
                       dplyr::filter(.data$cohort_definition_id == .env$outcomeCohortId) |>
                       dplyr::pull("cohort_name"))
 
-    if(!is.null(competingOutcomeCohortTable)) {
+    if(!is.null(analysisCompetingOutcomeCohortTable)) {
       summary <- summary |>
-        dplyr::mutate(competing_outcome = omopgenerics::settings(cdm[[competingOutcomeCohortTable]]) |>
-                        dplyr::filter(.data$cohort_definition_id == .env$competingOutcomeCohortId) |>
+        dplyr::mutate(competing_outcome = omopgenerics::settings(cdm[[analysisCompetingOutcomeCohortTable]]) |>
+                        dplyr::filter(.data$cohort_definition_id == .env$analysisCompetingOutcomeCohortId) |>
                         dplyr::pull("cohort_name"))
     } else {
       summary <- summary |>
@@ -1133,7 +1267,7 @@ singleEventSurvival <- function(survData, times, variables, eventGap,
 
   weights <- if (!is.null(weight)) survData[[weight]] else NULL
 
-  cli::cli_progress_message("Getting overall estimates")
+  cli::cli_inform("Getting overall estimates")
   fit <- survival::survfit(survival::Surv(outcome_time, outcome_status) ~ 1,
                            data = survData,
                            weights = weights
@@ -1217,9 +1351,7 @@ singleEventSurvival <- function(survData, times, variables, eventGap,
         dplyr::pull()
 
       if(length(uniqueVals) == 1){
-        cli::cli_inform("All values of {name} are equal to {uniqueVals}
-                        and stratified results will not be returned for
-                        this variable")
+        cli::cli_inform("All values of {name} are equal to {uniqueVals} and stratified results will not be returned for this variable")
       } else {
         expr <- stats::as.formula(paste(c(
           "survival::Surv(outcome_time, outcome_status) ~ 1",
@@ -1409,12 +1541,10 @@ competingRiskSurvival <- function(survData, times, variables, eventGap,
   # Ensure the competing-risk status variable has three levels: 0 (none), 1 (outcome), 2 (competing)
   if (length(unique(as.character(survData |> dplyr::pull("outcome_or_competing_status")))) != 3) {
     cli::cli_h1("No results for competing risk analysis")
-    cli::cli_text(c(
-      "Competing risk variable must have three levels.",
-      "Do you have at least 1 individual for:"
-    ))
+    cli::cli_text("Competing risk variable must have three levels.")
+    cli::cli_text("Do you have at least 1 individual for:")
     cli::cli_li("1) censored without event,")
-    cli::cli_li("2) censored at outcome event of intest, and")
+    cli::cli_li("2) censored at outcome event of interest, and")
     cli::cli_li("3) censored at outcome competing event?")
 
     return(empty_estimates())
@@ -1427,7 +1557,7 @@ competingRiskSurvival <- function(survData, times, variables, eventGap,
 
   weights <- if (!is.null(weight)) survData[[weight]] else NULL
 
-  cli::cli_progress_message("Getting overall estimates")
+  cli::cli_inform("Getting overall estimates")
   fit <- survival::survfit(
     formula = survival::Surv(
       outcome_or_competing_time,
@@ -1494,9 +1624,7 @@ competingRiskSurvival <- function(survData, times, variables, eventGap,
         dplyr::distinct() |>
         dplyr::pull()
       if(length(uniqueVals) == 1){
-        cli::cli_inform("All values of {name} are equal to {uniqueVals}
-                        and stratified results will not be returned for
-                        this variable")
+        cli::cli_inform("All values of {name} are equal to {uniqueVals} and stratified results will not be returned for this variable")
       } else {
         expr <- stats::as.formula(paste(c(
           "survival::Surv(outcome_or_competing_time, outcome_or_competing_status) ~ 1",
@@ -1703,6 +1831,86 @@ addCohortDetails <- function(x,
 
 empty_estimates <- function() {
   dplyr::tibble()
+}
+
+washoutAttritionReason <- function(outcomeType, washoutDays) {
+  dayLabel <- if (isTRUE(washoutDays == 1)) {
+    "1 day"
+  } else {
+    paste0(washoutDays, " days")
+  }
+  paste0("No ", outcomeType, " event in washout period of ", dayLabel)
+}
+
+emptySurvivalResult <- function(complete_results,
+                                cdm,
+                                outcomeCohortTable,
+                                outcomeCohortId,
+                                competingOutcomeCohortTable = NULL,
+                                competingOutcomeCohortId = NULL,
+                                analysisType,
+                                eventGap,
+                                outcomeDateVariable,
+                                outcomeWashout,
+                                censorOnCohortExit,
+                                censorOnDate,
+                                followUpDays,
+                                restrictedMeanFollowUp,
+                                minimumSurvivalDays) {
+  outcomeNames <- cohortNamesForIds(cdm, outcomeCohortTable, outcomeCohortId)
+  if (length(outcomeNames) == 0) {
+    outcomeNames <- NA_character_
+  }
+
+  if (is.null(competingOutcomeCohortTable)) {
+    settings <- dplyr::tibble(
+      outcome = outcomeNames,
+      competing_outcome = "none"
+    )
+  } else {
+    competingOutcomeNames <- cohortNamesForIds(
+      cdm, competingOutcomeCohortTable, competingOutcomeCohortId
+    )
+    if (length(competingOutcomeNames) == 0) {
+      competingOutcomeNames <- NA_character_
+    }
+    settings <- expand.grid(
+      outcome = outcomeNames,
+      competing_outcome = competingOutcomeNames,
+      stringsAsFactors = FALSE
+    ) |>
+      dplyr::as_tibble()
+  }
+
+  settings <- settings |>
+    dplyr::mutate(
+      result_id = dplyr::row_number(),
+      result_type = "survival_estimates",
+      package_name = "CohortSurvival",
+      package_version = as.character(utils::packageVersion("CohortSurvival")),
+      analysis_type = .env$analysisType,
+      eventgap = NA,
+      outcome_date_variable = .env$outcomeDateVariable,
+      outcome_washout = .env$outcomeWashout,
+      censor_on_cohort_exit = .env$censorOnCohortExit,
+      censor_on_date = .env$censorOnDate,
+      follow_up_days = .env$followUpDays,
+      restricted_mean_follow_up = .env$restrictedMeanFollowUp,
+      minimum_survival_days = .env$minimumSurvivalDays
+    ) |>
+    dplyr::relocate("result_id", .before = "result_type")
+
+  return(omopgenerics::newSummarisedResult(complete_results, settings = settings))
+}
+
+cohortNamesForIds <- function(cdm, cohortTable, cohortId) {
+  if (is.null(cohortTable) || length(cohortId) == 0) {
+    return(character())
+  }
+
+  omopgenerics::settings(cdm[[cohortTable]]) |>
+    dplyr::filter(.data$cohort_definition_id %in% .env$cohortId) |>
+    dplyr::pull("cohort_name")
 }
 
 # Helper function to get cohort id

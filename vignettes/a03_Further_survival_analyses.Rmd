@@ -32,11 +32,11 @@ We will create a cdm reference to use our example MGUS2 survival dataset.
 cdm <- CohortSurvival::mockMGUS2cdm()
 ```
 
-The CohortSurvival package does not have implemented functionality to do more complex survival analyses than Kaplar Meier curves, like Cox Proportional Hazards modelling. However, the format the data has to be in to be inputted to well-known modelling functions from packages like `survival` or `cmprsk`can be retrieved from OMOP data with some in-built functions in this package. Let us see how to do it in both single event and competing risk survival settings.
+The CohortSurvival package focuses on Kaplan-Meier survival estimates and cumulative incidence in a competing-risk setting. It does not fit more complex models, such as Cox proportional hazards or Fine and Gray models, directly. However, the format the data has to be in to be inputted to well-known modelling functions from packages like `survival` or `cmprsk` can be retrieved from OMOP data with `addCohortSurvival()`. Let us see how to do it in both single-event and competing-risk survival settings.
 
 ## Further analysis with single event survival
 
-To get the `time` and `status` information we need for the `coxph` function in the package `survival`, for instance, we only need to call `addCohortSurvival`. The stratification variables need to be columns previously added to the cohort by the user.
+To get the `time` and `status` information we need for the `coxph` function in the package `survival`, for instance, we only need to call `addCohortSurvival()`. The stratification variables need to be columns previously added to the cohort by the user. `status` is `1` for people with the outcome event and `0` for people censored before the event. `time` is the number of days from cohort entry to the event or censoring.
 
 ```{r, fig.width=5}
 input_survival_single <- cdm$mgus_diagnosis |>
@@ -50,7 +50,7 @@ input_survival_single |>
   glimpse()
 ```
 
-We can decide to change some of the default parameters in this function. Information on all these can be found `?addCohortSurvival`. For instance, we can choose to exclude people with an outcome only 180 days before index date, instead of anytime, and follow them up for only one year. We can also decide to use `cohort_end_date` as their outcome variable and censor them at a particular date, for instance, the 1st of January of 1994. We see how that gives us different results:
+We can decide to change some of the default parameters in this function. Information on all these can be found in `?addCohortSurvival`. For instance, we can choose to exclude people with an outcome only 180 days before index date, instead of anytime, and follow them up for only one year. We can also decide to use `cohort_end_date` as the outcome date variable and censor them at a particular date, for instance, the 1st of January of 1994. We see how that gives us different results:
 
 ```{r}
 cdm$mgus_diagnosis |>
@@ -82,7 +82,7 @@ survival::survdiff(survival::Surv(time, status) ~ sex, data = input_survival_sin
 
 ## Further analysis with competing risk survival
 
-For competing risk settings, we need to use the same function that adds `time` and `status` information, but twice. We first need to add time and status information for the outcome, then for the competing outcome. Then we leverage all those variables to get what outcome (if any) to count per individual so that we can feed the result to subsequent models.
+For competing-risk settings, we need to use the same function that adds `time` and `status` information, but twice. We first add time and status information for the outcome, then for the competing outcome. Then we combine those variables to identify which outcome, if any, happened first for each individual so that we can feed the result to subsequent models. In the coding below, `status = 0` means censored, `status = 1` means the event of interest, and `status = 2` means the competing outcome.
 
 ```{r}
 
@@ -99,7 +99,7 @@ For competing risk settings, we need to use the same function that adds `time` a
       "competing_outcome_status" = "status"
     )
   
-  # Collect and 
+  # Collect and combine the two event processes
   input_survival_cr <- input_survival_cr |>
     dplyr::collect() |>
     dplyr::mutate(

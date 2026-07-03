@@ -2,19 +2,28 @@
 % Please edit documentation in R/asSurvivalResult.R
 \name{asSurvivalResult}
 \alias{asSurvivalResult}
-\title{A tidy implementation of the summarised_characteristics object.}
+\title{Convert survival summarised results to a survival-specific format}
 \usage{
 asSurvivalResult(result)
 }
 \arguments{
-\item{result}{A summarised_characteristics object.}
+\item{result}{A summarised_result object.}
 }
 \value{
-A tibble with a tidy version of the summarised_characteristics
-object.
+A \code{survival_result} object.
 }
 \description{
-A tidy implementation of the summarised_characteristics object.
+Convert the long \code{omopgenerics::summarised_result} returned by
+\code{estimateSingleEventSurvival()} or \code{estimateCompetingRiskSurvival()} into a
+wider \code{survival_result} object that is easier to inspect manually. The main
+object contains time-specific estimates when available. Event counts,
+summary statistics, and attrition are stored as attributes named \code{"events"},
+\code{"summary"}, and \code{"attrition"}.
+}
+\details{
+The plotting and table functions in CohortSurvival accept both formats. The
+original \code{summarised_result} is usually preferable for exporting, binding
+with other omopgenerics results, and reporting through visOmopResults.
 }
 \examples{
 \donttest{

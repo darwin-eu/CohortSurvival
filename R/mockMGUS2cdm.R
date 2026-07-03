@@ -25,6 +25,10 @@
 #' cdm$person
 #' }
 mockMGUS2cdm <- function() {
+  rlang::check_installed("DBI")
+  rlang::check_installed("duckdb")
+  rlang::check_installed("CDMConnector")
+
   mgus2 <- survival::mgus2 |>
     dplyr::mutate(
       cohort_start_date_diag = as.Date(paste0(
@@ -179,7 +183,6 @@ mockMGUS2cdm <- function() {
                                      ),
                                      cdmName = "mock")
 
-  rlang::check_installed("CDMConnector")
   cdm2 <- CDMConnector::copyCdmTo(db,
                             cdm,
                             schema = "main",

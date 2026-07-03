@@ -1,3 +1,14 @@
+# CohortSurvival 1.1.2
+
+* Expand survival documentation and vignettes by @KimLopezGuell #415, #416
+* Move `DBI` to `Suggests` and check optional mock-CDM dependencies only when
+  the mock helpers are used by @KimLopezGuell #413
+* Fallback to single event survival output when a competing risk analysis has
+  no observed competing events by @KimLopezGuell #412
+* Improve handling of empty target and outcome cohorts by @KimLopezGuell #411
+* Improve survival table output, especially for competing risk results by @KimLopezGuell #409, #411
+
+
 # CohortSurvival 1.1.1
 
 * Remove duplicate outcome cohort validation by @KimLopezGuell #395

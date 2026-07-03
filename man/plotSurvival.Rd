@@ -2,7 +2,7 @@
 % Please edit documentation in R/plotSurvival.R
 \name{plotSurvival}
 \alias{plotSurvival}
-\title{Plot survival results}
+\title{Plot survival or cumulative incidence results}
 \usage{
 plotSurvival(
   result,
@@ -19,24 +19,28 @@ plotSurvival(
 )
 }
 \arguments{
-\item{result}{Survival results}
+\item{result}{Survival results. A \code{summarised_result} or \code{survival_result}
+is accepted.}
 
-\item{ribbon}{If TRUE, the plot will join points using a ribbon}
+\item{ribbon}{If TRUE, add a ribbon using the confidence interval columns.}
 
-\item{facet}{Variables to use for facets}
+\item{facet}{Variables to use for facets.}
 
-\item{colour}{Variables to use for colours}
+\item{colour}{Variables to use for colours.}
 
-\item{cumulativeFailure}{whether to plot the cumulative failure probability
-instead of the survival probability}
+\item{cumulativeFailure}{Whether to plot the cumulative failure probability
+instead of the survival probability.}
 
-\item{riskTable}{Whether to print risk table below the plot}
+\item{riskTable}{Whether to print risk table below the plot.}
 
-\item{riskInterval}{Interval of time to print risk table below the plot}
+\item{riskInterval}{Interval of time to print risk table below the plot. This
+should be compatible with the \code{eventGap} used when estimating the result.}
 
-\item{logLog}{If TRUE, the survival probabilities are transformed using the log-log formula}
+\item{logLog}{If TRUE, the survival probabilities are transformed using the
+log-log formula.}
 
-\item{timeScale}{The scale of time in the x-axis. Can be "days", "months", or "years"}
+\item{timeScale}{The scale of time in the x-axis. Can be "days", "months",
+or "years".}
 
 \item{type}{Character string specifying the desired plot type.
 See \code{visOmopResults::scatterPlot()} for supported types.
@@ -49,10 +53,20 @@ for all available style pre-defined themes. For further customization, you can a
 modify the returned ggplot object directly.}
 }
 \value{
-A plot of survival probabilities over time
+A plot of survival probabilities or cumulative incidence
+probabilities over time.
 }
 \description{
-Plot survival results
+Plot the time-specific estimates returned by \code{estimateSingleEventSurvival()}
+or \code{estimateCompetingRiskSurvival()}. Single-event results are plotted as
+survival probabilities by default and can be displayed as cumulative failure
+with \code{cumulativeFailure = TRUE}. Competing-risk results are cumulative
+incidence estimates and therefore require \code{cumulativeFailure = TRUE}.
+}
+\details{
+\code{facet} and \code{colour} should refer to columns available after converting the
+result with \code{asSurvivalResult()}, for example \code{target_cohort}, \code{outcome},
+\code{competing_outcome}, \code{variable}, or strata columns such as \code{sex}.
 }
 \examples{
 \donttest{
