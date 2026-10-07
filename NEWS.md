@@ -1,3 +1,24 @@
+# CohortSurvival 1.2.0
+
+* Define and document configurable same-day precedence for outcomes, competing
+  outcomes, and censoring by @KimLopezGuell
+* Clarify outcome washout defaults, retain empty outcome definitions, document
+  tie handling, and remove internal follow-up columns from returned cohort
+  tables by @KimLopezGuell #426
+* Add `filterSurvivalChanges()` to remove consecutive unchanged probability
+  estimates by @KimLopezGuell #425
+* Preserve target cohort names in attrition and include time units in survival
+  summary labels by @KimLopezGuell #424
+* Allow multiple outcomes in `addCohortSurvival()` by @KimLopezGuell #423
+* Allow callers to select which result components are returned by
+  `estimateSingleEventSurvival()` and `estimateCompetingRiskSurvival()` by
+  @KimLopezGuell #422
+* Change survival table functions to use the package-wide default output type
+  when `type` is not supplied by @catalamarti #421
+* Use a SQL Server-safe logical conversion when preparing competing-risk
+  attrition by @catalamarti #419
+
+
 # CohortSurvival 1.1.2
 
 * Expand survival documentation and vignettes by @KimLopezGuell #415, #416

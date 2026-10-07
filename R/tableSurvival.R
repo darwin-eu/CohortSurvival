@@ -105,7 +105,7 @@ tableSurvival <- function(x,
                           timeScale = "days",
                           header = c("estimate"),
                           estimates = c("median_survival", "restricted_mean_survival"),
-                          type = "gt",
+                          type = NULL,
                           groupColumn = NULL,
                           hide = c("result_id", "estimate_type"),
                           style = NULL,
@@ -403,8 +403,10 @@ tableSurvival <- function(x,
   }
   if ("median_survival" %in% unique(summary_table$estimate_name)) {
     formatEstimateName <- c(
-      "Median survival (95% CI)" =
+      stats::setNames(
         "<median_survival> (<median_survival_95CI_lower>, <median_survival_95CI_higher>)",
+        paste0("Median survival in ", timeScale, " (95% CI)")
+      ),
       formatEstimateName
     )
   }
@@ -414,16 +416,26 @@ tableSurvival <- function(x,
 
   if ("median_survival" %in% unique(summary_table$estimate_name)) {
     formatEstimateName <- c(formatEstimateName,
-                            "Median survival (95% CI)" = "<median_survival> (<median_survival_95CI_lower>, <median_survival_95CI_higher>)")
+                            stats::setNames(
+                              "<median_survival> (<median_survival_95CI_lower>, <median_survival_95CI_higher>)",
+                              paste0("Median survival in ", timeScale, " (95% CI)")
+                            ))
   }
 
-  formatEstimateName <- c(formatEstimateName,
-                          "Restricted mean survival (95% CI)" = "<restricted_mean_survival> (<restricted_mean_survival_95CI_lower>, <restricted_mean_survival_95CI_upper>)")
+  formatEstimateName <- c(
+    formatEstimateName,
+    stats::setNames(
+      "<restricted_mean_survival> (<restricted_mean_survival_95CI_lower>, <restricted_mean_survival_95CI_upper>)",
+      paste0("Restricted mean survival in ", timeScale, " (95% CI)")
+    )
+  )
 
   # Add quantile formatting
   quantile_estimates <- c("q0_survival", "q05_survival", "q25_survival", "q75_survival", "q95_survival", "q100_survival")
-  quantile_labels <- c("0% quantile (95% CI)", "5% quantile (95% CI)", "25% quantile (95% CI)",
-                       "75% quantile (95% CI)", "95% quantile (95% CI)", "100% quantile (95% CI)")
+  quantile_labels <- paste0(
+    c("0%", "5%", "25%", "75%", "95%", "100%"),
+    " quantile in ", timeScale, " (95% CI)"
+  )
 
   for (i in seq_along(quantile_estimates)) {
     if (quantile_estimates[i] %in% unique(summary_table$estimate_name)) {
@@ -519,7 +531,7 @@ normaliseTableSurvivalHide <- function(hide) {
 riskTable <- function(x,
                       eventGap = NULL,
                       header = c("estimate"),
-                      type = "gt",
+                      type = NULL,
                       groupColumn = NULL,
                       hide = c("result_id", "estimate_type"),
                       style = NULL,
@@ -567,7 +579,7 @@ riskTable <- function(x,
 tableSurvivalEvents <- function(x,
                                 eventGap = NULL,
                                 header = c("estimate"),
-                                type = "gt",
+                                type = NULL,
                                 groupColumn = NULL,
                                 hide = c("result_id", "estimate_type"),
                                 style = NULL,
@@ -719,7 +731,7 @@ tableSurvivalEvents <- function(x,
 #' }
 #'
 tableSurvivalAttrition <- function(result,
-                                   type = "gt",
+                                   type = NULL,
                                    header = "variable_name",
                                    groupColumn = c("cdm_name", "target_cohort", "variable_level"),
                                    hide = c("estimate_name"),

@@ -17,8 +17,8 @@ test_that("survival summary", {
        c('Data source', 'Target cohort', 'Outcome name',
          '[header_name]Estimate name\n[header_level]Number records',
          '[header_name]Estimate name\n[header_level]Number events',
-         '[header_name]Estimate name\n[header_level]Median survival (95% CI)',
-         '[header_name]Estimate name\n[header_level]Restricted mean survival (95% CI)',
+         '[header_name]Estimate name\n[header_level]Median survival in days (95% CI)',
+         '[header_name]Estimate name\n[header_level]Restricted mean survival in days (95% CI)',
          '[header_name]Estimate name\n[header_level]100 days survival estimate',
          '[header_name]Estimate name\n[header_level]200 days survival estimate')))
 
@@ -44,7 +44,7 @@ test_that("survival summary", {
        c('Data source', 'Target cohort', 'Outcome type', 'Outcome name',
          '[header_name]Estimate name\n[header_level]Number records',
          '[header_name]Estimate name\n[header_level]Number events',
-         '[header_name]Estimate name\n[header_level]Restricted mean survival (95% CI)',
+         '[header_name]Estimate name\n[header_level]Restricted mean survival in days (95% CI)',
          '[header_name]Estimate name\n[header_level]100 days cumulative incidence estimate',
          '[header_name]Estimate name\n[header_level]200 days cumulative incidence estimate')))
 
@@ -54,7 +54,7 @@ test_that("survival summary", {
      colnames(fx1$body$dataset ) ==
        c('Data source', 'Target cohort', 'Outcome type', 'Outcome name',
          'Estimate name\nNumber records', 'Estimate name\nNumber events',
-         'Estimate name\nRestricted mean survival (95% CI)')))
+         'Estimate name\nRestricted mean survival in days (95% CI)')))
 
   survsex <- estimateSingleEventSurvival(cdm,
                                       targetCohortTable = "mgus_diagnosis",
@@ -71,8 +71,8 @@ test_that("survival summary", {
        c('Data source', 'Target cohort', 'Sex', 'Outcome name',
          '[header_name]Estimate name\n[header_level]Number records',
          '[header_name]Estimate name\n[header_level]Number events',
-         '[header_name]Estimate name\n[header_level]Median survival (95% CI)',
-         '[header_name]Estimate name\n[header_level]Restricted mean survival (95% CI)')))
+         '[header_name]Estimate name\n[header_level]Median survival in days (95% CI)',
+         '[header_name]Estimate name\n[header_level]Restricted mean survival in days (95% CI)')))
 
   gt3 <- tableSurvival(survsex, header = c("cdm_name", "group"))
    expect_true(all(
@@ -129,6 +129,10 @@ test_that("timeScale months", {
   tabdays <- tableSurvival(surv, times = c(30,183,365,730), type = "tibble")
   tabmonths <- tableSurvival(surv, times = c(1,6,12,24), timeScale = "months", type = "tibble")
   tabyears <- tableSurvival(surv, times = c(0.5,1,2), timeScale = "years", type = "tibble")
+
+  expect_true(any(grepl("Restricted mean survival in days", names(tabdays))))
+  expect_true(any(grepl("Restricted mean survival in months", names(tabmonths))))
+  expect_true(any(grepl("Restricted mean survival in years", names(tabyears))))
 
   expect_true(all(tabdays |> dplyr::pull("[header_name]Estimate name\n[header_level]30 days cumulative incidence estimate") ==
                   tabmonths |> dplyr::pull("[header_name]Estimate name\n[header_level]1 months cumulative incidence estimate")))

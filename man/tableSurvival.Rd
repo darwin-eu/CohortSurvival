@@ -10,7 +10,7 @@ tableSurvival(
   timeScale = "days",
   header = c("estimate"),
   estimates = c("median_survival", "restricted_mean_survival"),
-  type = "gt",
+  type = NULL,
   groupColumn = NULL,
   hide = c("result_id", "estimate_type"),
   style = NULL,

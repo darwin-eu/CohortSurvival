@@ -1,12 +1,12 @@
 Package: CohortSurvival
 Title: Estimate Survival from Common Data Model Cohorts
-Version: 1.1.2
+Version: 1.2.0
 Authors@R: c(
     person("Kim", "López-Güell", email = "kim.lopez@spc.ox.ac.uk", 
-    role = c("aut", "cre"),
+    role = c("aut"),
     comment = c(ORCID = "0000-0002-8462-8668")),
     person("Edward", "Burn", email = "edward.burn@ndorms.ox.ac.uk", 
-    role = c("aut"), 
+    role = c("aut", "cre"),
     comment = c(ORCID = "0000-0002-9286-1128")), 
     person("Martí", "Català", email = "marti.catalasabate@ndorms.ox.ac.uk", 
     role = c("aut"), 
@@ -25,6 +25,8 @@ License: Apache License (>= 2)
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 8.0.0
+Depends:
+    R (>= 4.1.0)
 Imports: 
     broom,
     cli,
@@ -45,6 +47,7 @@ Suggests:
     CodelistGenerator,
     DBI,
     roxygen2,
+    omock (>= 0.7.0),
     knitr,
     tictoc,
     rmarkdown,

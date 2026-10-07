@@ -27,6 +27,15 @@
 #' `asSurvivalResult()` when you want a wider, survival-specific view for manual
 #' inspection or downstream modelling.
 #'
+#' `outcomeWashout` defaults to `Inf`. Therefore, unless it is explicitly
+#' changed, target cohort records with any outcome before cohort entry are
+#' excluded from the analysis.
+#'
+#' By default, an outcome recorded on the same day as any censoring boundary
+#' is counted as an event. The boundary may be the end of the observation
+#' period, target cohort exit, `censorOnDate`, or `followUpDays`. Set
+#' `censorTie = "censor"` to censor same-day outcomes instead.
+#'
 #' `restrictedMeanFollowUp` defines the time horizon used for the restricted
 #' mean survival time. It is calculated as the area under the survival curve up
 #' to that horizon. If `restrictedMeanFollowUp = NULL`, the horizon is left to
@@ -59,7 +68,7 @@
 #' cohort can be used.
 #' @param outcomeWashout Number of days before target cohort entry used to
 #' exclude people with a prior outcome. `Inf` excludes people with any prior
-#' outcome before index; `0` applies no pre-index washout.
+#' outcome before index; `0` applies no pre-index washout. The default is `Inf`.
 #' @param censorOnCohortExit If TRUE, an individual's follow up will be
 #' censored at their target cohort exit date.
 #' @param censorOnDate If not NULL, an individual's follow up will be censored
@@ -82,6 +91,14 @@
 #' calculating restricted mean survival. See Details.
 #' @param minimumSurvivalDays Minimum number of days required for the main cohort
 #' to contribute to the analysis.
+#' @param results Result components to return. Choose any combination of
+#' `"probability"`, `"events"`, `"summary"`, and `"attrition"`. By default all
+#' components are returned. `"probability"` represents survival estimates for
+#' single-event analyses and cumulative-incidence estimates for competing-risk
+#' analyses.
+#' @param censorTie How to resolve an outcome occurring on the same day as a
+#' censoring boundary. Use `"event"` (the default) to count the outcome or
+#' `"censor"` to censor the record at that time.
 #'
 #' @return An `omopgenerics::summarised_result` object with result types
 #' `survival_estimates`, `survival_events`, `survival_summary`, and
@@ -116,13 +133,30 @@ estimateSingleEventSurvival <- function(cdm,
                                         eventGap = 30,
                                         estimateGap = 1,
                                         restrictedMeanFollowUp = NULL,
-                                        minimumSurvivalDays = 1) {
+                                        minimumSurvivalDays = 1,
+                                        results = c("probability", "events", "summary", "attrition"),
+                                        censorTie = c("event", "censor")) {
+  omopgenerics::assertCharacter(results, empty = FALSE, unique = TRUE)
+  omopgenerics::assertChoice(
+    results,
+    choices = c("probability", "events", "summary", "attrition")
+  )
+  requestedResults <- results
+  censorTie <- match.arg(censorTie)
+  if (missing(outcomeWashout)) {
+    cli::cli_inform(c(
+      "i" = "{.arg outcomeWashout} was not provided and defaults to {.val Inf}.",
+      "i" = "People with any outcome before target cohort entry will be excluded from the analysis."
+    ))
+  }
+
   # Get ids of interest
     if (is.null(targetCohortId)) {
     targetCohortId <- getCohortId(targetCohortTable, cdm)
   }
   if (is.null(outcomeCohortId)) {
-    outcomeCohortId <- getCohortId(outcomeCohortTable, cdm)
+    outcomeCohortId <- omopgenerics::settings(cdm[[outcomeCohortTable]]) |>
+      dplyr::pull("cohort_definition_id")
   }
 
   emptyOutcomes <- omopgenerics::settings(cdm[[outcomeCohortTable]]) |>
@@ -193,7 +227,8 @@ estimateSingleEventSurvival <- function(cdm,
         eventGap = eventGap,
         estimateGap = estimateGap,
         restrictedMeanFollowUp = restrictedMeanFollowUp,
-        minimumSurvivalDays = minimumSurvivalDays
+        minimumSurvivalDays = minimumSurvivalDays,
+        censorTie = censorTie
       )
 
       # Extract attrition, events, and summary
@@ -236,6 +271,7 @@ estimateSingleEventSurvival <- function(cdm,
         package_version = as.character(utils::packageVersion("CohortSurvival")),
         result_type = "survival_attrition",
         group_name = "target_cohort",
+        group_level = .data$target_cohort,
         variable_level = .data$outcome,
         analysis_type = "single_event",
         estimate_name = "count"
@@ -255,13 +291,6 @@ estimateSingleEventSurvival <- function(cdm,
       ) |>
       omopgenerics::uniteStrata("reason") |>
       omopgenerics::uniteAdditional("reason_id")
-
-    if (attrition |> dplyr::group_by("target_cohort") |> dplyr::tally() |> dplyr::pull("n") ==
-        attrition |> dplyr::group_by("target_cohort", "cohort_definition_id") |> dplyr::tally() |> dplyr::pull("n")) {
-      attrition <- attrition |>
-        dplyr::mutate(target_cohort = paste0(.data$target_cohort, "_", .data$cohort_definition_id),
-                      group_level = .data$target_cohort)
-    }
 
     attrition <- attrition |>
       dplyr::select(-c("cohort_definition_id"))
@@ -354,6 +383,8 @@ estimateSingleEventSurvival <- function(cdm,
         censor_on_cohort_exit = .env$censorOnCohortExit,
         censor_on_date = .env$censorOnDate,
         follow_up_days = .env$followUpDays,
+        outcome_competing_tie = "none",
+        event_censor_tie = .env$censorTie,
         restricted_mean_follow_up = .env$restrictedMeanFollowUp,
         minimum_survival_days = .env$minimumSurvivalDays
       )
@@ -405,6 +436,8 @@ estimateSingleEventSurvival <- function(cdm,
         censor_on_cohort_exit = .env$censorOnCohortExit,
         censor_on_date = .env$censorOnDate,
         follow_up_days = .env$followUpDays,
+        outcome_competing_tie = "none",
+        event_censor_tie = .env$censorTie,
         restricted_mean_follow_up = .env$restrictedMeanFollowUp,
         minimum_survival_days = .env$minimumSurvivalDays
       )
@@ -427,12 +460,22 @@ estimateSingleEventSurvival <- function(cdm,
       censorOnCohortExit = censorOnCohortExit,
       censorOnDate = censorOnDate,
       followUpDays = followUpDays,
+      outcomeTie = NULL,
+      censorTie = censorTie,
       restrictedMeanFollowUp = restrictedMeanFollowUp,
       minimumSurvivalDays = minimumSurvivalDays
     )
   }
 
-  return(surv_estimates)
+  result_types <- c(
+    probability = "survival_estimates",
+    events = "survival_events",
+    summary = "survival_summary",
+    attrition = "survival_attrition"
+  )[requestedResults]
+
+  return(surv_estimates |>
+           omopgenerics::filterSettings(.data$result_type %in% .env$result_types))
 }
 
 #' Estimate cumulative incidence with a competing outcome
@@ -449,6 +492,21 @@ estimateSingleEventSurvival <- function(cdm,
 #' `omopgenerics::summarised_result` containing cumulative incidence estimates,
 #' event counts, summary statistics, and attrition. Use `asSurvivalResult()` for
 #' a wider, survival-specific view.
+#'
+#' `outcomeWashout` and `competingOutcomeWashout` default to `Inf`. Therefore,
+#' unless they are explicitly changed, target cohort records with any prior
+#' outcome of the corresponding type are excluded from the analysis.
+#'
+#' The default same-day hierarchy is **outcome of interest, competing outcome,
+#' then censoring**. Thus, when all three occur on the same day, the outcome of
+#' interest is counted. Censoring includes the end of the observation period,
+#' target cohort exit, `censorOnDate`, and `followUpDays`.
+#'
+#' Use `outcomeTie` to choose whether the outcome of interest or competing
+#' outcome wins when both occur on the same day. Use `censorTie` to choose
+#' whether a same-day event or censoring boundary wins. The censoring rule is
+#' applied first: with `censorTie = "censor"`, a three-way tie is censored;
+#' with `censorTie = "event"`, `outcomeTie` decides which event is counted.
 #'
 #' `restrictedMeanFollowUp` defines the time horizon used for the restricted
 #' mean summary. If `restrictedMeanFollowUp = NULL`, the horizon is left to the
@@ -482,7 +540,7 @@ estimateSingleEventSurvival <- function(cdm,
 #' cohort can be used.
 #' @param outcomeWashout Number of days before target cohort entry used to
 #' exclude people with a prior outcome. `Inf` excludes people with any prior
-#' outcome before index; `0` applies no pre-index washout.
+#' outcome before index; `0` applies no pre-index washout. The default is `Inf`.
 #' @param competingOutcomeCohortId Competing outcome cohorts to include. It can either be a
 #' cohort_definition_id value or a cohort_name. Multiple ids are allowed. If
 #' `NULL`, all competing outcome cohorts in `competingOutcomeCohortTable` are
@@ -492,6 +550,7 @@ estimateSingleEventSurvival <- function(cdm,
 #' @param competingOutcomeWashout Number of days before target cohort entry used
 #' to exclude people with a prior competing outcome. `Inf` excludes people with
 #' any prior competing outcome before index; `0` applies no pre-index washout.
+#' The default is `Inf`.
 #' @param censorOnCohortExit If TRUE, an individual's follow up will be
 #' censored at their target cohort exit date.
 #' @param censorOnDate If not NULL, an individual's follow up will be censored
@@ -514,6 +573,16 @@ estimateSingleEventSurvival <- function(cdm,
 #' calculating restricted mean summaries. See Details.
 #' @param minimumSurvivalDays Minimum number of days required for the main cohort
 #' to contribute to the analysis.
+#' @param results Result components to return. Choose any combination of
+#' `"probability"`, `"events"`, `"summary"`, and `"attrition"`. By default all
+#' components are returned. `"probability"` represents cumulative-incidence
+#' estimates for the outcome and competing outcome.
+#' @param outcomeTie How to resolve the outcome of interest and competing
+#' outcome occurring on the same day. Use `"outcome"` (the default) or
+#' `"competingOutcome"`.
+#' @param censorTie How to resolve an event occurring on the same day as a
+#' censoring boundary. Use `"event"` (the default) to count the event or
+#' `"censor"` to censor the record at that time.
 #'
 #' @return An `omopgenerics::summarised_result` object with result types
 #' `survival_estimates`, `survival_events`, `survival_summary`, and
@@ -554,16 +623,42 @@ estimateCompetingRiskSurvival <- function(cdm,
                                           eventGap = 30,
                                           estimateGap = 1,
                                           restrictedMeanFollowUp = NULL,
-                                          minimumSurvivalDays = 1) {
+                                          minimumSurvivalDays = 1,
+                                          results = c("probability", "events", "summary", "attrition"),
+                                          outcomeTie = c("outcome", "competingOutcome"),
+                                          censorTie = c("event", "censor")) {
+  omopgenerics::assertCharacter(results, empty = FALSE, unique = TRUE)
+  omopgenerics::assertChoice(
+    results,
+    choices = c("probability", "events", "summary", "attrition")
+  )
+  requestedResults <- results
+  outcomeTie <- match.arg(outcomeTie)
+  censorTie <- match.arg(censorTie)
+  if (missing(outcomeWashout)) {
+    cli::cli_inform(c(
+      "i" = "{.arg outcomeWashout} was not provided and defaults to {.val Inf}.",
+      "i" = "People with any outcome before target cohort entry will be excluded from the analysis."
+    ))
+  }
+  if (missing(competingOutcomeWashout)) {
+    cli::cli_inform(c(
+      "i" = "{.arg competingOutcomeWashout} was not provided and defaults to {.val Inf}.",
+      "i" = "People with any competing outcome before target cohort entry will be excluded from the analysis."
+    ))
+  }
+
   # Get ids of interest
   if (is.null(targetCohortId)) {
     targetCohortId <- getCohortId(targetCohortTable, cdm)
   }
   if (is.null(outcomeCohortId)) {
-    outcomeCohortId <- getCohortId(outcomeCohortTable, cdm)
+    outcomeCohortId <- omopgenerics::settings(cdm[[outcomeCohortTable]]) |>
+      dplyr::pull("cohort_definition_id")
   }
   if (is.null(competingOutcomeCohortId)) {
-    competingOutcomeCohortId <- getCohortId(competingOutcomeCohortTable, cdm)
+    competingOutcomeCohortId <- omopgenerics::settings(cdm[[competingOutcomeCohortTable]]) |>
+      dplyr::pull("cohort_definition_id")
   }
 
 
@@ -657,7 +752,9 @@ estimateCompetingRiskSurvival <- function(cdm,
         eventGap = eventGap,
         estimateGap = estimateGap,
         restrictedMeanFollowUp = restrictedMeanFollowUp,
-        minimumSurvivalDays = minimumSurvivalDays
+        minimumSurvivalDays = minimumSurvivalDays,
+        outcomeTie = outcomeTie,
+        censorTie = censorTie
       )
 
       # Extract attrition, events, and summary
@@ -666,7 +763,7 @@ estimateCompetingRiskSurvival <- function(cdm,
         attrition <- attr(surv, "cohort_attrition") |>
           dplyr::mutate(target_cohort = working_target, outcome = working_outcome,
                         competing_outcome = working_competing_outcome,
-                        fallback_to_single_event = fallback_to_single_event) |>
+                        fallback_to_single_event = as.logical(fallback_to_single_event)) |>
           dplyr::collect() |>
           dplyr::filter(.data$cohort_definition_id == working_target_id)
       } else {
@@ -707,6 +804,7 @@ estimateCompetingRiskSurvival <- function(cdm,
         package_version = as.character(utils::packageVersion("CohortSurvival")),
         result_type = "survival_attrition",
         group_name = "target_cohort",
+        group_level = .data$target_cohort,
         variable_level = .data$outcome,
         analysis_type = dplyr::if_else(
           .data$fallback_to_single_event,
@@ -730,13 +828,6 @@ estimateCompetingRiskSurvival <- function(cdm,
       ) |>
       omopgenerics::uniteStrata("reason") |>
       omopgenerics::uniteAdditional("reason_id")
-
-    if (attrition |> dplyr::group_by("target_cohort") |> dplyr::tally() |> dplyr::pull("n") ==
-        attrition |> dplyr::group_by("target_cohort", "cohort_definition_id") |> dplyr::tally() |> dplyr::pull("n")) {
-      attrition <- attrition |>
-        dplyr::mutate(target_cohort = paste0(.data$target_cohort, "_", .data$cohort_definition_id),
-                      group_level = .data$target_cohort)
-    }
 
     attrition <- attrition |>
       dplyr::select(-c("cohort_definition_id"))
@@ -829,6 +920,8 @@ estimateCompetingRiskSurvival <- function(cdm,
         censor_on_cohort_exit = .env$censorOnCohortExit,
         censor_on_date = .env$censorOnDate,
         follow_up_days = .env$followUpDays,
+        outcome_competing_tie = .env$outcomeTie,
+        event_censor_tie = .env$censorTie,
         restricted_mean_follow_up = .env$restrictedMeanFollowUp,
         minimum_survival_days = .env$minimumSurvivalDays
       )
@@ -880,6 +973,8 @@ estimateCompetingRiskSurvival <- function(cdm,
         censor_on_cohort_exit = .env$censorOnCohortExit,
         censor_on_date = .env$censorOnDate,
         follow_up_days = .env$followUpDays,
+        outcome_competing_tie = .env$outcomeTie,
+        event_censor_tie = .env$censorTie,
         restricted_mean_follow_up = .env$restrictedMeanFollowUp,
         minimum_survival_days = .env$minimumSurvivalDays
       )
@@ -902,12 +997,22 @@ estimateCompetingRiskSurvival <- function(cdm,
       censorOnCohortExit = censorOnCohortExit,
       censorOnDate = censorOnDate,
       followUpDays = followUpDays,
+      outcomeTie = outcomeTie,
+      censorTie = censorTie,
       restrictedMeanFollowUp = restrictedMeanFollowUp,
       minimumSurvivalDays = minimumSurvivalDays
     )
   }
 
-  return(surv_estimates)
+  result_types <- c(
+    probability = "survival_estimates",
+    events = "survival_events",
+    summary = "survival_summary",
+    attrition = "survival_attrition"
+  )[requestedResults]
+
+  return(surv_estimates |>
+           omopgenerics::filterSettings(.data$result_type %in% .env$result_types))
 }
 
 
@@ -930,7 +1035,12 @@ estimateSurvival <- function(cdm,
                              eventGap = 30,
                              estimateGap = 1,
                              restrictedMeanFollowUp = NULL,
-                             minimumSurvivalDays = 1) {
+                             minimumSurvivalDays = 1,
+                             outcomeTie = c("outcome", "competingOutcome"),
+                             censorTie = c("event", "censor")) {
+
+  outcomeTie <- match.arg(outcomeTie)
+  censorTie <- match.arg(censorTie)
 
   # check inputs
   omopgenerics::assertCharacter(targetCohortTable, length = 1)
@@ -965,8 +1075,17 @@ estimateSurvival <- function(cdm,
 # extract and prepare exposure data
   workingExposureTable <- cdm[[targetCohortTable]] |>
     dplyr::filter(.data$cohort_definition_id == .env$targetCohortId) |>
-    addCohortSurvival(cdm, outcomeCohortTable, outcomeCohortId, outcomeDateVariable,
-      outcomeWashout, censorOnCohortExit, censorOnDate, followUpDays) |>
+    addCohortSurvival(
+      cdm = cdm,
+      outcomeCohortTable = outcomeCohortTable,
+      outcomeCohortId = outcomeCohortId,
+      outcomeDateVariable = outcomeDateVariable,
+      outcomeWashout = outcomeWashout,
+      censorOnCohortExit = censorOnCohortExit,
+      censorOnDate = censorOnDate,
+      followUpDays = followUpDays,
+      censorTie = censorTie
+    ) |>
     dplyr::rename( "outcome_time" = "time", "outcome_status" = "status") |>
     dplyr::compute(temporary = FALSE,
                    logPrefix = "CohortSurvival_estimateSurvival_exposure")
@@ -974,9 +1093,17 @@ estimateSurvival <- function(cdm,
   # handle competing risks
   if (!is.null(competingOutcomeCohortTable)) {
     workingExposureTable <- workingExposureTable |>
-      addCohortSurvival(cdm, competingOutcomeCohortTable, competingOutcomeCohortId,
-        competingOutcomeDateVariable, competingOutcomeWashout, censorOnCohortExit,
-        censorOnDate, followUpDays) |>
+      addCohortSurvival(
+        cdm = cdm,
+        outcomeCohortTable = competingOutcomeCohortTable,
+        outcomeCohortId = competingOutcomeCohortId,
+        outcomeDateVariable = competingOutcomeDateVariable,
+        outcomeWashout = competingOutcomeWashout,
+        censorOnCohortExit = censorOnCohortExit,
+        censorOnDate = censorOnDate,
+        followUpDays = followUpDays,
+        censorTie = censorTie
+      ) |>
       dplyr::rename("competing_risk_time" = "time", "competing_risk_status" = "status") |>
       dplyr::compute(temporary = FALSE,
                      logPrefix = "CohortSurvival_estimateSurvival_add_competing_risk")
@@ -1020,7 +1147,7 @@ estimateSurvival <- function(cdm,
     survData <- addCompetingRiskVars(data = survData, time1 = "outcome_time",
       status1 = "outcome_status", time2 = "competing_risk_time",
       status2 = "competing_risk_status", nameOutTime = "outcome_or_competing_time",
-      nameOutStatus = "outcome_or_competing_status")
+      nameOutStatus = "outcome_or_competing_status", outcomeTie = outcomeTie)
   }
 
   fallbackToSingleEvent <- FALSE
@@ -1247,13 +1374,24 @@ estimateSurvival <- function(cdm,
 }
 
 addCompetingRiskVars <- function(data, time1, status1, time2, status2,
-                                 nameOutTime, nameOutStatus) {
+                                 nameOutTime, nameOutStatus,
+                                 outcomeTie = c("outcome", "competingOutcome")) {
+  outcomeTie <- match.arg(outcomeTie)
+  competingWinsTie <- outcomeTie == "competingOutcome"
+
   # - add competing risk variables (time and status)
   # 0: no event, 1: event 1, 2: event 2
   data |>
     dplyr::mutate(
       !!nameOutTime := pmin(.data[[time1]], .data[[time2]]),
-      !!nameOutStatus := factor(dplyr::if_else(.data[[time2]] <= .data[[time1]], 2 * .data[[status2]], .data[[status1]]))
+      !!nameOutStatus := factor(dplyr::case_when(
+        .data[[status1]] == 1 & .data[[time1]] <= .data[[time2]] &
+          .data[[status2]] == 1 & .data[[time2]] <= .data[[time1]] &
+          .env$competingWinsTie ~ 2L,
+        .data[[status1]] == 1 & .data[[time1]] <= .data[[time2]] ~ 1L,
+        .data[[status2]] == 1 & .data[[time2]] <= .data[[time1]] ~ 2L,
+        .default = 0L
+      ))
     )
 }
 
@@ -1855,6 +1993,8 @@ emptySurvivalResult <- function(complete_results,
                                 censorOnCohortExit,
                                 censorOnDate,
                                 followUpDays,
+                                outcomeTie = NULL,
+                                censorTie,
                                 restrictedMeanFollowUp,
                                 minimumSurvivalDays) {
   outcomeNames <- cohortNamesForIds(cdm, outcomeCohortTable, outcomeCohortId)
@@ -1895,6 +2035,8 @@ emptySurvivalResult <- function(complete_results,
       censor_on_cohort_exit = .env$censorOnCohortExit,
       censor_on_date = .env$censorOnDate,
       follow_up_days = .env$followUpDays,
+      outcome_competing_tie = if (is.null(outcomeTie)) "none" else .env$outcomeTie,
+      event_censor_tie = .env$censorTie,
       restricted_mean_follow_up = .env$restrictedMeanFollowUp,
       minimum_survival_days = .env$minimumSurvivalDays
     ) |>

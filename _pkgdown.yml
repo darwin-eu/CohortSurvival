@@ -23,6 +23,7 @@ reference:
 - subtitle: Tidy results
 - contents:
   - matches("asSurvivalResult")
+  - matches("filterSurvivalChanges")
 - subtitle: Mock data
 - contents:
   - matches("mockMGUS2cdm")

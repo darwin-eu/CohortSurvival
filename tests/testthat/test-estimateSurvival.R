@@ -2265,10 +2265,10 @@ test_that("restrictedMeanFollowUp", {
   tsurv <- tableSurvival(survCR, type = "tibble", .options = list(includeHeaderKey = FALSE))
   tsurvrmean <- tableSurvival(survCR_rmean, type = "tibble", .options = list(includeHeaderKey = FALSE))
 
-  expect_true(all.equal(tsurv |> dplyr::select(- dplyr::contains("Restricted mean survival (95% CI)")),
-                        tsurvrmean |> dplyr::select(- dplyr::contains("Restricted mean survival (95% CI)"))))
-  expect_true(all(tsurv |> dplyr::pull(dplyr::contains("Restricted mean survival (95% CI)")) == c("35.00 (28.00, 42.00)", "260.00 (250.00, 269.00)")))
-  expect_true(all(tsurvrmean |> dplyr::pull(dplyr::contains("Restricted mean survival (95% CI)")) == c("3.00 (2.00, 3.00)", "28.00 (26.00, 29.00)")))
+  expect_true(all.equal(tsurv |> dplyr::select(- dplyr::contains("Restricted mean survival in days (95% CI)")),
+                        tsurvrmean |> dplyr::select(- dplyr::contains("Restricted mean survival in days (95% CI)"))))
+  expect_true(all(tsurv |> dplyr::pull(dplyr::contains("Restricted mean survival in days (95% CI)")) == c("38.00 (31.00, 45.00)", "257.00 (247.00, 267.00)")))
+  expect_true(all(tsurvrmean |> dplyr::pull(dplyr::contains("Restricted mean survival in days (95% CI)")) == c("3.00 (2.00, 4.00)", "27.00 (25.00, 29.00)")))
 
   # too big a number produces NA
   survCR_rmean_big <- estimateCompetingRiskSurvival(cdm,
@@ -2312,7 +2312,32 @@ test_that("restrictedMeanFollowUp", {
 
   tsurvrmeanbigs <- tableSurvival(survCR_rmean_big_strata, type = "tibble", .options = list(includeHeaderKey = FALSE)) |>
     dplyr::arrange("Sex", "Outcome name")
-  expect_true(all(compareNA(tsurvrmeanbigs |> dplyr::pull(dplyr::contains("Restricted mean survival (95% CI)")), c("31.00 (26.00, 37.00)","241.00 (232.00, 250.00)","\U2013","27.00 (20.00, 34.00)","\U2013","252.00 (241.00, 264.00)"))))
+  expect_true(all(compareNA(tsurvrmeanbigs |> dplyr::pull(dplyr::contains("Restricted mean survival in days (95% CI)")), c("34.00 (28.00, 40.00)","238.00 (229.00, 247.00)","\U2013","29.00 (22.00, 37.00)","\U2013","250.00 (238.00, 262.00)"))))
+
+  CDMConnector::cdmDisconnect(cdm)
+})
+
+test_that("attrition preserves target cohort names", {
+  skip_on_cran()
+  cdm <- mockMGUS2cdm()
+
+  single_event <- estimateSingleEventSurvival(
+    cdm,
+    targetCohortTable = "mgus_diagnosis",
+    outcomeCohortTable = "death_cohort"
+  ) |>
+    omopgenerics::filterSettings(result_type == "survival_attrition")
+
+  competing_risk <- estimateCompetingRiskSurvival(
+    cdm,
+    targetCohortTable = "mgus_diagnosis",
+    outcomeCohortTable = "progression",
+    competingOutcomeCohortTable = "death_cohort"
+  ) |>
+    omopgenerics::filterSettings(result_type == "survival_attrition")
+
+  expect_identical(unique(single_event$group_level), "mgus_diagnosis")
+  expect_identical(unique(competing_risk$group_level), "mgus_diagnosis")
 
   CDMConnector::cdmDisconnect(cdm)
 })
@@ -2331,8 +2356,16 @@ test_that("mgus example: empty outcome tables or cohorts", {
     attr(cdm$death_c, "tbl_name") <- "death_c"
 
     # Whole empty table throws warning for outcome
-    expect_warning(estimateSingleEventSurvival(cdm, targetCohortTable = "mgus_diagnosis",
-                                             outcomeCohortTable = "death_c"))
+    expect_warning(emptyOutcomeResult <- estimateSingleEventSurvival(
+      cdm,
+      targetCohortTable = "mgus_diagnosis",
+      outcomeCohortTable = "death_c",
+      outcomeWashout = 0
+    ))
+    emptyOutcomeEstimates <- emptyOutcomeResult |>
+      omopgenerics::filterSettings(result_type == "survival_estimates")
+    expect_gt(nrow(emptyOutcomeEstimates), 0)
+    expect_true(all(as.numeric(emptyOutcomeEstimates$estimate_value) == 1))
 
     # and warning for target
     expect_warning(estimateSingleEventSurvival(cdm, targetCohortTable = "death_c",
@@ -2535,7 +2568,7 @@ test_that("empty input cohort after input filtering", {
                                                   "survival_summary", "survival_attrition")))
 
   expect_true(all(omopgenerics::filterSettings(surv, result_id == 4) |>
-                    dplyr::pull(group_level) |> unique() == c("mgus_diagnosis_1", "mgus_diagnosis_2020_2")))
+                    dplyr::pull(group_level) |> unique() == c("mgus_diagnosis", "mgus_diagnosis_2020")))
 
   CDMConnector::cdmDisconnect(cdm)
 })
@@ -2697,4 +2730,38 @@ test_that("tableSurvival estimates parameter works correctly", {
   expect_error(tableSurvival(surv, estimates = "invalid_estimate"))
 
   CDMConnector::cdmDisconnect(cdm)
+})
+
+test_that("outcome precedence for same-day events is configurable", {
+  data <- tibble::tibble(
+    outcome_time = c(10, 10, 10, 10, 10),
+    outcome_status = c(1, 1, 0, 1, 0),
+    competing_time = c(10, 11, 10, 10, 10),
+    competing_status = c(1, 1, 0, 0, 1)
+  )
+
+  result <- CohortSurvival:::addCompetingRiskVars(
+    data,
+    time1 = "outcome_time",
+    status1 = "outcome_status",
+    time2 = "competing_time",
+    status2 = "competing_status",
+    nameOutTime = "time",
+    nameOutStatus = "status"
+  )
+
+  competing_result <- CohortSurvival:::addCompetingRiskVars(
+    data,
+    time1 = "outcome_time",
+    status1 = "outcome_status",
+    time2 = "competing_time",
+    status2 = "competing_status",
+    nameOutTime = "time",
+    nameOutStatus = "status",
+    outcomeTie = "competingOutcome"
+  )
+
+  expect_identical(as.character(result$status), c("1", "1", "0", "1", "2"))
+  expect_identical(as.character(competing_result$status), c("2", "1", "0", "1", "2"))
+  expect_identical(result$time, c(10, 10, 10, 10, 10))
 })

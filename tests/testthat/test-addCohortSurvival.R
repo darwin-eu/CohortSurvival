@@ -325,18 +325,12 @@ test_that("censorOnCohortExit", {
                                    dplyr::select(time) |>
                                    dplyr::pull()),
                             sort(c(NA, 3, 1155)))))
-  expect_true(all(compareNA(sort(cohortNoCensorExit |>
-                                   dplyr::select(days_to_exit) |>
-                                   dplyr::pull()),
-                            sort(c(1186, 1216, 1155)))))
+  expect_false("days_to_exit" %in% colnames(cohortNoCensorExit))
   expect_true(all(compareNA(sort(cohortCensorExit |>
                                    dplyr::select(time) |>
                                    dplyr::pull()),
                             sort(c(NA, 3, 60)))))
-  expect_true(all(compareNA(sort(cohortCensorExit |>
-                                   dplyr::select(days_to_exit) |>
-                                   dplyr::pull()),
-                            sort(c(91, 213, 60)))))
+  expect_false("days_to_exit" %in% colnames(cohortCensorExit))
 
   CDMConnector::cdmDisconnect(cdm)
 })
@@ -411,10 +405,7 @@ test_that("censorOnDate", {
                                    dplyr::select(status) |>
                                    dplyr::pull()),
                             sort(c(NA, 1, 0)))))
-  expect_true(all(compareNA(sort(cohortCensorDate |>
-                                   dplyr::select(days_to_exit) |>
-                                   dplyr::pull()),
-                            sort(c(369, 368, 3)))))
+  expect_false("days_to_exit" %in% colnames(cohortCensorDate))
   expect_true(all(compareNA(sort(cohortCensorDate |>
                                    dplyr::select(time) |>
                                    dplyr::pull()),
@@ -525,10 +516,7 @@ test_that("followUpDays", {
     ) |>
     dplyr::arrange(subject_id)
 
-  expect_true(all(cohortFollowUp |>
-                    dplyr::select(days_to_exit) |>
-                    dplyr::pull() ==
-                    c(20,20,20)))
+  expect_false("days_to_exit" %in% colnames(cohortFollowUp))
   expect_true(all(cohortFollowUp |>
                     dplyr::select(status) |>
                     dplyr::pull() ==
@@ -538,10 +526,7 @@ test_that("followUpDays", {
                     dplyr::pull() ==
                     c(20,3,10)))
 
-  expect_true(all(cohortFUandCE |>
-                    dplyr::select(days_to_exit) |>
-                    dplyr::pull() ==
-                    c(20,20,5)))
+  expect_false("days_to_exit" %in% colnames(cohortFUandCE))
   expect_true(all(cohortFUandCE |>
                     dplyr::select(status) |>
                     dplyr::pull() ==
@@ -1000,4 +985,21 @@ test_that("cohort id or cohort name", {
                  dplyr::arrange(subject_id) |>
                  dplyr::pull(time))
 CDMConnector::cdmDisconnect(cdm)
+})
+
+test_that("addCohortSurvival returns only the documented survival columns", {
+  skip_on_cran()
+  cdm <- mockMGUS2cdm()
+
+  result <- addCohortSurvival(
+    cdm$mgus_diagnosis,
+    cdm = cdm,
+    outcomeCohortTable = "death_cohort",
+    outcomeWashout = 0
+  )
+
+  expect_true(all(c("time", "status") %in% colnames(result)))
+  expect_false("days_to_exit" %in% colnames(result))
+
+  CDMConnector::cdmDisconnect(cdm)
 })

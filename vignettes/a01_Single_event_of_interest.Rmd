@@ -201,7 +201,7 @@ So far we have seen how to estimate survival for the whole cohort with the defau
 
 The main function, `estimateSingleEventSurvival()`, has many input parameters that we can change to provide results more targeted to our needs. You can check all options, as usual, with `?estimateSingleEventSurvival`. We will comment on some of these options in this section.
 
-By default, `outcomeWashout` is set to Inf, which means that we only include people who have not had the outcome before index date (as defined by their entry to the target cohort). We can change that and ask, for instance, for people to only be excluded from the estimation for a 30 day washout period instead. In this case, we would write `estimateSingleEventSurvival(cdm, "mgus_diagnosis", "death_cohort", outcomeWashout = 30)`.
+By default, `outcomeWashout` is set to `Inf`, which means that we only include people who have never had the outcome before index date (as defined by their entry to the target cohort). Because this default materially changes the population being analysed, CohortSurvival reports it when `outcomeWashout` is omitted. We can change it and ask, for instance, for people to only be excluded from the estimation for a 30 day washout period instead. In this case, we would write `estimateSingleEventSurvival(cdm, "mgus_diagnosis", "death_cohort", outcomeWashout = 30)`. Setting `outcomeWashout = 0` disables pre-index outcome exclusion.
 
 Other options include requiring a minimum number of survival days (the default is set to `minimumSurvivalDays = 1`) or cutting the follow-up at a certain amount of time (the default is set to `followUpDays = Inf`, i.e. as much follow up as available).
 
@@ -213,10 +213,16 @@ The main time-related parameters control different parts of the analysis:
 | `followUpDays` | Censors everyone after a fixed number of days from target cohort entry. |
 | `censorOnCohortExit` | Censors follow-up at the target cohort end date. |
 | `censorOnDate` | Censors follow-up at one calendar date, or at a date column in the target cohort. |
+| `censorTie` | Resolves an outcome recorded on the same day as a censoring boundary. `"event"` counts the outcome (the default); `"censor"` censors it. |
 | `minimumSurvivalDays` | Removes records that do not contribute at least this many survival days. |
 | `eventGap` | Sets the width of intervals used for event and risk table counts. |
 | `estimateGap` | Sets the spacing between survival probability estimates. |
 | `restrictedMeanFollowUp` | Sets the common horizon used to calculate restricted mean survival. |
+
+By default, censoring happens after events recorded on the same day. Therefore,
+an outcome on the end date of the observation period, target cohort exit,
+`censorOnDate`, or the last `followUpDays` day is counted as an event. Set
+`censorTie = "censor"` when the censoring boundary should win these ties instead.
 
 We might want to retrieve event information at a smaller interval than the default, which is every 30 days. Note that if we use the usual exporting functions from `omopgenerics`, small numbers will be suppressed. This can be changed, but it is likely that you cannot report small counts anyway. Bigger intervals allow for aggregated counts which tend to be bigger.
 

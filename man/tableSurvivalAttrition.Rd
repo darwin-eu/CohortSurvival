@@ -6,7 +6,7 @@
 \usage{
 tableSurvivalAttrition(
   result,
-  type = "gt",
+  type = NULL,
   header = "variable_name",
   groupColumn = c("cdm_name", "target_cohort", "variable_level"),
   hide = c("estimate_name"),

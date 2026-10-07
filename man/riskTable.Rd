@@ -8,7 +8,7 @@ riskTable(
   x,
   eventGap = NULL,
   header = c("estimate"),
-  type = "gt",
+  type = NULL,
   groupColumn = NULL,
   hide = c("result_id", "estimate_type"),
   style = NULL,

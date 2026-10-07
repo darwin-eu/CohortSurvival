@@ -20,7 +20,9 @@ estimateSingleEventSurvival(
   eventGap = 30,
   estimateGap = 1,
   restrictedMeanFollowUp = NULL,
-  minimumSurvivalDays = 1
+  minimumSurvivalDays = 1,
+  results = c("probability", "events", "summary", "attrition"),
+  censorTie = c("event", "censor")
 )
 }
 \arguments{
@@ -48,7 +50,7 @@ cohort can be used.}
 
 \item{outcomeWashout}{Number of days before target cohort entry used to
 exclude people with a prior outcome. \code{Inf} excludes people with any prior
-outcome before index; \code{0} applies no pre-index washout.}
+outcome before index; \code{0} applies no pre-index washout. The default is \code{Inf}.}
 
 \item{censorOnCohortExit}{If TRUE, an individual's follow up will be
 censored at their target cohort exit date.}
@@ -80,6 +82,16 @@ calculating restricted mean survival. See Details.}
 
 \item{minimumSurvivalDays}{Minimum number of days required for the main cohort
 to contribute to the analysis.}
+
+\item{results}{Result components to return. Choose any combination of
+\code{"probability"}, \code{"events"}, \code{"summary"}, and \code{"attrition"}. By default all
+components are returned. \code{"probability"} represents survival estimates for
+single-event analyses and cumulative-incidence estimates for competing-risk
+analyses.}
+
+\item{censorTie}{How to resolve an outcome occurring on the same day as a
+censoring boundary. Use \code{"event"} (the default) to count the outcome or
+\code{"censor"} to censor the record at that time.}
 }
 \value{
 An \code{omopgenerics::summarised_result} object with result types
@@ -97,6 +109,15 @@ The returned object is an \code{omopgenerics::summarised_result} containing
 survival estimates, event counts, summary statistics, and attrition. Use
 \code{asSurvivalResult()} when you want a wider, survival-specific view for manual
 inspection or downstream modelling.
+
+\code{outcomeWashout} defaults to \code{Inf}. Therefore, unless it is explicitly
+changed, target cohort records with any outcome before cohort entry are
+excluded from the analysis.
+
+By default, an outcome recorded on the same day as any censoring boundary
+is counted as an event. The boundary may be the end of the observation
+period, target cohort exit, \code{censorOnDate}, or \code{followUpDays}. Set
+\code{censorTie = "censor"} to censor same-day outcomes instead.
 
 \code{restrictedMeanFollowUp} defines the time horizon used for the restricted
 mean survival time. It is calculated as the area under the survival curve up

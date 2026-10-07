@@ -14,7 +14,8 @@ addCohortSurvival(
   censorOnCohortExit = FALSE,
   censorOnDate = NULL,
   followUpDays = Inf,
-  name = NULL
+  name = NULL,
+  censorTie = c("event", "censor")
 )
 }
 \arguments{
@@ -25,9 +26,10 @@ addCohortSurvival(
 \item{outcomeCohortTable}{Name of the cohort table containing the outcome of
 interest.}
 
-\item{outcomeCohortId}{ID of event cohorts to include. Only one outcome
-(and so one ID) can be considered. It can either be a
-cohort_definition_id value or a cohort_name.}
+\item{outcomeCohortId}{IDs of event cohorts to include. Values can be
+cohort definition IDs or cohort names. With one outcome, the added columns
+are \code{time} and \code{status}. With multiple outcomes, one pair is added per
+outcome and named \code{<cohort_name>_time} and \code{<cohort_name>_status}.}
 
 \item{outcomeDateVariable}{Variable containing date of outcome event. This is
 usually \code{"cohort_start_date"}.}
@@ -35,7 +37,7 @@ usually \code{"cohort_start_date"}.}
 \item{outcomeWashout}{Washout time in days for the outcome. If an individual
 has an outcome during the washout period before target cohort entry, \code{status}
 and \code{time} will be set to \code{NA}. Use \code{Inf} for any prior outcome and \code{0} for
-no pre-index washout.}
+no pre-index washout. The default is \code{Inf}.}
 
 \item{censorOnCohortExit}{If TRUE, an individual's follow up will be
 censored at their target cohort exit.}
@@ -48,11 +50,15 @@ at the given date. This can be a scalar Date or the name of a date column in
 upper bound Inf). Follow-up is censored at this value.}
 
 \item{name}{Name of the new table, if NULL a temporary table is returned.}
+
+\item{censorTie}{How to resolve an outcome occurring on the same day as a
+censoring boundary. Use \code{"event"} (the default) to count the outcome or
+\code{"censor"} to censor the record at that time.}
 }
 \value{
-A cohort table with two additional columns. The \code{time} column
-contains the number of days to event or censoring. The \code{status} column
-indicates whether the patient had the event (\code{1}) or was censored (\code{0}).
+A cohort table with \code{time} and \code{status} columns for a single outcome.
+For multiple outcomes, it contains a \code{<cohort_name>_time} and
+\code{<cohort_name>_status} pair for every requested outcome.
 }
 \description{
 Add the columns needed by standard survival modelling functions, such as
@@ -68,6 +74,12 @@ target cohort exit when \code{censorOnCohortExit = TRUE}, at \code{censorOnDate}
 for censored records. Records with an outcome in the washout window are kept
 in the table with \code{time} and \code{status} set to \code{NA}, so they can be removed by
 downstream analyses.
+
+By default, an outcome recorded on the same day as a censoring boundary is
+counted as an event. This rule is applied consistently to the end of the
+observation period, target cohort exit, \code{censorOnDate}, and \code{followUpDays}.
+Set \code{censorTie = "censor"} to censor records when an outcome and censoring
+boundary occur on the same day instead.
 }
 \examples{
 \donttest{

@@ -29,19 +29,26 @@
 #' in the table with `time` and `status` set to `NA`, so they can be removed by
 #' downstream analyses.
 #'
+#' By default, an outcome recorded on the same day as a censoring boundary is
+#' counted as an event. This rule is applied consistently to the end of the
+#' observation period, target cohort exit, `censorOnDate`, and `followUpDays`.
+#' Set `censorTie = "censor"` to censor records when an outcome and censoring
+#' boundary occur on the same day instead.
+#'
 #' @param x Cohort table to add survival information to.
 #' @param cdm CDM reference created by CDMConnector.
 #' @param outcomeCohortTable Name of the cohort table containing the outcome of
 #' interest.
-#' @param outcomeCohortId ID of event cohorts to include. Only one outcome
-#' (and so one ID) can be considered. It can either be a
-#' cohort_definition_id value or a cohort_name.
+#' @param outcomeCohortId IDs of event cohorts to include. Values can be
+#' cohort definition IDs or cohort names. With one outcome, the added columns
+#' are `time` and `status`. With multiple outcomes, one pair is added per
+#' outcome and named `<cohort_name>_time` and `<cohort_name>_status`.
 #' @param outcomeDateVariable Variable containing date of outcome event. This is
 #' usually `"cohort_start_date"`.
 #' @param outcomeWashout Washout time in days for the outcome. If an individual
 #' has an outcome during the washout period before target cohort entry, `status`
 #' and `time` will be set to `NA`. Use `Inf` for any prior outcome and `0` for
-#' no pre-index washout.
+#' no pre-index washout. The default is `Inf`.
 #' @param censorOnCohortExit If TRUE, an individual's follow up will be
 #' censored at their target cohort exit.
 #' @param censorOnDate If not NULL, an individual's follow up will be censored
@@ -50,10 +57,13 @@
 #' @param followUpDays Number of days to follow up individuals (lower bound 1,
 #' upper bound Inf). Follow-up is censored at this value.
 #' @param name Name of the new table, if NULL a temporary table is returned.
+#' @param censorTie How to resolve an outcome occurring on the same day as a
+#' censoring boundary. Use `"event"` (the default) to count the outcome or
+#' `"censor"` to censor the record at that time.
 #'
-#' @return A cohort table with two additional columns. The `time` column
-#' contains the number of days to event or censoring. The `status` column
-#' indicates whether the patient had the event (`1`) or was censored (`0`).
+#' @return A cohort table with `time` and `status` columns for a single outcome.
+#' For multiple outcomes, it contains a `<cohort_name>_time` and
+#' `<cohort_name>_status` pair for every requested outcome.
 #' @export
 #'
 #' @examples
@@ -81,7 +91,18 @@ addCohortSurvival <- function(x,
                               censorOnCohortExit = FALSE,
                               censorOnDate = NULL,
                               followUpDays = Inf,
-                              name = NULL) {
+                              name = NULL,
+                              censorTie = c("event", "censor")) {
+
+  censorTie <- match.arg(censorTie)
+  eventWinsTie <- censorTie == "event"
+
+  if (missing(outcomeWashout)) {
+    cli::cli_inform(c(
+      "i" = "{.arg outcomeWashout} was not provided and defaults to {.val Inf}.",
+      "i" = "People with any outcome before target cohort entry will be excluded from the analysis."
+    ))
+  }
 
   validateExtractSurvivalInputs(
     cdm = cdm,
@@ -93,6 +114,28 @@ addCohortSurvival <- function(x,
     censorOnDate = censorOnDate,
     followUpDays = followUpDays
   )
+
+  outcomeCohortId <- omopgenerics::validateCohortIdArgument(
+    outcomeCohortId,
+    cdm[[outcomeCohortTable]],
+    null = FALSE
+  )
+
+  if (length(outcomeCohortId) > 1L) {
+    return(addMultipleCohortSurvival(
+      x = x,
+      cdm = cdm,
+      outcomeCohortTable = outcomeCohortTable,
+      outcomeCohortId = outcomeCohortId,
+      outcomeDateVariable = outcomeDateVariable,
+      outcomeWashout = outcomeWashout,
+      censorOnCohortExit = censorOnCohortExit,
+      censorOnDate = censorOnDate,
+      followUpDays = followUpDays,
+      name = name,
+      censorTie = censorTie
+    ))
+  }
 
   comp <- newTable(name)
 
@@ -157,6 +200,15 @@ addCohortSurvival <- function(x,
   # 3) cohort exit (if censorOnCohortExit is TRUE)
   # 4) followUpDays (if followUpDays is not Inf)
 
+  # Observation-period end is always a censoring boundary. Outcomes after it
+  # are censored; same-day outcomes follow `censorTie`.
+  x <- x |>
+    dplyr::mutate(days_to_event = dplyr::if_else(
+      .data$days_to_event < .data$days_to_exit |
+        (.env$eventWinsTie & .data$days_to_event == .data$days_to_exit),
+      .data$days_to_event, as.numeric(NA)
+    ))
+
   if (isTRUE(censorOnCohortExit)) {
     x <- x |>
       dplyr::mutate(days_end_cohort = clock::date_count_between(
@@ -165,7 +217,8 @@ addCohortSurvival <- function(x,
         precision = "day"
       )) |>
       dplyr::mutate(days_to_event = dplyr::if_else(
-        .data$days_to_event <= .data$days_end_cohort,
+        .data$days_to_event < .data$days_end_cohort |
+          (.env$eventWinsTie & .data$days_to_event == .data$days_end_cohort),
         .data$days_to_event, as.numeric(NA)
       )) |>
       dplyr::mutate(days_to_exit = dplyr::if_else(
@@ -194,8 +247,9 @@ addCohortSurvival <- function(x,
         precision = "day"
       )) |>
       dplyr::mutate(days_to_event = dplyr::if_else(
-        .data$days_to_event >= .data$days_to_censor,
-        as.numeric(NA), .data$days_to_event
+        .data$days_to_event < .data$days_to_censor |
+          (.env$eventWinsTie & .data$days_to_event == .data$days_to_censor),
+        .data$days_to_event, as.numeric(NA)
       )) |>
       dplyr::mutate(days_to_exit = dplyr::if_else(
         .data$days_to_exit < .data$days_to_censor,
@@ -208,7 +262,8 @@ addCohortSurvival <- function(x,
   if (followUpDays != Inf) {
     x <- x |>
       dplyr::mutate(days_to_event = dplyr::if_else(
-        .data$days_to_event <= .env$followUpDays,
+        .data$days_to_event < .env$followUpDays |
+          (.env$eventWinsTie & .data$days_to_event == .env$followUpDays),
         .data$days_to_event, as.numeric(NA)
       )) |>
       dplyr::mutate(days_to_exit = dplyr::if_else(
@@ -262,13 +317,71 @@ addCohortSurvival <- function(x,
   # earlier we applied cohort-start > censor_date adjustments when creating censor_date
 
   x <- x |>
-    dplyr::select(!c("event_in_washout", "days_to_event")) |>
+    dplyr::select(!c("event_in_washout", "days_to_event", "days_to_exit")) |>
     dplyr::compute(name = comp$name, temporary = comp$temporary,
                    logPrefix = "CohortSurvival_addCohortSurvival_clean")
 
   return(x)
 }
 
+addMultipleCohortSurvival <- function(x,
+                                      cdm,
+                                      outcomeCohortTable,
+                                      outcomeCohortId,
+                                      outcomeDateVariable,
+                                      outcomeWashout,
+                                      censorOnCohortExit,
+                                      censorOnDate,
+                                      followUpDays,
+                                      name,
+                                      censorTie) {
+  comp <- newTable(name)
+  outcome_names <- omopgenerics::settings(cdm[[outcomeCohortTable]]) |>
+    dplyr::filter(.data$cohort_definition_id %in% .env$outcomeCohortId) |>
+    dplyr::arrange(match(.data$cohort_definition_id, .env$outcomeCohortId)) |>
+    dplyr::pull("cohort_name") |>
+    omopgenerics::toSnakeCase()
+
+  join_columns <- c(
+    "cohort_definition_id", "subject_id",
+    "cohort_start_date", "cohort_end_date"
+  )
+  join_columns <- intersect(join_columns, colnames(x))
+  original_x <- x
+
+  for (i in seq_along(outcomeCohortId)) {
+    outcome_result <- addCohortSurvival(
+      x = original_x,
+      cdm = cdm,
+      outcomeCohortTable = outcomeCohortTable,
+      outcomeCohortId = outcomeCohortId[i],
+      outcomeDateVariable = outcomeDateVariable,
+      outcomeWashout = outcomeWashout,
+      censorOnCohortExit = censorOnCohortExit,
+      censorOnDate = censorOnDate,
+      followUpDays = followUpDays,
+      censorTie = censorTie
+    ) |>
+      dplyr::rename(
+        !!paste0(outcome_names[i], "_time") := "time",
+        !!paste0(outcome_names[i], "_status") := "status"
+      ) |>
+      dplyr::select(
+        dplyr::all_of(join_columns),
+        dplyr::all_of(paste0(outcome_names[i], c("_time", "_status")))
+      )
+
+    x <- x |>
+      dplyr::left_join(outcome_result, by = join_columns)
+  }
+
+  x |>
+    dplyr::compute(
+      name = comp$name,
+      temporary = comp$temporary,
+      logPrefix = "CohortSurvival_addMultipleCohortSurvival_clean"
+    )
+}
 validateExtractSurvivalInputs <- function(cdm,
                                           cohortTable,
                                           outcomeCohortTable,

@@ -24,7 +24,10 @@ estimateCompetingRiskSurvival(
   eventGap = 30,
   estimateGap = 1,
   restrictedMeanFollowUp = NULL,
-  minimumSurvivalDays = 1
+  minimumSurvivalDays = 1,
+  results = c("probability", "events", "summary", "attrition"),
+  outcomeTie = c("outcome", "competingOutcome"),
+  censorTie = c("event", "censor")
 )
 }
 \arguments{
@@ -54,7 +57,7 @@ cohort can be used.}
 
 \item{outcomeWashout}{Number of days before target cohort entry used to
 exclude people with a prior outcome. \code{Inf} excludes people with any prior
-outcome before index; \code{0} applies no pre-index washout.}
+outcome before index; \code{0} applies no pre-index washout. The default is \code{Inf}.}
 
 \item{competingOutcomeCohortId}{Competing outcome cohorts to include. It can either be a
 cohort_definition_id value or a cohort_name. Multiple ids are allowed. If
@@ -66,7 +69,8 @@ event date.}
 
 \item{competingOutcomeWashout}{Number of days before target cohort entry used
 to exclude people with a prior competing outcome. \code{Inf} excludes people with
-any prior competing outcome before index; \code{0} applies no pre-index washout.}
+any prior competing outcome before index; \code{0} applies no pre-index washout.
+The default is \code{Inf}.}
 
 \item{censorOnCohortExit}{If TRUE, an individual's follow up will be
 censored at their target cohort exit date.}
@@ -98,6 +102,19 @@ calculating restricted mean summaries. See Details.}
 
 \item{minimumSurvivalDays}{Minimum number of days required for the main cohort
 to contribute to the analysis.}
+
+\item{results}{Result components to return. Choose any combination of
+\code{"probability"}, \code{"events"}, \code{"summary"}, and \code{"attrition"}. By default all
+components are returned. \code{"probability"} represents cumulative-incidence
+estimates for the outcome and competing outcome.}
+
+\item{outcomeTie}{How to resolve the outcome of interest and competing
+outcome occurring on the same day. Use \code{"outcome"} (the default) or
+\code{"competingOutcome"}.}
+
+\item{censorTie}{How to resolve an event occurring on the same day as a
+censoring boundary. Use \code{"event"} (the default) to count the event or
+\code{"censor"} to censor the record at that time.}
 }
 \value{
 An \code{omopgenerics::summarised_result} object with result types
@@ -118,6 +135,21 @@ as ordinary Kaplan-Meier survival probabilities. The returned object is an
 \code{omopgenerics::summarised_result} containing cumulative incidence estimates,
 event counts, summary statistics, and attrition. Use \code{asSurvivalResult()} for
 a wider, survival-specific view.
+
+\code{outcomeWashout} and \code{competingOutcomeWashout} default to \code{Inf}. Therefore,
+unless they are explicitly changed, target cohort records with any prior
+outcome of the corresponding type are excluded from the analysis.
+
+The default same-day hierarchy is \strong{outcome of interest, competing outcome,
+then censoring}. Thus, when all three occur on the same day, the outcome of
+interest is counted. Censoring includes the end of the observation period,
+target cohort exit, \code{censorOnDate}, and \code{followUpDays}.
+
+Use \code{outcomeTie} to choose whether the outcome of interest or competing
+outcome wins when both occur on the same day. Use \code{censorTie} to choose
+whether a same-day event or censoring boundary wins. The censoring rule is
+applied first: with \code{censorTie = "censor"}, a three-way tie is censored;
+with \code{censorTie = "event"}, \code{outcomeTie} decides which event is counted.
 
 \code{restrictedMeanFollowUp} defines the time horizon used for the restricted
 mean summary. If \code{restrictedMeanFollowUp = NULL}, the horizon is left to the
