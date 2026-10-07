@@ -19,7 +19,8 @@ addCohortSurvival(
   censorOnCohortExit = FALSE,
   censorOnDate = NULL,
   followUpDays = Inf,
-  name = NULL
+  name = NULL,
+  censorTie = c("event", "censor")
 )
 ```
 
@@ -39,9 +40,10 @@ addCohortSurvival(
 
 - outcomeCohortId:
 
-  ID of event cohorts to include. Only one outcome (and so one ID) can
-  be considered. It can either be a cohort_definition_id value or a
-  cohort_name.
+  IDs of event cohorts to include. Values can be cohort definition IDs
+  or cohort names. With one outcome, the added columns are `time` and
+  `status`. With multiple outcomes, one pair is added per outcome and
+  named `<cohort_name>_time` and `<cohort_name>_status`.
 
 - outcomeDateVariable:
 
@@ -53,7 +55,7 @@ addCohortSurvival(
   Washout time in days for the outcome. If an individual has an outcome
   during the washout period before target cohort entry, `status` and
   `time` will be set to `NA`. Use `Inf` for any prior outcome and `0`
-  for no pre-index washout.
+  for no pre-index washout. The default is `Inf`.
 
 - censorOnCohortExit:
 
@@ -74,11 +76,17 @@ addCohortSurvival(
 
   Name of the new table, if NULL a temporary table is returned.
 
+- censorTie:
+
+  How to resolve an outcome occurring on the same day as a censoring
+  boundary. Use `"event"` (the default) to count the outcome or
+  `"censor"` to censor the record at that time.
+
 ## Value
 
-A cohort table with two additional columns. The `time` column contains
-the number of days to event or censoring. The `status` column indicates
-whether the patient had the event (`1`) or was censored (`0`).
+A cohort table with `time` and `status` columns for a single outcome.
+For multiple outcomes, it contains a `<cohort_name>_time` and
+`<cohort_name>_status` pair for every requested outcome.
 
 ## Details
 
@@ -90,12 +98,26 @@ the outcome event and `0` for censored records. Records with an outcome
 in the washout window are kept in the table with `time` and `status` set
 to `NA`, so they can be removed by downstream analyses.
 
+By default, an outcome recorded on the same day as a censoring boundary
+is counted as an event. This rule is applied consistently to the end of
+the observation period, target cohort exit, `censorOnDate`, and
+`followUpDays`. Set `censorTie = "censor"` to censor records when an
+outcome and censoring boundary occur on the same day instead.
+
 ## Examples
 
 ``` r
 # \donttest{
 
 cdm <- mockMGUS2cdm()
+#> duckdb keeps downloaded extensions and secrets in a temporary directory:
+#> ℹ /tmp/RtmpaKsdVj/duckdb
+#> This is removed when the R session ends.
+#> • Extensions are re-downloaded each session.
+#> • Secrets are lost.
+#> ℹ Run duckdb(shared_home = TRUE) (or create ~/.duckdb) to keep them (suitable for most users).
+#> ℹ Run duckdb(shared_home = FALSE) to accept the temporary directory (and silence this message).
+#> ℹ See ?duckdb_storage for details and alternatives.
 #> Creating a new cdm
 #> Uploading table person (1384 rows) - [1/7]
 #> Uploading table observation_period (1384 rows) - [2/7]
@@ -110,6 +132,9 @@ cdm$mgus_diagnosis <- cdm$mgus_diagnosis |>
     outcomeCohortTable = "death_cohort",
     outcomeCohortId = 1
   )
+#> ℹ `outcomeWashout` was not provided and defaults to "Inf".
+#> ℹ People with any outcome before target cohort entry will be excluded from the
+#>   analysis.
 
 cdm$mgus_diagnosis |>
   dplyr::select(subject_id, cohort_start_date, time, status) |>

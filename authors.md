@@ -2,10 +2,10 @@
 
 ## Authors
 
-- **Kim López-Güell**. Author, maintainer.
-  [](https://orcid.org/0000-0002-8462-8668)
+- **Kim López-Güell**. Author. [](https://orcid.org/0000-0002-8462-8668)
 
-- **Edward Burn**. Author. [](https://orcid.org/0000-0002-9286-1128)
+- **Edward Burn**. Author, maintainer.
+  [](https://orcid.org/0000-0002-9286-1128)
 
 - **Martí Català**. Author. [](https://orcid.org/0000-0003-3308-9905)
 
@@ -19,16 +19,16 @@
 ## Citation
 
 Source:
-[`DESCRIPTION`](https://github.com/darwin-eu/CohortSurvival/blob/v1.1.2/DESCRIPTION)
+[`DESCRIPTION`](https://github.com/darwin-eu/CohortSurvival/blob/main/DESCRIPTION)
 
 López-Güell K, Burn E, Català M, Li X, Newby D, Mercade-Besora N (2026).
 *CohortSurvival: Estimate Survival from Common Data Model Cohorts*. R
-package version 1.1.2, <https://darwin-eu.github.io/CohortSurvival/>.
+package version 1.2.0, <https://darwin-eu.github.io/CohortSurvival/>.
 
     @Manual{,
       title = {CohortSurvival: Estimate Survival from Common Data Model Cohorts},
       author = {Kim López-Güell and Edward Burn and Martí Català and Xintong Li and Danielle Newby and Nuria Mercade-Besora},
       year = {2026},
-      note = {R package version 1.1.2},
+      note = {R package version 1.2.0},
       url = {https://darwin-eu.github.io/CohortSurvival/},
     }

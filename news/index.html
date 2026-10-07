@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">CohortSurvival</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.1.2</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.2.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -33,9 +33,20 @@
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="../logo.png" class="logo" alt=""><h1>Changelog</h1>
-      <small>Source: <a href="https://github.com/darwin-eu/CohortSurvival/blob/v1.1.2/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
+      <small>Source: <a href="https://github.com/darwin-eu/CohortSurvival/blob/main/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="1.2.0" id="cohortsurvival-120">CohortSurvival 1.2.0<a class="anchor" aria-label="anchor" href="#cohortsurvival-120"></a></h2><p class="text-muted">CRAN release: 2026-10-01</p>
+<ul><li>Define and document configurable same-day precedence for outcomes, competing outcomes, and censoring by <a href="https://github.com/KimLopezGuell" class="external-link">@KimLopezGuell</a></li>
+<li>Clarify outcome washout defaults, retain empty outcome definitions, document tie handling, and remove internal follow-up columns from returned cohort tables by <a href="https://github.com/KimLopezGuell" class="external-link">@KimLopezGuell</a> <a href="https://github.com/darwin-eu/CohortSurvival/issues/426" class="external-link">#426</a></li>
+<li>Add <code><a href="../reference/filterSurvivalChanges.html">filterSurvivalChanges()</a></code> to remove consecutive unchanged probability estimates by <a href="https://github.com/KimLopezGuell" class="external-link">@KimLopezGuell</a> <a href="https://github.com/darwin-eu/CohortSurvival/issues/425" class="external-link">#425</a></li>
+<li>Preserve target cohort names in attrition and include time units in survival summary labels by <a href="https://github.com/KimLopezGuell" class="external-link">@KimLopezGuell</a> <a href="https://github.com/darwin-eu/CohortSurvival/issues/424" class="external-link">#424</a></li>
+<li>Allow multiple outcomes in <code><a href="../reference/addCohortSurvival.html">addCohortSurvival()</a></code> by <a href="https://github.com/KimLopezGuell" class="external-link">@KimLopezGuell</a> <a href="https://github.com/darwin-eu/CohortSurvival/issues/423" class="external-link">#423</a></li>
+<li>Allow callers to select which result components are returned by <code><a href="../reference/estimateSingleEventSurvival.html">estimateSingleEventSurvival()</a></code> and <code><a href="../reference/estimateCompetingRiskSurvival.html">estimateCompetingRiskSurvival()</a></code> by <a href="https://github.com/KimLopezGuell" class="external-link">@KimLopezGuell</a> <a href="https://github.com/darwin-eu/CohortSurvival/issues/422" class="external-link">#422</a></li>
+<li>Change survival table functions to use the package-wide default output type when <code>type</code> is not supplied by <a href="https://github.com/catalamarti" class="external-link">@catalamarti</a> <a href="https://github.com/darwin-eu/CohortSurvival/issues/421" class="external-link">#421</a></li>
+<li>Use a SQL Server-safe logical conversion when preparing competing-risk attrition by <a href="https://github.com/catalamarti" class="external-link">@catalamarti</a> <a href="https://github.com/darwin-eu/CohortSurvival/issues/419" class="external-link">#419</a></li>
+</ul></div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="1.1.2" id="cohortsurvival-112">CohortSurvival 1.1.2<a class="anchor" aria-label="anchor" href="#cohortsurvival-112"></a></h2><p class="text-muted">CRAN release: 2026-07-03</p>
 <ul><li>Expand survival documentation and vignettes by <a href="https://github.com/KimLopezGuell" class="external-link">@KimLopezGuell</a> <a href="https://github.com/darwin-eu/CohortSurvival/issues/415" class="external-link">#415</a>, <a href="https://github.com/darwin-eu/CohortSurvival/issues/416" class="external-link">#416</a></li>
@@ -107,7 +118,7 @@
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1.</p>
 </div>
 
     </footer></div>

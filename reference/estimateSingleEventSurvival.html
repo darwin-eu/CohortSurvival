@@ -13,7 +13,7 @@ defines the event of interest."><meta property="og:image" content="https://darwi
 
     <a class="navbar-brand me-2" href="../index.html">CohortSurvival</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.1.2</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.2.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -39,7 +39,7 @@ defines the event of interest."><meta property="og:image" content="https://darwi
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="../logo.png" class="logo" alt=""><h1>Estimate survival for a single event of interest</h1>
-      <small class="dont-index">Source: <a href="https://github.com/darwin-eu/CohortSurvival/blob/v1.1.2/R/estimateSurvival.R" class="external-link"><code>R/estimateSurvival.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/darwin-eu/CohortSurvival/blob/main/R/estimateSurvival.R" class="external-link"><code>R/estimateSurvival.R</code></a></small>
       <div class="d-none name"><code>estimateSingleEventSurvival.Rd</code></div>
     </div>
 
@@ -68,7 +68,9 @@ defines the event of interest.</p>
 <span>  eventGap <span class="op">=</span> <span class="fl">30</span>,</span>
 <span>  estimateGap <span class="op">=</span> <span class="fl">1</span>,</span>
 <span>  restrictedMeanFollowUp <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  minimumSurvivalDays <span class="op">=</span> <span class="fl">1</span></span>
+<span>  minimumSurvivalDays <span class="op">=</span> <span class="fl">1</span>,</span>
+<span>  results <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"probability"</span>, <span class="st">"events"</span>, <span class="st">"summary"</span>, <span class="st">"attrition"</span><span class="op">)</span>,</span>
+<span>  censorTie <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"event"</span>, <span class="st">"censor"</span><span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -113,7 +115,7 @@ cohort can be used.</p></dd>
 <dt id="arg-outcomewashout">outcomeWashout<a class="anchor" aria-label="anchor" href="#arg-outcomewashout"></a></dt>
 <dd><p>Number of days before target cohort entry used to
 exclude people with a prior outcome. <code>Inf</code> excludes people with any prior
-outcome before index; <code>0</code> applies no pre-index washout.</p></dd>
+outcome before index; <code>0</code> applies no pre-index washout. The default is <code>Inf</code>.</p></dd>
 
 
 <dt id="arg-censoroncohortexit">censorOnCohortExit<a class="anchor" aria-label="anchor" href="#arg-censoroncohortexit"></a></dt>
@@ -164,6 +166,20 @@ calculating restricted mean survival. See Details.</p></dd>
 <dd><p>Minimum number of days required for the main cohort
 to contribute to the analysis.</p></dd>
 
+
+<dt id="arg-results">results<a class="anchor" aria-label="anchor" href="#arg-results"></a></dt>
+<dd><p>Result components to return. Choose any combination of
+<code>"probability"</code>, <code>"events"</code>, <code>"summary"</code>, and <code>"attrition"</code>. By default all
+components are returned. <code>"probability"</code> represents survival estimates for
+single-event analyses and cumulative-incidence estimates for competing-risk
+analyses.</p></dd>
+
+
+<dt id="arg-censortie">censorTie<a class="anchor" aria-label="anchor" href="#arg-censortie"></a></dt>
+<dd><p>How to resolve an outcome occurring on the same day as a
+censoring boundary. Use <code>"event"</code> (the default) to count the outcome or
+<code>"censor"</code> to censor the record at that time.</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
@@ -177,6 +193,13 @@ to contribute to the analysis.</p></dd>
 survival estimates, event counts, summary statistics, and attrition. Use
 <code><a href="asSurvivalResult.html">asSurvivalResult()</a></code> when you want a wider, survival-specific view for manual
 inspection or downstream modelling.</p>
+<p><code>outcomeWashout</code> defaults to <code>Inf</code>. Therefore, unless it is explicitly
+changed, target cohort records with any outcome before cohort entry are
+excluded from the analysis.</p>
+<p>By default, an outcome recorded on the same day as any censoring boundary
+is counted as an event. The boundary may be the end of the observation
+period, target cohort exit, <code>censorOnDate</code>, or <code>followUpDays</code>. Set
+<code>censorTie = "censor"</code> to censor same-day outcomes instead.</p>
 <p><code>restrictedMeanFollowUp</code> defines the time horizon used for the restricted
 mean survival time. It is calculated as the area under the survival curve up
 to that horizon. If <code>restrictedMeanFollowUp = NULL</code>, the horizon is left to
@@ -196,6 +219,14 @@ restricted mean is reported as missing.</p>
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># \donttest{</span></span></span>
 <span class="r-in"><span><span class="va">cdm</span> <span class="op">&lt;-</span> <span class="fu"><a href="mockMGUS2cdm.html">mockMGUS2cdm</a></span><span class="op">(</span><span class="op">)</span></span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> duckdb keeps downloaded extensions and secrets in a temporary directory:</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #0000BB;">ℹ</span> /tmp/RtmpaKsdVj/duckdb</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> This is removed when the R session ends.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">•</span> Extensions are re-downloaded each session.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">•</span> Secrets are lost.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #0000BB;">ℹ</span> Run duckdb(shared_home = TRUE) (or create ~/.duckdb) to keep them (suitable for most users).</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #0000BB;">ℹ</span> Run duckdb(shared_home = FALSE) to accept the temporary directory (and silence this message).</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #0000BB;">ℹ</span> See ?duckdb_storage for details and alternatives.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Creating a new cdm</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Uploading table person (1384 rows) - [1/7]</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Uploading table observation_period (1384 rows) - [2/7]</span>
@@ -212,6 +243,9 @@ restricted mean is reported as missing.</p>
 <span class="r-in"><span>  outcomeCohortId <span class="op">=</span> <span class="fl">1</span>,</span></span>
 <span class="r-in"><span>  eventGap <span class="op">=</span> <span class="fl">7</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> `outcomeWashout` was not provided and defaults to <span style="color: #0000BB;">"Inf"</span>.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> People with any outcome before target cohort entry will be excluded from the</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>   analysis.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> Getting survival for target cohort 'mgus_diagnosis' and outcome cohort</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span>   'death_cohort'</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Getting overall estimates</span>
@@ -230,7 +264,7 @@ restricted mean is reported as missing.</p>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1.</p>
 </div>
 
     </footer></div>

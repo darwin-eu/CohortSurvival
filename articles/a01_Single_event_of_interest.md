@@ -137,16 +137,17 @@ function from `omopgenerics`.
 ``` r
 
 settings(MGUS_death)
-#> # A tibble: 4 × 17
+#> # A tibble: 4 × 19
 #>   result_id result_type     package_name package_version group strata additional
 #>       <int> <chr>           <chr>        <chr>           <chr> <chr>  <chr>     
-#> 1         1 survival_estim… CohortSurvi… 1.1.2           targ… ""     "time"    
-#> 2         2 survival_events CohortSurvi… 1.1.2           targ… ""     "time"    
-#> 3         3 survival_summa… CohortSurvi… 1.1.2           targ… ""     ""        
-#> 4         4 survival_attri… CohortSurvi… 1.1.2           targ… "reas… "reason_i…
-#> # ℹ 10 more variables: min_cell_count <chr>, analysis_type <chr>,
-#> #   censor_on_cohort_exit <chr>, competing_outcome <chr>, eventgap <chr>,
-#> #   follow_up_days <chr>, minimum_survival_days <chr>, outcome <chr>,
+#> 1         1 survival_estim… CohortSurvi… 1.2.0           targ… ""     "time"    
+#> 2         2 survival_events CohortSurvi… 1.2.0           targ… ""     "time"    
+#> 3         3 survival_summa… CohortSurvi… 1.2.0           targ… ""     ""        
+#> 4         4 survival_attri… CohortSurvi… 1.2.0           targ… "reas… "reason_i…
+#> # ℹ 12 more variables: min_cell_count <chr>, analysis_type <chr>,
+#> #   censor_on_cohort_exit <chr>, competing_outcome <chr>,
+#> #   event_censor_tie <chr>, eventgap <chr>, follow_up_days <chr>,
+#> #   minimum_survival_days <chr>, outcome <chr>, outcome_competing_tie <chr>,
 #> #   outcome_date_variable <chr>, outcome_washout <chr>
 ```
 
@@ -477,7 +478,7 @@ attr(MGUS_death_survresult,"attrition") |>
 #> Rows: 12
 #> Columns: 9
 #> $ cdm_name          <chr> "mock", "mock", "mock", "mock", "mock", "mock", "moc…
-#> $ target_cohort     <chr> "mgus_diagnosis_1", "mgus_diagnosis_1", "mgus_diagno…
+#> $ target_cohort     <chr> "mgus_diagnosis", "mgus_diagnosis", "mgus_diagnosis"…
 #> $ outcome           <chr> "death_cohort", "death_cohort", "death_cohort", "dea…
 #> $ competing_outcome <chr> "none", "none", "none", "none", "none", "none", "non…
 #> $ reason            <chr> "Initial qualifying events", "Initial qualifying eve…
@@ -526,12 +527,15 @@ targeted to our needs. You can check all options, as usual, with
 [`?estimateSingleEventSurvival`](https://darwin-eu.github.io/CohortSurvival/reference/estimateSingleEventSurvival.md).
 We will comment on some of these options in this section.
 
-By default, `outcomeWashout` is set to Inf, which means that we only
-include people who have not had the outcome before index date (as
-defined by their entry to the target cohort). We can change that and
-ask, for instance, for people to only be excluded from the estimation
-for a 30 day washout period instead. In this case, we would write
+By default, `outcomeWashout` is set to `Inf`, which means that we only
+include people who have never had the outcome before index date (as
+defined by their entry to the target cohort). Because this default
+materially changes the population being analysed, CohortSurvival reports
+it when `outcomeWashout` is omitted. We can change it and ask, for
+instance, for people to only be excluded from the estimation for a 30
+day washout period instead. In this case, we would write
 `estimateSingleEventSurvival(cdm, "mgus_diagnosis", "death_cohort", outcomeWashout = 30)`.
+Setting `outcomeWashout = 0` disables pre-index outcome exclusion.
 
 Other options include requiring a minimum number of survival days (the
 default is set to `minimumSurvivalDays = 1`) or cutting the follow-up at
@@ -547,10 +551,17 @@ analysis:
 | `followUpDays` | Censors everyone after a fixed number of days from target cohort entry. |
 | `censorOnCohortExit` | Censors follow-up at the target cohort end date. |
 | `censorOnDate` | Censors follow-up at one calendar date, or at a date column in the target cohort. |
+| `censorTie` | Resolves an outcome recorded on the same day as a censoring boundary. `"event"` counts the outcome (the default); `"censor"` censors it. |
 | `minimumSurvivalDays` | Removes records that do not contribute at least this many survival days. |
 | `eventGap` | Sets the width of intervals used for event and risk table counts. |
 | `estimateGap` | Sets the spacing between survival probability estimates. |
 | `restrictedMeanFollowUp` | Sets the common horizon used to calculate restricted mean survival. |
+
+By default, censoring happens after events recorded on the same day.
+Therefore, an outcome on the end date of the observation period, target
+cohort exit, `censorOnDate`, or the last `followUpDays` day is counted
+as an event. Set `censorTie = "censor"` when the censoring boundary
+should win these ties instead.
 
 We might want to retrieve event information at a smaller interval than
 the default, which is every 30 days. Note that if we use the usual
@@ -759,16 +770,17 @@ the estimates coloured by target cohort like this:
 ``` r
 
 settings(MGUS_MM_death)
-#> # A tibble: 4 × 17
+#> # A tibble: 4 × 19
 #>   result_id result_type     package_name package_version group strata additional
 #>       <int> <chr>           <chr>        <chr>           <chr> <chr>  <chr>     
-#> 1         1 survival_estim… CohortSurvi… 1.1.2           targ… ""     "time"    
-#> 2         2 survival_events CohortSurvi… 1.1.2           targ… ""     "time"    
-#> 3         3 survival_summa… CohortSurvi… 1.1.2           targ… ""     ""        
-#> 4         4 survival_attri… CohortSurvi… 1.1.2           targ… "reas… "reason_i…
-#> # ℹ 10 more variables: min_cell_count <chr>, analysis_type <chr>,
-#> #   censor_on_cohort_exit <chr>, competing_outcome <chr>, eventgap <chr>,
-#> #   follow_up_days <chr>, minimum_survival_days <chr>, outcome <chr>,
+#> 1         1 survival_estim… CohortSurvi… 1.2.0           targ… ""     "time"    
+#> 2         2 survival_events CohortSurvi… 1.2.0           targ… ""     "time"    
+#> 3         3 survival_summa… CohortSurvi… 1.2.0           targ… ""     ""        
+#> 4         4 survival_attri… CohortSurvi… 1.2.0           targ… "reas… "reason_i…
+#> # ℹ 12 more variables: min_cell_count <chr>, analysis_type <chr>,
+#> #   censor_on_cohort_exit <chr>, competing_outcome <chr>,
+#> #   event_censor_tie <chr>, eventgap <chr>, follow_up_days <chr>,
+#> #   minimum_survival_days <chr>, outcome <chr>, outcome_competing_tie <chr>,
 #> #   outcome_date_variable <chr>, outcome_washout <chr>
 tableSurvival(MGUS_MM_death)
 ```

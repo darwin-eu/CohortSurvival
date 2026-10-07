@@ -7,7 +7,7 @@ Display the attrition of a survival result in a visual table
 ``` r
 tableSurvivalAttrition(
   result,
-  type = "gt",
+  type = NULL,
   header = "variable_name",
   groupColumn = c("cdm_name", "target_cohort", "variable_level"),
   hide = c("estimate_name"),
@@ -96,6 +96,14 @@ A visual table
 library(CohortSurvival)
 
 cdm <- mockMGUS2cdm()
+#> duckdb keeps downloaded extensions and secrets in a temporary directory:
+#> ℹ /tmp/RtmpaKsdVj/duckdb
+#> This is removed when the R session ends.
+#> • Extensions are re-downloaded each session.
+#> • Secrets are lost.
+#> ℹ Run duckdb(shared_home = TRUE) (or create ~/.duckdb) to keep them (suitable for most users).
+#> ℹ Run duckdb(shared_home = FALSE) to accept the temporary directory (and silence this message).
+#> ℹ See ?duckdb_storage for details and alternatives.
 #> Creating a new cdm
 #> Uploading table person (1384 rows) - [1/7]
 #> Uploading table observation_period (1384 rows) - [2/7]
@@ -110,6 +118,9 @@ surv <- estimateSingleEventSurvival(
   targetCohortTable = "mgus_diagnosis",
   outcomeCohortTable = "death_cohort"
 )
+#> ℹ `outcomeWashout` was not provided and defaults to "Inf".
+#> ℹ People with any outcome before target cohort entry will be excluded from the
+#>   analysis.
 #> ℹ Getting survival for target cohort 'mgus_diagnosis' and outcome cohort
 #>   'death_cohort'
 #> Getting overall estimates

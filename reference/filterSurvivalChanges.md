@@ -1,36 +1,35 @@
-# Convert survival summarised results to a survival-specific format
+# Keep survival estimates only when the probability changes
 
-Convert the long `omopgenerics::summarised_result` returned by
-[`estimateSingleEventSurvival()`](https://darwin-eu.github.io/CohortSurvival/reference/estimateSingleEventSurvival.md)
-or
-[`estimateCompetingRiskSurvival()`](https://darwin-eu.github.io/CohortSurvival/reference/estimateCompetingRiskSurvival.md)
-into a wider `survival_result` object that is easier to inspect
-manually. The main object contains time-specific estimates when
-available. Event counts, summary statistics, and attrition are stored as
-attributes named `"events"`, `"summary"`, and `"attrition"`.
+Reduce the size of a survival result by removing time points at which
+the reported survival or cumulative-incidence probability is unchanged
+from the previous reported time. The first time point in every curve is
+always kept. Confidence limits for a retained time point are kept with
+its estimate.
 
 ## Usage
 
 ``` r
-asSurvivalResult(result)
+filterSurvivalChanges(result)
 ```
 
 ## Arguments
 
 - result:
 
-  A summarised_result object.
+  A `summarised_result` produced by CohortSurvival.
 
 ## Value
 
-A `survival_result` object.
+A `summarised_result` with unchanged probabilities removed.
 
 ## Details
 
-The plotting and table functions in CohortSurvival accept both formats.
-The original `summarised_result` is usually preferable for exporting,
-binding with other omopgenerics results, and reporting through
-visOmopResults.
+Only `survival_estimates` rows are filtered. Event counts, summaries,
+attrition, settings, and other result types are returned unchanged. This
+makes the result suitable for
+[`plotSurvival()`](https://darwin-eu.github.io/CohortSurvival/reference/plotSurvival.md),
+while tables requesting an exact removed time point will not be able to
+display that time.
 
 ## Examples
 
@@ -53,15 +52,11 @@ cdm <- mockMGUS2cdm()
 #> Uploading table mgus_diagnosis (1384 rows) - [5/7]
 #> Uploading table progression (115 rows) - [6/7]
 #> Uploading table progression_type (230 rows) - [7/7]
-surv <- estimateSingleEventSurvival(
-  cdm = cdm,
+result <- estimateSingleEventSurvival(
+  cdm,
   targetCohortTable = "mgus_diagnosis",
-  targetCohortId = 1,
-  outcomeCohortTable = "death_cohort",
-  outcomeCohortId = 1,
-  eventGap = 7
-) |>
-asSurvivalResult()
+  outcomeCohortTable = "death_cohort"
+)
 #> ℹ `outcomeWashout` was not provided and defaults to "Inf".
 #> ℹ People with any outcome before target cohort entry will be excluded from the
 #>   analysis.
@@ -70,7 +65,6 @@ asSurvivalResult()
 #> Getting overall estimates
 #> `eventgap`, `outcome_washout`, `censor_on_cohort_exit`, `follow_up_days`, and
 #> `minimum_survival_days` cast to character.
-#> Warning: eventgap column will be added to the survival result object to include all
-#> relevant information
+compactResult <- filterSurvivalChanges(result)
 # }
 ```

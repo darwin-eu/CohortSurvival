@@ -31,6 +31,8 @@
 
 - [`asSurvivalResult()`](https://darwin-eu.github.io/CohortSurvival/reference/asSurvivalResult.md)
   : Convert survival summarised results to a survival-specific format
+- [`filterSurvivalChanges()`](https://darwin-eu.github.io/CohortSurvival/reference/filterSurvivalChanges.md)
+  : Keep survival estimates only when the probability changes
 
 ### Mock data
 

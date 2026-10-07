@@ -30,7 +30,10 @@ estimateCompetingRiskSurvival(
   eventGap = 30,
   estimateGap = 1,
   restrictedMeanFollowUp = NULL,
-  minimumSurvivalDays = 1
+  minimumSurvivalDays = 1,
+  results = c("probability", "events", "summary", "attrition"),
+  outcomeTie = c("outcome", "competingOutcome"),
+  censorTie = c("event", "censor")
 )
 ```
 
@@ -75,7 +78,7 @@ estimateCompetingRiskSurvival(
 
   Number of days before target cohort entry used to exclude people with
   a prior outcome. `Inf` excludes people with any prior outcome before
-  index; `0` applies no pre-index washout.
+  index; `0` applies no pre-index washout. The default is `Inf`.
 
 - competingOutcomeCohortId:
 
@@ -92,7 +95,8 @@ estimateCompetingRiskSurvival(
 
   Number of days before target cohort entry used to exclude people with
   a prior competing outcome. `Inf` excludes people with any prior
-  competing outcome before index; `0` applies no pre-index washout.
+  competing outcome before index; `0` applies no pre-index washout. The
+  default is `Inf`.
 
 - censorOnCohortExit:
 
@@ -142,6 +146,25 @@ estimateCompetingRiskSurvival(
   Minimum number of days required for the main cohort to contribute to
   the analysis.
 
+- results:
+
+  Result components to return. Choose any combination of
+  `"probability"`, `"events"`, `"summary"`, and `"attrition"`. By
+  default all components are returned. `"probability"` represents
+  cumulative-incidence estimates for the outcome and competing outcome.
+
+- outcomeTie:
+
+  How to resolve the outcome of interest and competing outcome occurring
+  on the same day. Use `"outcome"` (the default) or
+  `"competingOutcome"`.
+
+- censorTie:
+
+  How to resolve an event occurring on the same day as a censoring
+  boundary. Use `"event"` (the default) to count the event or `"censor"`
+  to censor the record at that time.
+
 ## Value
 
 An `omopgenerics::summarised_result` object with result types
@@ -158,6 +181,24 @@ cumulative incidence estimates, event counts, summary statistics, and
 attrition. Use
 [`asSurvivalResult()`](https://darwin-eu.github.io/CohortSurvival/reference/asSurvivalResult.md)
 for a wider, survival-specific view.
+
+`outcomeWashout` and `competingOutcomeWashout` default to `Inf`.
+Therefore, unless they are explicitly changed, target cohort records
+with any prior outcome of the corresponding type are excluded from the
+analysis.
+
+The default same-day hierarchy is **outcome of interest, competing
+outcome, then censoring**. Thus, when all three occur on the same day,
+the outcome of interest is counted. Censoring includes the end of the
+observation period, target cohort exit, `censorOnDate`, and
+`followUpDays`.
+
+Use `outcomeTie` to choose whether the outcome of interest or competing
+outcome wins when both occur on the same day. Use `censorTie` to choose
+whether a same-day event or censoring boundary wins. The censoring rule
+is applied first: with `censorTie = "censor"`, a three-way tie is
+censored; with `censorTie = "event"`, `outcomeTie` decides which event
+is counted.
 
 `restrictedMeanFollowUp` defines the time horizon used for the
 restricted mean summary. If `restrictedMeanFollowUp = NULL`, the horizon
@@ -178,6 +219,14 @@ missing.
 ``` r
 # \donttest{
 cdm <- mockMGUS2cdm()
+#> duckdb keeps downloaded extensions and secrets in a temporary directory:
+#> ℹ /tmp/RtmpaKsdVj/duckdb
+#> This is removed when the R session ends.
+#> • Extensions are re-downloaded each session.
+#> • Secrets are lost.
+#> ℹ Run duckdb(shared_home = TRUE) (or create ~/.duckdb) to keep them (suitable for most users).
+#> ℹ Run duckdb(shared_home = FALSE) to accept the temporary directory (and silence this message).
+#> ℹ See ?duckdb_storage for details and alternatives.
 #> Creating a new cdm
 #> Uploading table person (1384 rows) - [1/7]
 #> Uploading table observation_period (1384 rows) - [2/7]
@@ -196,6 +245,12 @@ surv <- estimateCompetingRiskSurvival(
   competingOutcomeCohortId = 1,
   eventGap = 7
 )
+#> ℹ `outcomeWashout` was not provided and defaults to "Inf".
+#> ℹ People with any outcome before target cohort entry will be excluded from the
+#>   analysis.
+#> ℹ `competingOutcomeWashout` was not provided and defaults to "Inf".
+#> ℹ People with any competing outcome before target cohort entry will be excluded
+#>   from the analysis.
 #> ℹ Getting survival for target cohort 'mgus_diagnosis', outcome cohort
 #>   'progression' and competing outcome cohort 'death_cohort'
 #> Getting overall estimates

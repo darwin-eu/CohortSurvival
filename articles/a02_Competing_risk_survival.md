@@ -155,9 +155,36 @@ The outcome and competing outcome can have separate washout definitions.
 `outcomeWashout` controls prior events of the outcome of interest, while
 `competingOutcomeWashout` controls prior competing events. In both
 cases, `Inf` means any prior event before target cohort entry and `0`
-means no pre-index washout. Other censoring parameters, such as
-`followUpDays`, `censorOnCohortExit`, and `censorOnDate`, behave as in
-the single-event setting.
+means no pre-index washout. Both arguments default to `Inf`, and
+CohortSurvival reports those defaults when the arguments are omitted.
+Other censoring parameters, such as `followUpDays`,
+`censorOnCohortExit`, and `censorOnDate`, behave as in the single-event
+setting.
+
+## Same-day event hierarchy
+
+The default hierarchy is **outcome of interest, competing outcome, then
+censoring**. This hierarchy applies when dates have only day-level
+precision:
+
+| Events recorded on the same day           | Default result |
+|-------------------------------------------|----------------|
+| Outcome and competing outcome             | Outcome        |
+| Either event and a censoring boundary     | Event          |
+| Outcome, competing outcome, and censoring | Outcome        |
+
+Censoring boundaries include the end of the observation period, target
+cohort exit, `censorOnDate`, and `followUpDays`. The rules can be
+changed explicitly:
+
+- `outcomeTie = "competingOutcome"` gives the competing outcome
+  precedence over the outcome of interest.
+- `censorTie = "censor"` gives censoring precedence over either event.
+
+For a three-way tie, `censorTie` is applied first. If it is `"censor"`,
+the record is censored. If it is `"event"`, `outcomeTie` decides which
+event is counted. The selected rules are stored as
+`outcome_competing_tie` and `event_censor_tie` in the result settings.
 
 ## With stratification
 

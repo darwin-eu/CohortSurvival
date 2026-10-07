@@ -24,7 +24,9 @@ estimateSingleEventSurvival(
   eventGap = 30,
   estimateGap = 1,
   restrictedMeanFollowUp = NULL,
-  minimumSurvivalDays = 1
+  minimumSurvivalDays = 1,
+  results = c("probability", "events", "summary", "attrition"),
+  censorTie = c("event", "censor")
 )
 ```
 
@@ -66,7 +68,7 @@ estimateSingleEventSurvival(
 
   Number of days before target cohort entry used to exclude people with
   a prior outcome. `Inf` excludes people with any prior outcome before
-  index; `0` applies no pre-index washout.
+  index; `0` applies no pre-index washout. The default is `Inf`.
 
 - censorOnCohortExit:
 
@@ -116,6 +118,20 @@ estimateSingleEventSurvival(
   Minimum number of days required for the main cohort to contribute to
   the analysis.
 
+- results:
+
+  Result components to return. Choose any combination of
+  `"probability"`, `"events"`, `"summary"`, and `"attrition"`. By
+  default all components are returned. `"probability"` represents
+  survival estimates for single-event analyses and cumulative-incidence
+  estimates for competing-risk analyses.
+
+- censorTie:
+
+  How to resolve an outcome occurring on the same day as a censoring
+  boundary. Use `"event"` (the default) to count the outcome or
+  `"censor"` to censor the record at that time.
+
 ## Value
 
 An `omopgenerics::summarised_result` object with result types
@@ -129,6 +145,16 @@ survival estimates, event counts, summary statistics, and attrition. Use
 [`asSurvivalResult()`](https://darwin-eu.github.io/CohortSurvival/reference/asSurvivalResult.md)
 when you want a wider, survival-specific view for manual inspection or
 downstream modelling.
+
+`outcomeWashout` defaults to `Inf`. Therefore, unless it is explicitly
+changed, target cohort records with any outcome before cohort entry are
+excluded from the analysis.
+
+By default, an outcome recorded on the same day as any censoring
+boundary is counted as an event. The boundary may be the end of the
+observation period, target cohort exit, `censorOnDate`, or
+`followUpDays`. Set `censorTie = "censor"` to censor same-day outcomes
+instead.
 
 `restrictedMeanFollowUp` defines the time horizon used for the
 restricted mean survival time. It is calculated as the area under the
@@ -150,6 +176,14 @@ mean is reported as missing.
 ``` r
 # \donttest{
 cdm <- mockMGUS2cdm()
+#> duckdb keeps downloaded extensions and secrets in a temporary directory:
+#> ℹ /tmp/RtmpaKsdVj/duckdb
+#> This is removed when the R session ends.
+#> • Extensions are re-downloaded each session.
+#> • Secrets are lost.
+#> ℹ Run duckdb(shared_home = TRUE) (or create ~/.duckdb) to keep them (suitable for most users).
+#> ℹ Run duckdb(shared_home = FALSE) to accept the temporary directory (and silence this message).
+#> ℹ See ?duckdb_storage for details and alternatives.
 #> Creating a new cdm
 #> Uploading table person (1384 rows) - [1/7]
 #> Uploading table observation_period (1384 rows) - [2/7]
@@ -166,6 +200,9 @@ surv <- estimateSingleEventSurvival(
   outcomeCohortId = 1,
   eventGap = 7
 )
+#> ℹ `outcomeWashout` was not provided and defaults to "Inf".
+#> ℹ People with any outcome before target cohort entry will be excluded from the
+#>   analysis.
 #> ℹ Getting survival for target cohort 'mgus_diagnosis' and outcome cohort
 #>   'death_cohort'
 #> Getting overall estimates

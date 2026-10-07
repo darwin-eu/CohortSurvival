@@ -17,6 +17,14 @@ CDM reference containing data from the survival::mgus2 dataset
 ``` r
  # \donttest{
 cdm <- mockMGUS2cdm()
+#> duckdb keeps downloaded extensions and secrets in a temporary directory:
+#> ℹ /tmp/RtmpaKsdVj/duckdb
+#> This is removed when the R session ends.
+#> • Extensions are re-downloaded each session.
+#> • Secrets are lost.
+#> ℹ Run duckdb(shared_home = TRUE) (or create ~/.duckdb) to keep them (suitable for most users).
+#> ℹ Run duckdb(shared_home = FALSE) to accept the temporary directory (and silence this message).
+#> ℹ See ?duckdb_storage for details and alternatives.
 #> Creating a new cdm
 #> Uploading table person (1384 rows) - [1/7]
 #> Uploading table observation_period (1384 rows) - [2/7]
@@ -27,7 +35,7 @@ cdm <- mockMGUS2cdm()
 #> Uploading table progression_type (230 rows) - [7/7]
 cdm$person
 #> # A query:  ?? x 7
-#> # Database: DuckDB 1.5.4 [unknown@Linux 6.17.0-1018-azure:R 4.6.1/:memory:]
+#> # Database: DuckDB 1.5.6 [unknown@Linux 6.17.0-1022-azure:R 4.6.1/:memory:]
 #>    person_id gender_concept_id year_of_birth month_of_birth day_of_birth
 #>        <int>             <int>         <int>          <int>        <int>
 #>  1         1              8532          1980             10            5

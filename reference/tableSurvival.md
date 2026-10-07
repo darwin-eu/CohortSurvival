@@ -18,7 +18,7 @@ tableSurvival(
   timeScale = "days",
   header = c("estimate"),
   estimates = c("median_survival", "restricted_mean_survival"),
-  type = "gt",
+  type = NULL,
   groupColumn = NULL,
   hide = c("result_id", "estimate_type"),
   style = NULL,
@@ -131,6 +131,14 @@ comparing restricted means across groups or strata.
 ``` r
 # \donttest{
 cdm <- mockMGUS2cdm()
+#> duckdb keeps downloaded extensions and secrets in a temporary directory:
+#> ℹ /tmp/RtmpaKsdVj/duckdb
+#> This is removed when the R session ends.
+#> • Extensions are re-downloaded each session.
+#> • Secrets are lost.
+#> ℹ Run duckdb(shared_home = TRUE) (or create ~/.duckdb) to keep them (suitable for most users).
+#> ℹ Run duckdb(shared_home = FALSE) to accept the temporary directory (and silence this message).
+#> ℹ See ?duckdb_storage for details and alternatives.
 #> Creating a new cdm
 #> Uploading table person (1384 rows) - [1/7]
 #> Uploading table observation_period (1384 rows) - [2/7]
@@ -142,6 +150,9 @@ cdm <- mockMGUS2cdm()
 surv <- estimateSingleEventSurvival(cdm,
                                     targetCohortTable = "mgus_diagnosis",
                                     outcomeCohortTable = "death_cohort")
+#> ℹ `outcomeWashout` was not provided and defaults to "Inf".
+#> ℹ People with any outcome before target cohort entry will be excluded from the
+#>   analysis.
 #> ℹ Getting survival for target cohort 'mgus_diagnosis' and outcome cohort
 #>   'death_cohort'
 #> Getting overall estimates

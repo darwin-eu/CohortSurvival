@@ -1,5 +1,44 @@
 # Changelog
 
+## CohortSurvival 1.2.0
+
+CRAN release: 2026-10-01
+
+- Define and document configurable same-day precedence for outcomes,
+  competing outcomes, and censoring by
+  [@KimLopezGuell](https://github.com/KimLopezGuell)
+- Clarify outcome washout defaults, retain empty outcome definitions,
+  document tie handling, and remove internal follow-up columns from
+  returned cohort tables by
+  [@KimLopezGuell](https://github.com/KimLopezGuell)
+  [\#426](https://github.com/darwin-eu/CohortSurvival/issues/426)
+- Add
+  [`filterSurvivalChanges()`](https://darwin-eu.github.io/CohortSurvival/reference/filterSurvivalChanges.md)
+  to remove consecutive unchanged probability estimates by
+  [@KimLopezGuell](https://github.com/KimLopezGuell)
+  [\#425](https://github.com/darwin-eu/CohortSurvival/issues/425)
+- Preserve target cohort names in attrition and include time units in
+  survival summary labels by
+  [@KimLopezGuell](https://github.com/KimLopezGuell)
+  [\#424](https://github.com/darwin-eu/CohortSurvival/issues/424)
+- Allow multiple outcomes in
+  [`addCohortSurvival()`](https://darwin-eu.github.io/CohortSurvival/reference/addCohortSurvival.md)
+  by [@KimLopezGuell](https://github.com/KimLopezGuell)
+  [\#423](https://github.com/darwin-eu/CohortSurvival/issues/423)
+- Allow callers to select which result components are returned by
+  [`estimateSingleEventSurvival()`](https://darwin-eu.github.io/CohortSurvival/reference/estimateSingleEventSurvival.md)
+  and
+  [`estimateCompetingRiskSurvival()`](https://darwin-eu.github.io/CohortSurvival/reference/estimateCompetingRiskSurvival.md)
+  by [@KimLopezGuell](https://github.com/KimLopezGuell)
+  [\#422](https://github.com/darwin-eu/CohortSurvival/issues/422)
+- Change survival table functions to use the package-wide default output
+  type when `type` is not supplied by
+  [@catalamarti](https://github.com/catalamarti)
+  [\#421](https://github.com/darwin-eu/CohortSurvival/issues/421)
+- Use a SQL Server-safe logical conversion when preparing competing-risk
+  attrition by [@catalamarti](https://github.com/catalamarti)
+  [\#419](https://github.com/darwin-eu/CohortSurvival/issues/419)
+
 ## CohortSurvival 1.1.2
 
 CRAN release: 2026-07-03
