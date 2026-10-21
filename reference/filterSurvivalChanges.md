@@ -37,7 +37,7 @@ display that time.
 # \donttest{
 cdm <- mockMGUS2cdm()
 #> duckdb keeps downloaded extensions and secrets in a temporary directory:
-#> ℹ /tmp/RtmpWqcmbM/duckdb
+#> ℹ /tmp/Rtmpijfcdz/duckdb
 #> This is removed when the R session ends.
 #> • Extensions are re-downloaded each session.
 #> • Secrets are lost.

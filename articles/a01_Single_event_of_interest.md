@@ -140,10 +140,10 @@ settings(MGUS_death)
 #> # A tibble: 4 × 19
 #>   result_id result_type     package_name package_version group strata additional
 #>       <int> <chr>           <chr>        <chr>           <chr> <chr>  <chr>     
-#> 1         1 survival_estim… CohortSurvi… 1.2.0           targ… ""     "time"    
-#> 2         2 survival_events CohortSurvi… 1.2.0           targ… ""     "time"    
-#> 3         3 survival_summa… CohortSurvi… 1.2.0           targ… ""     ""        
-#> 4         4 survival_attri… CohortSurvi… 1.2.0           targ… "reas… "reason_i…
+#> 1         1 survival_estim… CohortSurvi… 1.2.1           targ… ""     "time"    
+#> 2         2 survival_events CohortSurvi… 1.2.1           targ… ""     "time"    
+#> 3         3 survival_summa… CohortSurvi… 1.2.1           targ… ""     ""        
+#> 4         4 survival_attri… CohortSurvi… 1.2.1           targ… "reas… "reason_i…
 #> # ℹ 12 more variables: min_cell_count <chr>, analysis_type <chr>,
 #> #   censor_on_cohort_exit <chr>, competing_outcome <chr>,
 #> #   event_censor_tie <chr>, eventgap <chr>, follow_up_days <chr>,
@@ -773,10 +773,10 @@ settings(MGUS_MM_death)
 #> # A tibble: 4 × 19
 #>   result_id result_type     package_name package_version group strata additional
 #>       <int> <chr>           <chr>        <chr>           <chr> <chr>  <chr>     
-#> 1         1 survival_estim… CohortSurvi… 1.2.0           targ… ""     "time"    
-#> 2         2 survival_events CohortSurvi… 1.2.0           targ… ""     "time"    
-#> 3         3 survival_summa… CohortSurvi… 1.2.0           targ… ""     ""        
-#> 4         4 survival_attri… CohortSurvi… 1.2.0           targ… "reas… "reason_i…
+#> 1         1 survival_estim… CohortSurvi… 1.2.1           targ… ""     "time"    
+#> 2         2 survival_events CohortSurvi… 1.2.1           targ… ""     "time"    
+#> 3         3 survival_summa… CohortSurvi… 1.2.1           targ… ""     ""        
+#> 4         4 survival_attri… CohortSurvi… 1.2.1           targ… "reas… "reason_i…
 #> # ℹ 12 more variables: min_cell_count <chr>, analysis_type <chr>,
 #> #   censor_on_cohort_exit <chr>, competing_outcome <chr>,
 #> #   event_censor_tie <chr>, eventgap <chr>, follow_up_days <chr>,

@@ -1,5 +1,12 @@
 # Changelog
 
+## CohortSurvival 1.2.1
+
+CRAN release: 2026-10-21
+
+- Fix SQL Server translation of configurable outcome-censoring tie
+  handling.
+
 ## CohortSurvival 1.2.0
 
 CRAN release: 2026-10-01
