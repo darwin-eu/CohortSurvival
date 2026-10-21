@@ -202,10 +202,14 @@ addCohortSurvival <- function(x,
 
   # Observation-period end is always a censoring boundary. Outcomes after it
   # are censored; same-day outcomes follow `censorTie`.
+  event_before_exit <- eventBeforeCensorCondition(
+    event = rlang::expr(.data$days_to_event),
+    censor = rlang::expr(.data$days_to_exit),
+    eventWinsTie = eventWinsTie
+  )
   x <- x |>
     dplyr::mutate(days_to_event = dplyr::if_else(
-      .data$days_to_event < .data$days_to_exit |
-        (.env$eventWinsTie & .data$days_to_event == .data$days_to_exit),
+      !!event_before_exit,
       .data$days_to_event, as.numeric(NA)
     ))
 
@@ -215,10 +219,15 @@ addCohortSurvival <- function(x,
         start = .data$cohort_start_date,
         end = .data$cohort_end_date,
         precision = "day"
-      )) |>
+      ))
+    event_before_cohort_end <- eventBeforeCensorCondition(
+      event = rlang::expr(.data$days_to_event),
+      censor = rlang::expr(.data$days_end_cohort),
+      eventWinsTie = eventWinsTie
+    )
+    x <- x |>
       dplyr::mutate(days_to_event = dplyr::if_else(
-        .data$days_to_event < .data$days_end_cohort |
-          (.env$eventWinsTie & .data$days_to_event == .data$days_end_cohort),
+        !!event_before_cohort_end,
         .data$days_to_event, as.numeric(NA)
       )) |>
       dplyr::mutate(days_to_exit = dplyr::if_else(
@@ -245,10 +254,15 @@ addCohortSurvival <- function(x,
         start = .data$cohort_start_date,
         end = .data$censor_date,
         precision = "day"
-      )) |>
+      ))
+    event_before_censor_date <- eventBeforeCensorCondition(
+      event = rlang::expr(.data$days_to_event),
+      censor = rlang::expr(.data$days_to_censor),
+      eventWinsTie = eventWinsTie
+    )
+    x <- x |>
       dplyr::mutate(days_to_event = dplyr::if_else(
-        .data$days_to_event < .data$days_to_censor |
-          (.env$eventWinsTie & .data$days_to_event == .data$days_to_censor),
+        !!event_before_censor_date,
         .data$days_to_event, as.numeric(NA)
       )) |>
       dplyr::mutate(days_to_exit = dplyr::if_else(
@@ -260,10 +274,14 @@ addCohortSurvival <- function(x,
   }
 
   if (followUpDays != Inf) {
+    event_before_follow_up <- eventBeforeCensorCondition(
+      event = rlang::expr(.data$days_to_event),
+      censor = rlang::expr(.env$followUpDays),
+      eventWinsTie = eventWinsTie
+    )
     x <- x |>
       dplyr::mutate(days_to_event = dplyr::if_else(
-        .data$days_to_event < .env$followUpDays |
-          (.env$eventWinsTie & .data$days_to_event == .env$followUpDays),
+        !!event_before_follow_up,
         .data$days_to_event, as.numeric(NA)
       )) |>
       dplyr::mutate(days_to_exit = dplyr::if_else(
@@ -322,6 +340,11 @@ addCohortSurvival <- function(x,
                    logPrefix = "CohortSurvival_addCohortSurvival_clean")
 
   return(x)
+}
+
+eventBeforeCensorCondition <- function(event, censor, eventWinsTie) {
+  operator <- if (isTRUE(eventWinsTie)) "<=" else "<"
+  rlang::call2(operator, event, censor)
 }
 
 addMultipleCohortSurvival <- function(x,

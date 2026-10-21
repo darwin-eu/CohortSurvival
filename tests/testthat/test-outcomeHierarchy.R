@@ -72,6 +72,33 @@ test_that("censorTie is applied consistently to every censoring boundary", {
   CDMConnector::cdmDisconnect(cdm)
 })
 
+test_that("censorTie conditions produce valid SQL Server predicates", {
+  skip_if_not_installed("dbplyr")
+
+  render_condition <- function(eventWinsTie) {
+    condition <- CohortSurvival:::eventBeforeCensorCondition(
+      event = rlang::expr(.data$days_to_event),
+      censor = rlang::expr(.data$days_to_exit),
+      eventWinsTie = eventWinsTie
+    )
+    dbplyr::lazy_frame(
+      days_to_event = 1,
+      days_to_exit = 2,
+      con = dbplyr::simulate_mssql()
+    ) |>
+      dplyr::filter(!!condition) |>
+      dbplyr::sql_render()
+  }
+
+  event_sql <- render_condition(TRUE)
+  censor_sql <- render_condition(FALSE)
+
+  expect_match(event_sql, "\\[days_to_event\\] <= \\[days_to_exit\\]")
+  expect_match(censor_sql, "\\[days_to_event\\] < \\[days_to_exit\\]")
+  expect_false(grepl("[01] AND", event_sql))
+  expect_false(grepl("[01] AND", censor_sql))
+})
+
 test_that("outcomeTie resolves same-day outcome and competing outcome", {
   data <- tibble::tibble(
     outcome_time = 10,

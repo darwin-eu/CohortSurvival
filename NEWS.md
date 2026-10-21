@@ -1,3 +1,8 @@
+# CohortSurvival 1.2.1
+
+* Fix SQL Server translation of configurable outcome-censoring tie handling.
+
+
 # CohortSurvival 1.2.0
 
 * Define and document configurable same-day precedence for outcomes, competing
